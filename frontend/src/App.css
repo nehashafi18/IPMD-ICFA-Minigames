@@ -1,0 +1,289 @@
+body {
+  margin: 0;
+  background: #fafaf7;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+.appPage {
+  min-height: 100vh;
+  background: #fafaf7;
+  color: #3a2060;
+  display: flex;
+  justify-content: center;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+.appShell {
+  width: 100%;
+  max-width: 860px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+
+.appTitle {
+  margin: 0;
+  text-align: center;
+  font-size: 34px;
+  font-weight: 800;
+}
+
+.instructionBox {
+  width: 100%;
+  max-width: 620px;
+  padding: 18px 22px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.07);
+  backdrop-filter: blur(10px);
+  text-align: center;
+}
+
+.instructionBox h2,
+.instructionBox p {
+  margin: 0;
+}
+
+.instructionBox p {
+  margin-top: 8px;
+  font-size: 14px;
+  opacity: 0.75;
+}
+
+.controlPanel {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+}
+
+.fileInput,
+.selectBox {
+  border-radius: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: white;
+  padding: 10px 14px;
+  font-size: 14px;
+}
+
+.previewImage {
+  width: 100%;
+  max-width: 260px;
+  border-radius: 24px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+}
+
+.stepHeader {
+  text-align: center;
+}
+
+.stepHeader h2 {
+  margin: 4px 0 0;
+  font-size: 24px;
+}
+
+.stepText {
+  margin: 0;
+  font-size: 13px;
+  opacity: 0.5;
+}
+
+.cardGrid {
+  width: 100%;
+  max-height: 52vh;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 170px));
+  justify-content: center;
+  gap: 16px;
+  padding: 8px;
+  box-sizing: border-box;
+}
+
+.imageCard {
+  height: 230px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 24px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.76);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.imageCard:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.12);
+}
+
+.imageCard:active {
+  transform: scale(0.97);
+}
+
+.cardImage {
+  width: 100%;
+  height: 168px;
+  object-fit: contain;
+  background: #f7f4ef;
+}
+
+.cardName {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.bottomActions {
+  width: 100%;
+  max-width: 360px;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  padding-bottom: 12px;
+}
+
+.primaryButton,
+.secondaryButton {
+  min-width: 120px;
+  border: 0;
+  border-radius: 18px;
+  padding: 12px 18px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.primaryButton {
+  background: #3a2060;
+  color: white;
+}
+
+.secondaryButton {
+  background: rgba(255, 255, 255, 0.75);
+  color: #3a2060;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.primaryButton:hover,
+.secondaryButton:hover {
+  transform: scale(1.03);
+}
+
+.primaryButton:active,
+.secondaryButton:active {
+  transform: scale(0.96);
+}
+
+.secondaryButton:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.promptBox {
+  width: 100%;
+  max-width: 720px;
+  min-height: 180px;
+  border-radius: 20px;
+  padding: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.generatedImage {
+  width: 100%;
+  max-width: 420px;
+  border-radius: 24px;
+}
+
+.loadingScreen {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  background: rgba(250, 250, 247, 0.96);
+  padding: 16px;
+}
+
+.miniGameWrapper {
+  width: 100%;
+  max-width: 520px;
+  max-height: 92vh;
+  overflow: hidden;
+  border-radius: 28px;
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.18);
+}
+
+.artTitle {
+  margin: 0;
+  width: 100%;
+  white-space: nowrap;
+  text-align: center;
+
+  font-size: clamp(1.6rem, 6vw, 4rem);
+  font-weight: 900;
+  letter-spacing: 0.02em;
+
+  background: linear-gradient(135deg, #6f3cc3, #b47cff, #ff9bd2, #7c4dff);
+  background-size: 300% 300%;
+
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+
+  animation: gradientFlow 8s ease infinite;
+  font-family: "Cinzel", "Trebuchet MS", sans-serif;
+}
+
+@keyframes gradientFlow {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.miniGameOpenButton,
+.closeMiniGameButton {
+  border: 0;
+  border-radius: 18px;
+  padding: 10px 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.miniGameOpenButton {
+  background: #3a2060;
+  color: white;
+}
+
+.closeMiniGameButton {
+  position: fixed;
+  top: 18px;
+  right: 18px;
+  z-index: 60;
+  background: white;
+  color: #3a2060;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}

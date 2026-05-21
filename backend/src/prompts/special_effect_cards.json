@@ -1,0 +1,32 @@
+{
+  "category": "special_effect",
+  "category_weight": 0.9,
+  "special_effect_cards": {
+    "sparking": {
+      "display_name": "Sparking",
+      "description": "Bright shimmering visual enhancement effect.",
+      "image": "sparking.png",
+      "prompt_hints": [
+        "subtle sparkling highlights, glowing light particles",
+        "tiny shimmering reflections, glittering visual accents",
+        "radiant sparkle effects, delicate glowing details",
+        "soft twinkling highlights, luminous particle effects",
+        "bright reflective sparkles, magical glowing atmosphere"
+      ],
+      "negative_prompt_hint": "flat matte surfaces, dull lighting, low visual contrast"
+    },
+    "black_white": {
+      "display_name": "Black & White",
+      "description": "Monochrome visual style with grayscale tones.",
+      "image": "black_and_white.png",
+      "prompt_hints": [
+        "monochrome grayscale tones, dramatic black and white contrast",
+        "classic black ink shading, soft grayscale atmosphere",
+        "high-contrast monochrome lighting, cinematic grayscale texture",
+        "minimal black and white palette, elegant tonal balance",
+        "vintage monochrome rendering, deep grayscale shadows"
+      ],
+      "negative_prompt_hint": "vivid saturated colors, rainbow lighting, colorful gradients"
+    }
+  }
+}
