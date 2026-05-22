@@ -1,0 +1,11 @@
+torch
+diffusers
+transformers
+accelerate
+safetensors
+fastapi
+uvicorn
+pillow
+python-multipart
+python-dotenv
+huggingface_hub

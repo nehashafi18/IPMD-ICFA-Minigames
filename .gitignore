@@ -1,0 +1,12 @@
+venv/
+sd-backend/venv/
+node_modules/
+outputs/
+.env
+backend/.env
+.DS_Store
+__pycache__/
+*.pyc
+*.safetensors
+*.ckpt
+*.bin

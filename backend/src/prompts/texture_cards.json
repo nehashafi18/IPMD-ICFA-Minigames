@@ -1,0 +1,32 @@
+{
+  "category": "texture",
+  "category_weight": 0.7,
+  "texture_cards": {
+    "soft_fluffy": {
+      "display_name": "Soft & Fluffy",
+      "description": "Gentle soft-textured visual atmosphere.",
+      "image": "soft_fluffy.png",
+      "prompt_hints": [
+        "soft fuzzy surface texture, gentle plush shading",
+        "velvety soft atmosphere, light cotton-like texture",
+        "fluffy tactile surfaces, warm comforting softness",
+        "smooth plush material feel, soft diffused lighting",
+        "airy soft textures, delicate comforting atmosphere"
+      ],
+      "negative_prompt_hint": "sharp rough surfaces, metallic textures, harsh visual edges"
+    },
+    "shiny_glossy": {
+      "display_name": "Shiny / Glossy",
+      "description": "Reflective glossy visual surface effect.",
+      "image": "shiny_glossy.png",
+      "prompt_hints": [
+        "glossy reflective surfaces, bright polished highlights",
+        "smooth shiny materials, radiant reflective lighting",
+        "high-gloss visual texture, luminous surface reflections",
+        "polished glossy finish, clean reflective contrast",
+        "sleek shiny atmosphere, soft metallic highlights"
+      ],
+      "negative_prompt_hint": "matte rough textures, dusty surfaces, dull low-reflection lighting"
+    }
+  }
+}
