@@ -7,9 +7,9 @@ import {
 import {
   HTTPException,
   AIProviderException
-} from "./exceptions.js";
+} from "../utils/exceptions.js";
 
-function errorHandler(
+export function errorHandler(
   err: unknown,
   req: Request,
   res: Response,
@@ -19,28 +19,33 @@ function errorHandler(
 
   if (err instanceof AIProviderException) {
     return res.status(err.statusCode).json({
+      success: false,
       error: {
         provider: err.provider,
         code: err.statusCode,
         type: err.reason,
-        message: err.message,
-      },
+        message: err.message
+      }
     });
   }
 
   if (err instanceof HTTPException) {
     return res.status(err.statusCode).json({
-      code: err.statusCode,
-      reason: err.reason,
-      message: err.message,
+      success: false,
+      error: {
+        code: err.statusCode,
+        type: err.reason,
+        message: err.message
+      }
     });
   }
 
   return res.status(500).json({
-    code: 500,
-    reason: "InternalServerError",
-    message: "Internal server error",
+    success: false,
+    error: {
+      code: 500,
+      type: "InternalServerError",
+      message: "Internal server error"
+    }
   });
 }
-
-export default errorHandler;

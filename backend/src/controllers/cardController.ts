@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { Request, Response, NextFunction } from "express";
+import { parseCards } from "../services/cardService.js";
 
 type JsonObject = {
   [key: string]: any;
@@ -108,6 +109,23 @@ export function getCards(
       texture_cards: textureData.texture_cards,
       special_effect_cards:
         specialEffectData.special_effect_cards,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export function parseCardsController(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): void {
+  try {
+    const parsedCards = parseCards(req.body);
+
+    res.json({
+      success: true,
+      data: parsedCards
     });
   } catch (error) {
     next(error);

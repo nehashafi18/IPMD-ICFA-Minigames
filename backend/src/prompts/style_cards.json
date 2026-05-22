@@ -19,6 +19,7 @@
     },
 
     "watercolor_style": {
+      "id": "watercolor",
       "display_name": "Watercolor Style",
       "description": "Transparent watercolor painting with soft pigment flow.",
       "image": "watercolor.png",
@@ -33,6 +34,7 @@
     },
 
     "oil_painting_style": {
+      "id": "oilpainting",
       "display_name": "Oil Painting Style",
       "description": "Traditional oil painting style with rich texture and layered brushwork.",
       "image": "oil_painting.png",

@@ -3,6 +3,7 @@
   "category_weight": 0.7,
   "texture_cards": {
     "soft_fluffy": {
+      "id": "softfluffy",
       "display_name": "Soft & Fluffy",
       "description": "Gentle soft-textured visual atmosphere.",
       "image": "soft_fluffy.png",
@@ -16,6 +17,7 @@
       "negative_prompt_hint": "sharp rough surfaces, metallic textures, harsh visual edges"
     },
     "shiny_glossy": {
+      "id": "shinyglossy",
       "display_name": "Shiny / Glossy",
       "description": "Reflective glossy visual surface effect.",
       "image": "shiny_glossy.png",
