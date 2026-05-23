@@ -12,22 +12,50 @@ services:
     container_name: image-cards-backend
     ports:
       - "5001:5001"
+
     env_file:
       - ./backend/.env
+
     environment:
       - PORT=5001
+
+      # Stable Diffusion
       - SD_TXT2IMG_URL=http://sd-backend:8000/generate-text-to-image
       - SD_IMG2IMG_URL=http://sd-backend:8000/generate-image-to-image
+
+      # Qwen / Ollama
+      - LLM_PROVIDER=qwen
+      - QWEN_API_KEY=ollama
+      - QWEN_BASE_URL=http://ollama:11434/v1
+      - QWEN_MODEL=qwen3.5:2b
+
     volumes:
       - ./backend/uploads:/app/uploads
+
     depends_on:
       - sd-backend
+      - ollama
 
   sd-backend:
     build: ./sd-backend
     container_name: image-cards-sd-backend
+
     ports:
       - "8000:8000"
+
     volumes:
       - ~/hf_cache:/root/.cache/huggingface
       - ./sd-backend/outputs:/app/outputs
+
+  ollama:
+    image: ollama/ollama
+    container_name: image-cards-ollama
+
+    ports:
+      - "11434:11434"
+
+    volumes:
+      - ollama_data:/root/.ollama
+
+volumes:
+  ollama_data:

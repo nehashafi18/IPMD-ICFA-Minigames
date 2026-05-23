@@ -4,8 +4,13 @@ import MiniGame from "./components/miniGames/src/MiniGames";
 
 interface CardData {
   display_name: string;
-  image: string;
   description: string;
+
+  image?: string;
+  images?: string[];
+
+  prompt_hints?: string[];
+  negative_prompt_hints?: string[];
 }
 
 interface CardsGroup {
@@ -44,6 +49,59 @@ interface GenerateResponse {
   error?: string;
 }
 
+function pickRandomImage(
+  images: string[] = [],
+  previousImage?: string
+): string {
+  if (!images.length) return "";
+
+  const availableImages = images.filter(
+    (img) => img !== previousImage
+  );
+
+  if (!availableImages.length) {
+    return images[0];
+  }
+
+  return availableImages[
+    Math.floor(Math.random() * availableImages.length)
+  ];
+}
+
+function createRandomImageMap(
+  data: CardsResponse,
+  previousMap: Record<string, string> = {}
+): Record<string, string> {
+  const newMap: Record<string, string> = {};
+
+  const categories: [string, CardsGroup][] = [
+    ["style", data.style_cards],
+    ["emotion", data.emotion_cards],
+    ["texture", data.texture_cards],
+    ["special_effect", data.special_effect_cards]
+  ];
+
+  categories.forEach(([categoryKey, cards]) => {
+    Object.entries(cards).forEach(([id, card]) => {
+      const mapKey = `${categoryKey}_${id}`;
+
+      const imageList =
+        card.images && card.images.length > 0
+          ? card.images
+          : card.image
+          ? [card.image]
+          : [];
+
+      newMap[mapKey] = pickRandomImage(
+        imageList,
+        previousMap[mapKey]
+      );
+    });
+  });
+
+  return newMap;
+}
+
 export default function App() {
   const [stepIndex, setStepIndex] = useState<number>(0);
   const [selectedCards, setSelectedCards] = useState<SelectedCards>({});
@@ -57,6 +115,8 @@ export default function App() {
   const [showMiniGame, setShowMiniGame] = useState<boolean>(false);
   const [subject, setSubject] = useState<string>("");
 
+  const [cardImageMap, setCardImageMap] = useState<Record<string, string>>({});
+
   useEffect(() => {
     async function loadCards() {
       try {
@@ -67,7 +127,12 @@ export default function App() {
         }
 
         const data: CardsResponse = await response.json();
+
         setCardsData(data);
+
+        setCardImageMap((previousMap) =>
+          createRandomImageMap(data, previousMap)
+        );
       } catch (error) {
         if (error instanceof Error) {
           alert(error.message);
@@ -88,25 +153,53 @@ export default function App() {
     );
   }
 
+  function buildCards(
+    cardGroup: CardsGroup,
+    categoryKey: string
+  ): StepCard[] {
+    return Object.entries(cardGroup).map(([id, card]) => {
+      const mapKey = `${categoryKey}_${id}`;
+
+      const image =
+        cardImageMap[mapKey] ||
+        card.images?.[0] ||
+        card.image ||
+        "";
+
+      return {
+        id,
+        label: card.display_name,
+        description: card.description,
+        image
+      };
+    });
+  }
+
   const cardSteps: CardStep[] = [
-    ["style_card", "Choose a Style", cardsData.style_cards],
-    ["emotion_card", "Choose an Emotion", cardsData.emotion_cards],
-    ["texture_card", "Choose a Texture", cardsData.texture_cards],
-    [
-      "special_effect_card",
-      "Choose a Special Effect",
-      cardsData.special_effect_cards,
-    ],
-  ].map(([key, title, group]) => ({
-    key: key as string,
-    title: title as string,
-    cards: Object.entries(group as CardsGroup).map(([id, card]) => ({
-      id,
-      label: card.display_name,
-      image: card.image,
-      description: card.description,
-    })),
-  }));
+    {
+      key: "style_card",
+      title: "Choose a Style",
+      cards: buildCards(cardsData.style_cards, "style")
+    },
+    {
+      key: "emotion_card",
+      title: "Choose an Emotion",
+      cards: buildCards(cardsData.emotion_cards, "emotion")
+    },
+    {
+      key: "texture_card",
+      title: "Choose a Texture",
+      cards: buildCards(cardsData.texture_cards, "texture")
+    },
+    {
+      key: "special_effect_card",
+      title: "Choose a Special Effect",
+      cards: buildCards(
+        cardsData.special_effect_cards,
+        "special_effect"
+      )
+    }
+  ];
 
   const currentStep = cardSteps[stepIndex];
 
@@ -202,6 +295,12 @@ export default function App() {
     setSelectedCards({});
     setGeneratedPrompt("");
     setImageUrl("");
+
+    if (cardsData) {
+      setCardImageMap((previousMap) =>
+        createRandomImageMap(cardsData, previousMap)
+      );
+    }
   }
 
   if (generatedPrompt) {

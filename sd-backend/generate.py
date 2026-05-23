@@ -52,7 +52,7 @@ def generate_text_to_image(
         negative_prompt=negative_prompt,
         width=width,
         height=height,
-        num_inference_steps=20,
+        num_inference_steps=25,
         guidance_scale=7.5
     ).images[0]
     
@@ -77,7 +77,7 @@ def generate_image_to_image(
         image=image,
         strength=0.65,
         guidance_scale=7.5,
-        num_inference_steps=20
+        num_inference_steps=25
     ).images[0]
     
     img2img_pipe.enable_attention_slicing()
