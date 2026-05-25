@@ -1,7 +1,7 @@
 {
-  "category": "special_effect",
+  "category": "imagination",
   "category_weight": 0.9,
-  "special_effect_cards": {
+  "imagination_cards": {
     "sparking": {
       "id": "sparking",
       "display_name": "Sparking",
@@ -24,7 +24,7 @@
       "prompt_hints": [
         "monochrome grayscale tones, dramatic black and white contrast",
         "classic black ink shading, soft grayscale atmosphere",
-        "high-contrast monochrome lighting, cinematic grayscale texture",
+        "high-contrast monochrome lighting, cinematic grayscale memory",
         "minimal black and white palette, elegant tonal balance",
         "vintage monochrome rendering, deep grayscale shadows"
       ],

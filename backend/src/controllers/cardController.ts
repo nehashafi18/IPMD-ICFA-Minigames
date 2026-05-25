@@ -84,12 +84,12 @@ export function getCards(
       "./src/prompts/emotion_cards.json"
     );
 
-    let textureData = loadJson(
-      "./src/prompts/texture_cards.json"
+    let memoryData = loadJson(
+      "./src/prompts/memory_cards.json"
     );
 
-    let specialEffectData = loadJson(
-      "./src/prompts/special_effect_cards.json"
+    let imaginationData = loadJson(
+      "./src/prompts/imagination_cards.json"
     );
 
     // remove cards with missing PNG
@@ -97,18 +97,18 @@ export function getCards(
 
     emotionData = filterMissingImages(emotionData);
 
-    textureData = filterMissingImages(textureData);
+    memoryData = filterMissingImages(memoryData);
 
-    specialEffectData = filterMissingImages(
-      specialEffectData
+    imaginationData = filterMissingImages(
+      imaginationData
     );
 
     res.json({
       style_cards: styleData.style_cards,
       emotion_cards: emotionData.emotion_cards,
-      texture_cards: textureData.texture_cards,
-      special_effect_cards:
-        specialEffectData.special_effect_cards,
+      memory_cards: memoryData.memory_cards,
+      imagination_cards:
+        imaginationData.imagination_cards,
     });
   } catch (error) {
     next(error);

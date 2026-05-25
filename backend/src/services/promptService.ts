@@ -1,4 +1,3 @@
-// services/promptService.ts
 import { generatePromptWithLLM } from "../llm/llmClient.js";
 
 function weightedPrompt(text?: string, weight?: number): string | null {
@@ -24,30 +23,33 @@ export async function buildPrompt(body: any) {
     subject: subject.trim() || null,
     language,
 
-    selected_hints: [
-      weightedPrompt(
-        parsed_cards.style?.prompt_hint,
-        parsed_cards.category_weights.style
+    prompt_parts: {
+      memory: weightedPrompt(
+        parsed_cards.memory?.prompt_hint,
+        parsed_cards.category_weights?.memory
       ),
-      weightedPrompt(
+
+      emotion: weightedPrompt(
         parsed_cards.emotion?.prompt_hint,
-        parsed_cards.category_weights.emotion
+        parsed_cards.category_weights?.emotion
       ),
-      weightedPrompt(
-        parsed_cards.texture?.prompt_hint,
-        parsed_cards.category_weights.texture
+
+      imagination: weightedPrompt(
+        parsed_cards.imagination?.prompt_hint,
+        parsed_cards.category_weights?.imagination
       ),
-      weightedPrompt(
-        parsed_cards.special_effect?.prompt_hint,
-        parsed_cards.category_weights.special_effect
+
+      style: weightedPrompt(
+        parsed_cards.style?.prompt_hint,
+        parsed_cards.category_weights?.style
       )
-    ].filter(Boolean),
+    },
 
     negative_prompt: [
-      parsed_cards.style?.negative_prompt_hint,
+      parsed_cards.memory?.negative_prompt_hint,
       parsed_cards.emotion?.negative_prompt_hint,
-      parsed_cards.texture?.negative_prompt_hint,
-      parsed_cards.special_effect?.negative_prompt_hint
+      parsed_cards.imagination?.negative_prompt_hint,
+      parsed_cards.style?.negative_prompt_hint
     ]
       .filter(Boolean)
       .join(", ")
@@ -56,12 +58,20 @@ export async function buildPrompt(body: any) {
   const llmInstruction = `
 You are an AI Stable Diffusion prompt generator.
 
-Create one high-quality English prompt.
+Create one high-quality English prompt by combining:
+1. Memory = main scene or remembered place
+2. Emotion = emotional tone
+3. Imagination = surreal or creative elements
+4. Style = visual rendering style
 
-Rules:
-- If mode is "image_to_image", treat the uploaded image as the subject.
-- If mode is "text_to_image", use the subject text as the subject.
-- If mode is "card_only", create an abstract image using only card hints.
+Combination logic:
+- Memory should define the main scene.
+- Emotion should describe the mood or atmosphere.
+- Imagination should add dreamlike, symbolic, or surreal details.
+- Style should describe the final artistic rendering.
+- If mode is "image_to_image", treat the uploaded image as the subject and apply the four prompt parts to transform it.
+- If mode is "text_to_image", use the subject text as the main subject.
+- If mode is "card_only", create an abstract image using only the prompt parts.
 - Do not mention card names.
 - Return JSON only.
 
@@ -73,6 +83,9 @@ Return format:
   "prompt": "...",
   "negative_prompt": "..."
 }
+
+Example style of final prompt:
+"A quiet seaside memory at dusk with gentle waves, expressed in a soft, melancholic tone. Floating light particles drift through the scene beneath an oversized moon, creating a dreamlike surreal atmosphere. Rendered in soft watercolor memorys with diffused edges."
 `;
 
   return await generatePromptWithLLM(llmInstruction);

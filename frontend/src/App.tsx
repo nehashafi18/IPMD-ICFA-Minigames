@@ -18,10 +18,10 @@ interface CardsGroup {
 }
 
 interface CardsResponse {
-  style_cards: CardsGroup;
   emotion_cards: CardsGroup;
-  texture_cards: CardsGroup;
-  special_effect_cards: CardsGroup;
+  memory_cards: CardsGroup;
+  imagination_cards: CardsGroup;
+  style_cards: CardsGroup;
 }
 
 interface SelectedCards {
@@ -75,10 +75,10 @@ function createRandomImageMap(
   const newMap: Record<string, string> = {};
 
   const categories: [string, CardsGroup][] = [
-    ["style", data.style_cards],
     ["emotion", data.emotion_cards],
-    ["texture", data.texture_cards],
-    ["special_effect", data.special_effect_cards]
+    ["memory", data.memory_cards],
+    ["imagination", data.imagination_cards],
+    ["style", data.style_cards]
   ];
 
   categories.forEach(([categoryKey, cards]) => {
@@ -177,27 +177,27 @@ export default function App() {
 
   const cardSteps: CardStep[] = [
     {
-      key: "style_card",
-      title: "Choose a Style",
-      cards: buildCards(cardsData.style_cards, "style")
-    },
-    {
       key: "emotion_card",
       title: "Choose an Emotion",
       cards: buildCards(cardsData.emotion_cards, "emotion")
     },
     {
-      key: "texture_card",
-      title: "Choose a Texture",
-      cards: buildCards(cardsData.texture_cards, "texture")
+      key: "memory_card",
+      title: "Choose a memory",
+      cards: buildCards(cardsData.memory_cards, "memory")
     },
     {
-      key: "special_effect_card",
-      title: "Choose a Special Effect",
+      key: "imagination_card",
+      title: "Choose a imagination",
       cards: buildCards(
-        cardsData.special_effect_cards,
-        "special_effect"
+        cardsData.imagination_cards,
+        "imagination"
       )
+    },
+    {
+      key: "style_card",
+      title: "Choose a Style",
+      cards: buildCards(cardsData.style_cards, "style")
     }
   ];
 

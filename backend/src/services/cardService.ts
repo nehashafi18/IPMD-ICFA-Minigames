@@ -1,4 +1,3 @@
-// services/cardService.ts
 import fs from "fs";
 import {
   InvalidException,
@@ -7,14 +6,14 @@ import {
 
 let styleData: any;
 let emotionData: any;
-let textureData: any;
-let specialEffectData: any;
+let memoryData: any;
+let imaginationData: any;
 
 try {
   styleData = JSON.parse(fs.readFileSync("./src/prompts/style_cards.json", "utf-8"));
   emotionData = JSON.parse(fs.readFileSync("./src/prompts/emotion_cards.json", "utf-8"));
-  textureData = JSON.parse(fs.readFileSync("./src/prompts/texture_cards.json", "utf-8"));
-  specialEffectData = JSON.parse(fs.readFileSync("./src/prompts/special_effect_cards.json", "utf-8"));
+  memoryData = JSON.parse(fs.readFileSync("./src/prompts/memory_cards.json", "utf-8"));
+  imaginationData = JSON.parse(fs.readFileSync("./src/prompts/imagination_cards.json", "utf-8"));
 } catch {
   throw new InternalServerErrorException("Failed to load prompt JSON files");
 }
@@ -50,17 +49,17 @@ export function parseCards(body: any) {
   return {
     style: getCardPrompt(styleData, "style_cards", body.style_card),
     emotion: getCardPrompt(emotionData, "emotion_cards", body.emotion_card),
-    texture: getCardPrompt(textureData, "texture_cards", body.texture_card),
-    special_effect: getCardPrompt(
-      specialEffectData,
-      "special_effect_cards",
-      body.special_effect_card
+    memory: getCardPrompt(memoryData, "memory_cards", body.memory_card),
+    imagination: getCardPrompt(
+      imaginationData,
+      "imagination_cards",
+      body.imagination_card
     ),
     category_weights: {
       style: styleData.category_weight,
       emotion: emotionData.category_weight,
-      texture: textureData.category_weight,
-      special_effect: specialEffectData.category_weight
+      memory: memoryData.category_weight,
+      imagination: imaginationData.category_weight
     }
   };
 }

@@ -4,10 +4,10 @@
   "style_cards": {
     "van_gogh_style": {
       "display_name": "Van Gogh Style",
-      "description": "Expressive painterly style with strong motion and thick brush texture.",
+      "description": "Expressive painterly style with strong motion and thick brush memory.",
       "image": "Van_Gogh.png",
-      "prompt_hint": "expressive swirling brush strokes, thick impasto oil texture, vivid contrasting colors",
-      "negative_prompt_hint": "smooth digital shading, photorealistic rendering, minimal texture"
+      "prompt_hint": "expressive swirling brush strokes, thick impasto oil memory, vivid contrasting colors",
+      "negative_prompt_hint": "smooth digital shading, photorealistic rendering, minimal memory"
     },
 
     "monet_style": {
@@ -24,25 +24,25 @@
       "description": "Transparent watercolor painting with soft pigment flow.",
       "image": "watercolor.png",
       "prompt_hints": [
-        "soft watercolor pigment texture, transparent layered washes",
+        "soft watercolor pigment memory, transparent layered washes",
         "subtle paper grain, bleeding watercolor edges",
         "fluid watercolor blending, delicate pastel diffusion",
         "light watercolor brush flow, soft artistic transparency",
-        "gentle watercolor shading, airy painted texture"
+        "gentle watercolor shading, airy painted memory"
       ],
-      "negative_prompt_hint": "thick oil paint texture, hard digital edges, glossy plastic surface"
+      "negative_prompt_hint": "thick oil paint memory, hard digital edges, glossy plastic surface"
     },
 
     "oil_painting_style": {
       "id": "oilpainting",
       "display_name": "Oil Painting Style",
-      "description": "Traditional oil painting style with rich texture and layered brushwork.",
+      "description": "Traditional oil painting style with rich memory and layered brushwork.",
       "image": "oil_painting.png",
       "prompt_hints": [
-        "rich oil paint texture, layered painterly brush strokes",
+        "rich oil paint memory, layered painterly brush strokes",
         "thick impasto paint details, dramatic artistic lighting",
-        "visible canvas texture, expressive oil brushwork",
-        "deep painterly shading, textured oil paint layers",
+        "visible canvas memory, expressive oil brushwork",
+        "deep painterly shading, memoryd oil paint layers",
         "classic oil painting atmosphere, bold artistic contrast"
       ],
       "negative_prompt_hint": "flat digital shading, watercolor transparency, smooth plastic surfaces"
@@ -52,14 +52,14 @@
       "description": "Bold graphic comic rendering with outlines and flat colors.",
       "image": "comic.png",
       "prompt_hint": "bold inked outlines, high-contrast cel shading, graphic comic rendering",
-      "negative_prompt_hint": "soft watercolor blending, hazy impressionist edges, realistic photographic texture"
+      "negative_prompt_hint": "soft watercolor blending, hazy impressionist edges, realistic photographic memory"
     },
 
     "fairy_tale_illustration_style": {
       "display_name": "Fairy Tale Illustration Style",
       "description": "Dreamy storybook illustration with magical softness.",
       "image": "fairy_tale_illustration.png",
-      "prompt_hint": "dreamy storybook illustration texture, soft magical lighting, whimsical decorative details",
+      "prompt_hint": "dreamy storybook illustration memory, soft magical lighting, whimsical decorative details",
       "negative_prompt_hint": "harsh realistic lighting, dark horror atmosphere, technical industrial rendering"
     }
   }
