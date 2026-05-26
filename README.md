@@ -125,21 +125,20 @@ Generated Image
 Image_Cards_to_Fine_Arts/
 │
 ├── frontend/
+│   ├── public/
+│   │   ├── cards/
+│   │   └── icons/
+│   │
 │   ├── src/
 │   │   ├── App.tsx
 │   │   ├── main.tsx
-│   │   ├── components/
-│   │   │   ├── miniGames/
-│   │   │   ├── ui/
-│   │   │   └── cards/
-│   │   │
-│   │   ├── services/
-│   │   ├── assets/
-│   │   ├── types/
-│   │   └── styles/
+│   │   ├── App.css
+│   │   └── components/
+│   │       └── miniGames/
 │   │
 │   ├── package.json
 │   ├── tsconfig.json
+│   ├── Dockerfile
 │   └── vite.config.ts
 │
 ├── backend/
@@ -147,18 +146,8 @@ Image_Cards_to_Fine_Arts/
 │   ├── server.js
 │   │
 │   ├── routes/
-│   │   ├── cards.js
-│   │   ├── prompt.js
-│   │   └── art.js
-│   │
 │   ├── middleware/
-│   │   ├── logger.js
-│   │   └── auth_middleware.js
-│   │
 │   ├── utils/
-│   │   ├── response.js
-│   │   └── exceptions.js
-│   │
 │   ├── prompts/
 │   │   ├── style_cards.json
 │   │   ├── emotion_cards.json
@@ -166,25 +155,16 @@ Image_Cards_to_Fine_Arts/
 │   │   └── imagination_cards.json
 │   │
 │   ├── llm/
-│   │   ├── llm_client.js
-│   │   ├── gemma_config.json
-│   │   └── qwen_config.json
-│   │
-│   ├── pipeline/
-│   │   ├── generate_art_pipeline.js
-│   │   └── pipeline_test_cases.json
-│   │
 │   ├── uploads/
-│   ├── outputs/
 │   ├── package.json
+│   ├── Dockerfile
 │   └── .env
 │
 ├── sd-backend/
 │   ├── app.py
 │   ├── generate.py
-│   ├── sd_inference.py
-│   ├── sd_model_loader.py
 │   ├── requirements.txt
+│   ├── Dockerfile
 │   └── outputs/
 │
 ├── deploy/
