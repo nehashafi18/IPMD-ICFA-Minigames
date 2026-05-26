@@ -38,4 +38,12 @@ app.get(
   }
 );
 
+app.get("/health", (req, res) => {
+  res.json({
+    success: true,
+    service: "backend",
+    status: "healthy"
+  });
+});
+
 export default app;

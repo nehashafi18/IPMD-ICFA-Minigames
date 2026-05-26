@@ -65,3 +65,11 @@ async def image_to_image(
         "success": True,
         "image_url": f"http://localhost:8000/{image_path}"
     }
+    
+@app.get("/health")
+def health():
+    return {
+        "success": True,
+        "service": "sd-backend",
+        "status": "healthy"
+    }
