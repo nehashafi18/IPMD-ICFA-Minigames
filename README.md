@@ -2,51 +2,54 @@
 
 AI-powered artistic image generation platform using:
 
-- React frontend
-- Node.js backend
+- React + TypeScript frontend
+- Modular Node.js backend API
 - Qwen / Gemini prompt generation
-- Stable Diffusion image generation
+- Stable Diffusion 1.5 image generation
 - Card-based artistic prompting system
+- Dockerized deployment pipeline
 
 ---
 
 # Project Overview
 
-This project allows users to generate artistic AI images using a card-based prompt system.
+Image Cards to Fine Arts is an AI-assisted creative platform that transforms structured artistic card selections into high-quality generated artwork.
 
-Instead of manually writing long prompts, users select visual cards such as:
+Instead of manually writing complex prompts, users select visual artistic cards such as:
 
 - emotion cards
 - memory cards
 - imagination cards
 - style cards
 
-The selected cards are transformed into a structured AI prompt using a Large Language Model (LLM), then passed into Stable Diffusion to generate the final image.
+The selected cards are transformed into structured prompts using a Large Language Model (LLM), then passed into Stable Diffusion to generate final AI artwork.
 
 Users may also:
 - upload a source image
 - enter a text subject
 - generate only from cards
-- choose output image size
+- customize image dimensions
+- use local or cloud AI models
 
 ---
 
-# Features
+# Core Features
 
-## Prompt Card System
+## Card-Based Prompt System
 
 Supports:
 - Style cards
 - Emotion cards
-- memory cards
-- imagination cards
+- Memory cards
+- Imagination cards
 
 Each card contains:
-- image
-- name
+- preview image
+- display name
 - description
 - prompt hints
 - negative prompt hints
+- weighted prompt fragments
 
 ---
 
@@ -55,17 +58,19 @@ Each card contains:
 Supports:
 - Gemini API
 - Qwen API
-- Local Gemini models
-- Local Ollama Qwen models
+- Ollama local models
+- Local Gemma models
 
 The LLM combines:
-- card hints
-- subject
+- selected card metadata
+- prompt weights
+- subject text
 - uploaded image context
 
 into:
 - Stable Diffusion prompts
 - negative prompts
+- SD-compatible optimized prompt text
 
 ---
 
@@ -74,33 +79,40 @@ into:
 Supports:
 - text-to-image
 - image-to-image
-- customizable image size
+- configurable image size
 - Docker deployment
+- CPU inference pipeline
+- future OpenVINO optimization support
 
 ---
 
 ## Frontend Features
 
-- visual card selection
+- visual card selection interface
 - hover descriptions
-- image upload
+- image uploads
 - generated image display
 - loading mini-games
 - responsive UI
+- TypeScript architecture
+- Framer Motion animations
 
 ---
 
 # System Architecture
 
 ```txt
-Frontend (React + Vite)
+Frontend (React + TypeScript + Vite)
         ↓
-Backend API (Node.js + Express)
+Backend API Server (Node.js + Express)
+        ↓
+Card Parsing Pipeline
         ↓
 LLM Prompt Generation
 (Gemini / Qwen / Ollama)
         ↓
-Stable Diffusion Backend (FastAPI)
+Stable Diffusion Pipeline
+(FastAPI / Diffusers)
         ↓
 Generated Image
 ```
@@ -115,28 +127,70 @@ Image_Cards_to_Fine_Arts/
 ├── frontend/
 │   ├── src/
 │   │   ├── App.tsx
-│   │   ├── App.css
+│   │   ├── main.tsx
 │   │   ├── components/
 │   │   │   ├── miniGames/
-│   │   │   └── ui/
+│   │   │   ├── ui/
+│   │   │   └── cards/
 │   │   │
+│   │   ├── services/
 │   │   ├── assets/
-│   │   └── main.tsx
+│   │   ├── types/
+│   │   └── styles/
 │   │
 │   ├── package.json
+│   ├── tsconfig.json
 │   └── vite.config.ts
 │
 ├── backend/
-│   ├── src/
+│   │
+│   ├── server.js
+│   │
+│   ├── routes/
+│   │   ├── cards.js
+│   │   ├── prompt.js
+│   │   └── art.js
+│   │
+│   ├── middleware/
+│   │   ├── logger.js
+│   │   └── auth_middleware.js
+│   │
+│   ├── utils/
+│   │   ├── response.js
+│   │   └── exceptions.js
+│   │
+│   ├── prompts/
+│   │   ├── style_cards.json
+│   │   ├── emotion_cards.json
+│   │   ├── memory_cards.json
+│   │   └── imagination_cards.json
+│   │
+│   ├── llm/
+│   │   ├── llm_client.js
+│   │   ├── gemma_config.json
+│   │   └── qwen_config.json
+│   │
+│   ├── pipeline/
+│   │   ├── generate_art_pipeline.js
+│   │   └── pipeline_test_cases.json
+│   │
+│   ├── uploads/
+│   ├── outputs/
 │   ├── package.json
 │   └── .env
 │
 ├── sd-backend/
 │   ├── app.py
 │   ├── generate.py
-│   ├── Dockerfile
+│   ├── sd_inference.py
+│   ├── sd_model_loader.py
 │   ├── requirements.txt
 │   └── outputs/
+│
+├── deploy/
+│   ├── docker-compose.yml
+│   ├── healthcheck.sh
+│   └── README_DEPLOY.md
 │
 └── README.md
 ```
@@ -149,30 +203,85 @@ Image_Cards_to_Fine_Arts/
 
 `frontend/`
 
-## Main Responsibilities
+## Responsibilities
 
-- display cards
-- collect user input
-- upload images
+- display artistic cards
+- collect user selections
+- upload source images
 - display generated prompts
-- display generated images
-- show mini-games during generation
+- display generated artwork
+- run loading mini-games
+- manage frontend state
+- communicate with backend APIs
 
 ---
 
-# Backend
+# Backend API Server
 
 ## Location
 
 `backend/`
 
-## Main Responsibilities
+## Responsibilities
 
-- load card JSON files
-- validate requests
-- build structured prompts
-- call LLM APIs
-- communicate with Stable Diffusion backend
+- API routing
+- request validation
+- card metadata parsing
+- structured prompt building
+- LLM communication
+- Stable Diffusion communication
+- error handling
+- logging
+- authentication/session handling
+
+---
+
+# API Endpoints
+
+## Parse Selected Cards
+
+```txt
+POST /api/cards/parse
+```
+
+Input:
+- selected card IDs
+
+Output:
+- structured artistic metadata JSON
+
+---
+
+## Build AI Prompt
+
+```txt
+POST /api/prompt/build
+```
+
+Input:
+- structured card metadata
+- subject text
+- image context
+
+Output:
+- final Stable Diffusion prompt
+- negative prompt
+
+---
+
+## Generate AI Art
+
+```txt
+POST /api/art/generate
+```
+
+Input:
+- Stable Diffusion prompt
+
+Output:
+- generated image
+- image path
+- generation metadata
 
 ---
 
@@ -184,43 +293,133 @@ Image_Cards_to_Fine_Arts/
 
 ## Responsibilities
 
-- text-to-image generation
-- image-to-image generation
+- text-to-image inference
+- image-to-image inference
+- CPU image generation
 - image saving
 - image serving
+- model loading
+- optimization pipeline
 
 ---
 
-# Running the App
+# AI Pipeline Flow
 
-## From project root
+```txt
+Card Selection
+      ↓
+Card Metadata Parsing
+      ↓
+LLM Prompt Optimization
+      ↓
+Stable Diffusion Prompt Generation
+      ↓
+Image Generation
+      ↓
+Final Artwork Output
+```
+
+---
+
+# Running the Application
+
+## Build & Start
+
+From project root:
 
 ```bash
 docker compose up --build
 ```
 
-## Open
+---
 
-Frontend:
+# Local URLs
+
+## Frontend
 
 ```txt
 http://localhost:5173
 ```
 
-Backend:
+## Backend API
 
 ```txt
 http://localhost:5001
 ```
 
-SD backend:
+## Stable Diffusion Backend
 
 ```txt
 http://localhost:8000
 ```
 
-## Stop all
+---
+
+# Stop Containers
 
 ```bash
 docker compose down
 ```
+
+---
+
+# Environment Variables
+
+Example backend `.env`:
+
+```env
+PORT=5001
+
+LLM_PROVIDER=qwen
+
+QWEN_BASE_URL=http://localhost:11434/v1
+QWEN_MODEL=qwen3.5:2b
+
+SD_TXT2IMG_URL=http://sd-backend:8000/generate-text-to-image
+SD_IMG2IMG_URL=http://sd-backend:8000/generate-image-to-image
+```
+
+---
+
+# Future Improvements
+
+Planned future features include:
+
+- OpenVINO acceleration
+- ONNX inference optimization
+- image history system
+- user authentication
+- cloud deployment
+- art sharing/community system
+- prompt fine-tuning
+- advanced image editing
+- multi-image generation
+- distributed AI inference
+
+---
+
+# Technologies Used
+
+Frontend:
+- React
+- TypeScript
+- Vite
+- Tailwind CSS
+- Framer Motion
+
+Backend:
+- Node.js
+- Express
+- Multer
+- python
+
+AI / ML:
+- Gemini
+- Qwen
+- Stable Diffusion 1.5
+- Diffusers
+- PyTorch
+
+Deployment:
+- Docker
+- Docker Compose
