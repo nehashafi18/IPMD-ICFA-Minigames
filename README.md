@@ -16,10 +16,10 @@ This project allows users to generate artistic AI images using a card-based prom
 
 Instead of manually writing long prompts, users select visual cards such as:
 
-- style cards
 - emotion cards
-- texture cards
-- special effect cards
+- memory cards
+- imagination cards
+- style cards
 
 The selected cards are transformed into a structured AI prompt using a Large Language Model (LLM), then passed into Stable Diffusion to generate the final image.
 
@@ -38,8 +38,8 @@ Users may also:
 Supports:
 - Style cards
 - Emotion cards
-- Texture cards
-- Special effect cards
+- memory cards
+- imagination cards
 
 Each card contains:
 - image

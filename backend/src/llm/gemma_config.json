@@ -1,0 +1,10 @@
+{
+  "provider": "gemma",
+  "model": "gemma-4-26b-a4b-it",
+  "temperature": 0.7,
+  "max_tokens": 512,
+  "timeout": 30000,
+  "retry_attempts": 3,
+  "local": false,
+  "base_url": "http://localhost:11434/v1/chat/completions"
+}

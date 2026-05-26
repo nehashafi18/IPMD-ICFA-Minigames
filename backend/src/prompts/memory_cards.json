@@ -1,8 +1,9 @@
 {
-  "category": "special_effect",
+  "category": "imagination",
   "category_weight": 0.9,
-  "special_effect_cards": {
+  "imagination_cards": {
     "sparking": {
+      "id": "sparking",
       "display_name": "Sparking",
       "description": "Bright shimmering visual enhancement effect.",
       "image": "sparking.png",
@@ -16,13 +17,14 @@
       "negative_prompt_hint": "flat matte surfaces, dull lighting, low visual contrast"
     },
     "black_white": {
+      "id":"blackwhite",
       "display_name": "Black & White",
       "description": "Monochrome visual style with grayscale tones.",
       "image": "black_and_white.png",
       "prompt_hints": [
         "monochrome grayscale tones, dramatic black and white contrast",
         "classic black ink shading, soft grayscale atmosphere",
-        "high-contrast monochrome lighting, cinematic grayscale texture",
+        "high-contrast monochrome lighting, cinematic grayscale memory",
         "minimal black and white palette, elegant tonal balance",
         "vintage monochrome rendering, deep grayscale shadows"
       ],

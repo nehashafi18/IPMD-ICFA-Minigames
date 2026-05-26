@@ -3,6 +3,7 @@
   "category_weight": 1.1,
   "emotion_cards": {
       "positive": {
+        "id": "positive",
         "display_name": "Positive",
         "description": "General uplifting and emotionally positive atmosphere.",
         "image": "positive.png",
@@ -24,6 +25,7 @@
         "negative_prompt_hint": "warm cheerful lighting, peaceful harmonious tones, uplifting atmosphere"
       },
       "happy": {
+        "id": "happy",
         "display_name": "Happy",
         "description": "Bright uplifting emotional atmosphere.",
         "image" : "happy.png",
@@ -87,6 +89,7 @@
         "negative_prompt_hint": "cold detached atmosphere, emotional emptiness, harsh visual tension"
       },
       "sad": {
+        "id": "sad",
         "display_name": "Sad",
         "description": "Quiet melancholic emotional atmosphere.",
         "image" : "sad.png",
@@ -95,12 +98,13 @@
           "aggressive visual energy, harsh emotional lighting",
           "dark fiery atmosphere, strong shadow tension",
           "emotionally explosive mood, vivid heated colors",
-          "rough dramatic textures, intense visual conflict"
+          "rough dramatic memorys, intense visual conflict"
         ],
         "negative_prompt_hint": "bright energetic lighting, vivid cheerful colors, playful atmosphere"
       },
 
       "angry": {
+        "id": "angry",
         "display_name": "Angry",
         "description": "Intense and emotionally charged atmosphere.",
         "image": "angry.png",
@@ -109,7 +113,7 @@
           "aggressive visual energy, harsh emotional lighting",
           "dark fiery atmosphere, strong shadow tension",
           "emotionally explosive mood, vivid heated colors",
-          "rough dramatic textures, intense visual conflict"
+          "rough dramatic memorys, intense visual conflict"
         ],
         "negative_prompt_hint": "soft peaceful lighting, gentle pastel tones, calm atmosphere"
       },
@@ -194,6 +198,7 @@
       },
 
       "neutral": {
+        "id": "neutral",
         "display_name": "Neutral",
         "description": "Balanced emotionally steady atmosphere.",
         "image": "neutral.png",

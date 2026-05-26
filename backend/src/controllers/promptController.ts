@@ -1,46 +1,34 @@
-import { Request, Response, NextFunction } from "express";
+import {
+  Request,
+  Response,
+  NextFunction
+} from "express";
 
 import {
-  buildPrompt,
-  generateImageFromPrompt
+  buildPrompt
 } from "../services/promptService.js";
 
-interface GeneratePromptRequestBody {
-  width?: string | number;
-  height?: string | number;
+interface BuildPromptRequestBody {
   [key: string]: any;
 }
 
-export async function generatePrompt(
-  req: Request<{}, {}, GeneratePromptRequestBody>,
+export async function buildPromptController(
+  req: Request<{}, {}, BuildPromptRequestBody>,
   res: Response,
   next: NextFunction
 ): Promise<void> {
   try {
-    const width = Number(req.body.width || 512);
-    const height = Number(req.body.height || 512);
-
     const promptResult = await buildPrompt({
       ...req.body,
       has_image: Boolean(req.file)
     });
 
-    const imageUrl = await generateImageFromPrompt(
-      promptResult.prompt,
-      promptResult.negative_prompt,
-      req.file?.path || null,
-      width,
-      height
-    );
-
     res.json({
       success: true,
       data: {
         prompt: promptResult.prompt,
-        negative_prompt: promptResult.negative_prompt,
-        width,
-        height,
-        image_url: imageUrl
+        negative_prompt:
+          promptResult.negative_prompt
       }
     });
 
