@@ -15,19 +15,29 @@ if hf_token:
 
 model_id = "runwayml/stable-diffusion-v1-5"
 
-txt2img_pipe = StableDiffusionPipeline.from_pretrained(
-    model_id,
-    torch_dtype=torch.float32,
-    safety_checker=None,
-    requires_safety_checker=False
-).to("cpu")
+device = "cuda" if torch.cuda.is_available() else "cpu"
+dtype = torch.float16 if torch.cuda.is_available() else torch.float32
+
+print(f"Loading Stable Diffusion 1.5 on {device}...")
 
 txt2img_pipe = StableDiffusionPipeline.from_pretrained(
     model_id,
-    torch_dtype=torch.float32,
+    torch_dtype=dtype,
     safety_checker=None,
     requires_safety_checker=False
-).to("cpu")
+).to(device)
+
+img2img_pipe = StableDiffusionImg2ImgPipeline.from_pretrained(
+    model_id,
+    torch_dtype=dtype,
+    safety_checker=None,
+    requires_safety_checker=False
+).to(device)
+
+txt2img_pipe.enable_attention_slicing()
+img2img_pipe.enable_attention_slicing()
+
+print("Stable Diffusion pipelines ready!")
 
 
 def save_image(image):
@@ -55,16 +65,14 @@ def generate_text_to_image(
         num_inference_steps=25,
         guidance_scale=7.5
     ).images[0]
-    
-    txt2img_pipe.enable_attention_slicing()
 
     return save_image(result)
 
 
 def generate_image_to_image(
     prompt,
-    negative_prompt,
-    input_image,
+    negative_prompt="",
+    input_image=None,
     width=512,
     height=512
 ):
@@ -79,7 +87,5 @@ def generate_image_to_image(
         guidance_scale=7.5,
         num_inference_steps=25
     ).images[0]
-    
-    img2img_pipe.enable_attention_slicing()
 
     return save_image(result)

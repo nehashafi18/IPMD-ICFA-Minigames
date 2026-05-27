@@ -3,7 +3,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 import os
 
-from generate import generate_image_to_image, generate_text_to_image
+from sd_inference import generate_text_to_image, generate_image_to_image
 
 app = FastAPI()
 
@@ -41,6 +41,7 @@ def text_to_image(req: TextToImageRequest):
 
     return {
         "success": True,
+        "image_path": image_path,
         "image_url": f"http://localhost:8000/{image_path}"
     }
 
@@ -63,6 +64,7 @@ async def image_to_image(
 
     return {
         "success": True,
+        "image_path": image_path,
         "image_url": f"http://localhost:8000/{image_path}"
     }
     

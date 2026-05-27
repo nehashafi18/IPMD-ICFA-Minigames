@@ -45,6 +45,13 @@ export async function buildPrompt(body: any) {
       )
     },
 
+    raw_cards: {
+      memory_type: parsed_cards.memory?.display_name || null,
+      emotion: parsed_cards.emotion?.display_name || null,
+      imagination_style: parsed_cards.imagination?.display_name || null,
+      art_style: parsed_cards.style?.display_name || null
+    },
+
     negative_prompt: [
       parsed_cards.memory?.negative_prompt_hint,
       parsed_cards.emotion?.negative_prompt_hint,
@@ -55,37 +62,52 @@ export async function buildPrompt(body: any) {
       .join(", ")
   };
 
-  const llmInstruction = `
-You are an AI Stable Diffusion prompt generator.
+  const systemPrompt = `
+You are an expert AI prompt engineer for Stable Diffusion 1.5.
 
-Create one high-quality English prompt by combining:
-1. Memory = main scene or remembered place
-2. Emotion = emotional tone
-3. Imagination = surreal or creative elements
-4. Style = visual rendering style
+Your job is to generate short, beautiful, emotionally rich image prompts.
 
-Combination logic:
-- Memory should define the main scene.
-- Emotion should describe the mood or atmosphere.
+Rules:
+- Keep the prompt under 75 words.
+- Use strong nouns and clear visual descriptors.
+- Use short phrases, not long paragraphs.
+- Always include subject, emotion or mood, art style, lighting, and color palette.
+- Memory should define the main scene or remembered place.
+- Emotion should define the mood and atmosphere.
 - Imagination should add dreamlike, symbolic, or surreal details.
-- Style should describe the final artistic rendering.
-- If mode is "image_to_image", treat the uploaded image as the subject and apply the four prompt parts to transform it.
+- Style should define the final artistic rendering.
+- If mode is "image_to_image", treat the uploaded image as the subject and apply the card effects to transform it.
 - If mode is "text_to_image", use the subject text as the main subject.
-- If mode is "card_only", create an abstract image using only the prompt parts.
+- If mode is "card_only", create an abstract fine-art image using only the card prompt parts.
 - Do not mention card names.
-- Return JSON only.
+- Do not include markdown.
+- Do not include explanations.
+- Output valid JSON only.
+`;
 
-Input:
+  const userPrompt = `
+Generate a Stable Diffusion 1.5 prompt using this structured input:
+
 ${JSON.stringify(structuredPrompt, null, 2)}
 
-Return format:
+Return only this JSON format:
 {
   "prompt": "...",
   "negative_prompt": "..."
 }
 
-Example style of final prompt:
-"A quiet seaside memory at dusk with gentle waves, expressed in a soft, melancholic tone. Floating light particles drift through the scene beneath an oversized moon, creating a dreamlike surreal atmosphere. Rendered in soft watercolor memorys with diffused edges."
+Prompt requirements:
+- The prompt must be SD-compatible.
+- The prompt must be visually descriptive.
+- The prompt must be concise.
+- The prompt must feel artistic and emotionally rich.
+- The negative_prompt must combine the provided negative prompt hints.
+`;
+
+  const llmInstruction = `
+${systemPrompt.trim()}
+
+${userPrompt.trim()}
 `;
 
   return await generatePromptWithLLM(llmInstruction);

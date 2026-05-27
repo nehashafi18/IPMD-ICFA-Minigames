@@ -78,6 +78,29 @@ async function generateWithRemoteGemma(
   return parseLLMJson(response.text ?? "");
 }
 
+async function generateWithLocalQwenServer(
+  llmInstruction: string
+): Promise<LLMResponse> {
+  const response = await axios.post(
+    process.env.QWEN_LOCAL_URL ||
+      qwenConfig.base_url ||
+      "http://localhost:8001/generate",
+    {
+      instruction: llmInstruction
+    },
+    {
+      timeout: qwenConfig.timeout ?? 120000
+    }
+  );
+
+  const content =
+    response.data?.response ??
+    response.data?.content ??
+    "";
+
+  return parseLLMJson(content);
+}
+
 async function generateWithLocalGemma(
   llmInstruction: string
 ): Promise<LLMResponse> {
@@ -113,32 +136,38 @@ async function generateWithLocalGemma(
 async function generateWithQwen(
   llmInstruction: string
 ): Promise<LLMResponse> {
+
   const qwen = new OpenAI({
-    apiKey:
-      process.env.QWEN_API_KEY ||
-      "ollama",
+    apiKey: process.env.QWEN_API_KEY || "local-qwen",
     baseURL:
       process.env.QWEN_BASE_URL ||
-      qwenConfig.base_url
+      qwenConfig.base_url,
   });
 
-  const response = await qwen.chat.completions.create({
-    model:
-      process.env.QWEN_MODEL ||
-      qwenConfig.model,
-    messages: [
-      {
-        role: "user",
-        content: llmInstruction
-      }
-    ],
-    temperature: qwenConfig.temperature ?? 0.7,
-    max_tokens: qwenConfig.max_tokens ?? 512
-  });
+  const response =
+    await qwen.chat.completions.create({
+      model:
+        process.env.QWEN_MODEL ||
+        qwenConfig.model,
 
-  return parseLLMJson(
-    response.choices[0].message.content ?? ""
-  );
+      messages: [
+        {
+          role: "user",
+          content: llmInstruction,
+        },
+      ],
+
+      temperature:
+        qwenConfig.temperature ?? 0.7,
+
+      max_tokens:
+        qwenConfig.max_tokens ?? 512,
+    });
+
+  const content =
+    response.choices[0].message.content ?? "";
+
+  return parseLLMJson(content);
 }
 
 export async function generatePromptWithLLM(
@@ -179,7 +208,17 @@ export async function generatePromptWithLLM(
       const attempts = qwenConfig.retry_attempts ?? 3;
 
       return await retry(
-        () => generateWithQwen(llmInstruction),
+        () => {
+          const useLocalQwenServer =
+            process.env.QWEN_LOCAL_SERVER === "true" ||
+            qwenConfig.local === true;
+
+          if (useLocalQwenServer) {
+            return generateWithLocalQwenServer(llmInstruction);
+          }
+
+          return generateWithQwen(llmInstruction);
+        },
         attempts
       );
     } catch (error: unknown) {
