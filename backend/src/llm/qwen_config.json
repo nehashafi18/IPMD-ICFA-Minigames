@@ -1,0 +1,10 @@
+{
+  "provider": "qwen",
+  "model": "Qwen/Qwen2.5-1.5B-Instruct",
+  "temperature": 0.7,
+  "max_tokens": 512,
+  "timeout": 120000,
+  "retry_attempts": 2,
+  "base_url": "http://qwen-local:8001/v1",
+  "deployment": "local"
+}

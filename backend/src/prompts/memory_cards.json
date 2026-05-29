@@ -1,7 +1,7 @@
 {
-  "category": "imagination",
+  "category": "memory",
   "category_weight": 0.9,
-  "imagination_cards": {
+  "memory_cards": {
     "sparking": {
       "id": "sparking",
       "display_name": "Sparking",

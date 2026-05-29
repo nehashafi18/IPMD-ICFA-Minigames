@@ -1,77 +1,74 @@
-from fastapi import FastAPI, UploadFile, File, Form
-from fastapi.staticfiles import StaticFiles
+from fastapi import FastAPI
 from pydantic import BaseModel
+import torch
+from diffusers import StableDiffusionPipeline
+import uuid
 import os
-
-from sd_inference import generate_text_to_image, generate_image_to_image
 
 app = FastAPI()
 
-os.makedirs("outputs", exist_ok=True)
+MODEL_ID = "runwayml/stable-diffusion-v1-5"
+DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+DTYPE = torch.float16 if torch.cuda.is_available() else torch.float32
 
-app.mount("/outputs", StaticFiles(directory="outputs"), name="outputs")
+pipe = None
 
-
-class TextToImageRequest(BaseModel):
+class Txt2ImgRequest(BaseModel):
     prompt: str
-    negative_prompt: str = ""
+    negative_prompt: str = "blurry, low quality, distorted"
     width: int = 512
     height: int = 512
-
+    num_inference_steps: int = 10
+    guidance_scale: float = 7.5
 
 @app.get("/")
 def root():
     return {
-        "message": "Stable Diffusion backend running",
-        "endpoints": [
-            "/generate-text-to-image",
-            "/generate-image-to-image"
-        ]
+        "status": "ok",
+        "device": DEVICE,
+        "model_loaded": pipe is not None
     }
 
+def get_pipe():
+    global pipe
+
+    if pipe is None:
+        print(f"Loading Stable Diffusion model: {MODEL_ID}")
+        print(f"Device: {DEVICE}")
+
+        pipe = StableDiffusionPipeline.from_pretrained(
+            MODEL_ID,
+            torch_dtype=DTYPE,
+        )
+
+        pipe = pipe.to(DEVICE)
+        pipe.enable_attention_slicing()
+
+        print("Stable Diffusion loaded successfully")
+
+    return pipe
 
 @app.post("/generate-text-to-image")
-def text_to_image(req: TextToImageRequest):
-    image_path = generate_text_to_image(
+def generate_text_to_image(req: Txt2ImgRequest):
+    os.makedirs("outputs", exist_ok=True)
+
+    model = get_pipe()
+
+    image = model(
         prompt=req.prompt,
         negative_prompt=req.negative_prompt,
         width=req.width,
-        height=req.height
-    )
+        height=req.height,
+        num_inference_steps=req.num_inference_steps,
+        guidance_scale=req.guidance_scale,
+    ).images[0]
+
+    filename = f"{uuid.uuid4()}.png"
+    output_path = f"outputs/{filename}"
+    image.save(output_path)
 
     return {
         "success": True,
-        "image_path": image_path,
-        "image_url": f"http://localhost:8000/{image_path}"
-    }
-
-
-@app.post("/generate-image-to-image")
-async def image_to_image(
-    prompt: str = Form(...),
-    negative_prompt: str = Form(""),
-    width: int = Form(512),
-    height: int = Form(512),
-    image: UploadFile = File(...)
-):
-    image_path = generate_image_to_image(
-        prompt=prompt,
-        negative_prompt=negative_prompt,
-        input_image=image.file,
-        width=width,
-        height=height
-    )
-
-    return {
-        "success": True,
-        "image_path": image_path,
-        "image_url": f"http://localhost:8000/{image_path}"
-    }
-    
-@app.get("/health")
-def health():
-    return {
-        "success": True,
-        "service": "sd-backend",
-        "status": "healthy"
+        "filename": filename,
+        "image_url": f"/outputs/{filename}"
     }

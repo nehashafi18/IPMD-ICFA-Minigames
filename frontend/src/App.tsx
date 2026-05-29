@@ -82,6 +82,10 @@ function createRandomImageMap(
   ];
 
   categories.forEach(([categoryKey, cards]) => {
+    if (!cards) {
+      console.warn(`Missing category: ${categoryKey}`);
+      return;
+    }
     Object.entries(cards).forEach(([id, card]) => {
       const mapKey = `${categoryKey}_${id}`;
 
@@ -346,31 +350,36 @@ export default function App() {
             onChange={(e) => setSubject(e.target.value)}
           />
 
-          <input
-            className="fileInput"
-            type="file"
-            accept="image/*"
-            onChange={(e) => {
-              const file = e.target.files?.[0];
+          <div className="controlRow">
+            <label className="uploadButton">
+              Upload Image
+              <input
+                type="file"
+                accept="image/*"
+                hidden
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
 
-              if (!file) return;
+                  if (!file) return;
 
-              setUploadedImage(file);
-              setPreviewUrl(URL.createObjectURL(file));
-            }}
-          />
+                  setUploadedImage(file);
+                  setPreviewUrl(URL.createObjectURL(file));
+                }}
+              />
+            </label>
 
-          <select
-            className="selectBox"
-            value={imageSize}
-            onChange={(e) => setImageSize(e.target.value)}
-          >
-            <option value="512x512">512 × 512</option>
-            <option value="384x384">384 × 384</option>
-            <option value="256x256">256 × 256</option>
-            <option value="512x768">512 × 768</option>
-            <option value="768x512">768 × 512</option>
-          </select>
+            <select
+              className="selectBox"
+              value={imageSize}
+              onChange={(e) => setImageSize(e.target.value)}
+            >
+              <option value="512x512">512 × 512</option>
+              <option value="384x384">384 × 384</option>
+              <option value="256x256">256 × 256</option>
+              <option value="512x768">512 × 768</option>
+              <option value="768x512">768 × 512</option>
+            </select>
+          </div>
         </div>
 
         {previewUrl && (
