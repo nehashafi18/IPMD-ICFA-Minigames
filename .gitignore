@@ -10,3 +10,7 @@ __pycache__/
 *.safetensors
 *.ckpt
 *.bin
+frontend/dist/
+frontend/tsconfig.tsbuildinfo
+backend/dist/
+qwen-backend/.env

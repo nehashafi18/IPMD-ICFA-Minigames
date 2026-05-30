@@ -45,23 +45,27 @@ Image_Cards_to_Fine_Arts/
 
 ---
 
-# Environment Variables
+# Environment Setup
 
-Backend `.env` example:
+Before running the project, create local `.env` files.
 
-```env
-PORT=5001
+Backend:
 
-LLM_PROVIDER=qwen
-
-QWEN_BASE_URL=http://localhost:11434/v1
-QWEN_MODEL=qwen3.5:2b
-
-GEMINI_API_KEY=your_api_key
-
-SD_TXT2IMG_URL=http://sd-backend:8000/generate-text-to-image
-SD_IMG2IMG_URL=http://sd-backend:8000/generate-image-to-image
+```bash
+cp backend/.env.example backend/.env
 ```
+
+SD backend:
+
+```bash
+cp sd-backend/.env.example sd-backend/.env
+```
+
+Then fill in your API keys and tokens.
+
+Required:
+- HuggingFace token
+- Gemini API key (if using Gemini)
 
 ---
 

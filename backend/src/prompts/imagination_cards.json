@@ -1,7 +1,7 @@
 {
-  "category": "memory",
-  "category_weight": 0.7,
-  "memory_cards": {
+  "category": "imagination",
+  "category_weight": 0.9,
+  "imagination_cards": {
     "soft_fluffy": {
       "id": "softfluffy",
       "display_name": "Soft & Fluffy",

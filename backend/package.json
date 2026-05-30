@@ -3,7 +3,8 @@
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
-    "start": "node dist/server.js"
+    "start": "node dist/server.js",
+    "validate:cards": "tsx src/scripts/validateCards.ts"
   },
   "dependencies": {
     "@google/genai": "^1.0.0",

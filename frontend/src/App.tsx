@@ -22,6 +22,7 @@ interface CardsResponse {
   memory_cards: CardsGroup;
   imagination_cards: CardsGroup;
   style_cards: CardsGroup;
+  specialEffect_cards: CardsGroup;
 }
 
 interface SelectedCards {
@@ -78,10 +79,15 @@ function createRandomImageMap(
     ["emotion", data.emotion_cards],
     ["memory", data.memory_cards],
     ["imagination", data.imagination_cards],
-    ["style", data.style_cards]
+    ["style", data.style_cards],
+    ["specialEffect", data.specialEffect_cards]
   ];
 
   categories.forEach(([categoryKey, cards]) => {
+    if (!cards) {
+      console.warn(`Missing category: ${categoryKey}`);
+      return;
+    }
     Object.entries(cards).forEach(([id, card]) => {
       const mapKey = `${categoryKey}_${id}`;
 
@@ -198,6 +204,11 @@ export default function App() {
       key: "style_card",
       title: "Choose a Style",
       cards: buildCards(cardsData.style_cards, "style")
+    },
+    {
+      key: "specialEffect_card",
+      title: "Choose a Special Effect",
+      cards: buildCards(cardsData.specialEffect_cards, "specialEffect")
     }
   ];
 
@@ -346,31 +357,36 @@ export default function App() {
             onChange={(e) => setSubject(e.target.value)}
           />
 
-          <input
-            className="fileInput"
-            type="file"
-            accept="image/*"
-            onChange={(e) => {
-              const file = e.target.files?.[0];
+          <div className="controlRow">
+            <label className="uploadButton">
+              Upload Image
+              <input
+                type="file"
+                accept="image/*"
+                hidden
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
 
-              if (!file) return;
+                  if (!file) return;
 
-              setUploadedImage(file);
-              setPreviewUrl(URL.createObjectURL(file));
-            }}
-          />
+                  setUploadedImage(file);
+                  setPreviewUrl(URL.createObjectURL(file));
+                }}
+              />
+            </label>
 
-          <select
-            className="selectBox"
-            value={imageSize}
-            onChange={(e) => setImageSize(e.target.value)}
-          >
-            <option value="512x512">512 × 512</option>
-            <option value="384x384">384 × 384</option>
-            <option value="256x256">256 × 256</option>
-            <option value="512x768">512 × 768</option>
-            <option value="768x512">768 × 512</option>
-          </select>
+            <select
+              className="selectBox"
+              value={imageSize}
+              onChange={(e) => setImageSize(e.target.value)}
+            >
+              <option value="512x512">512 × 512</option>
+              <option value="384x384">384 × 384</option>
+              <option value="256x256">256 × 256</option>
+              <option value="512x768">512 × 768</option>
+              <option value="768x512">768 × 512</option>
+            </select>
+          </div>
         </div>
 
         {previewUrl && (

@@ -1,0 +1,32 @@
+{
+  "category": "category",
+  "category_weight": 1,
+  "category cards": {
+    "card1": {
+      "id": "id",
+      "display_name": "name",
+      "description": "description",
+      "image": [
+        "image1.png",
+        "image2.png",
+        "image3.png",
+        "image4.png",
+        "image5.png"
+      ],
+      "prompt_hints": [
+        "pos hint 1",
+        "pos hint 2",
+        "pos hint 3",
+        "pos hint 4",
+        "pos hint 5"
+      ],
+      "negative_prompt_hint": [
+        "neg hint 1",
+        "neg hint 2",
+        "neg hint 3",
+        "neg hint 4",
+        "neg hint 5"
+      ]
+    }
+  }
+}

@@ -8,12 +8,14 @@ let styleData: any;
 let emotionData: any;
 let memoryData: any;
 let imaginationData: any;
+let specialEffectData: any;
 
 try {
   styleData = JSON.parse(fs.readFileSync("./src/prompts/style_cards.json", "utf-8"));
   emotionData = JSON.parse(fs.readFileSync("./src/prompts/emotion_cards.json", "utf-8"));
   memoryData = JSON.parse(fs.readFileSync("./src/prompts/memory_cards.json", "utf-8"));
   imaginationData = JSON.parse(fs.readFileSync("./src/prompts/imagination_cards.json", "utf-8"));
+  specialEffectData = JSON.parse(fs.readFileSync("./src/prompts/specialEffect_cards.json", "utf-8"));
 } catch {
   throw new InternalServerErrorException("Failed to load prompt JSON files");
 }
@@ -55,11 +57,17 @@ export function parseCards(body: any) {
       "imagination_cards",
       body.imagination_card
     ),
+    specialEffect: getCardPrompt(
+      specialEffectData,
+      "specialEffect_cards",
+      body.specialEffect_card
+    ),
     category_weights: {
       style: styleData.category_weight,
       emotion: emotionData.category_weight,
       memory: memoryData.category_weight,
-      imagination: imaginationData.category_weight
+      imagination: imaginationData.category_weight,
+      specialEffect: specialEffectData.category_weight,
     }
   };
 }
