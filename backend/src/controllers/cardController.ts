@@ -17,50 +17,42 @@ function loadJson(pathname: string): JsonObject {
   return JSON.parse(content);
 }
 
-// frontend/public/cards
 function filterMissingImages(cardsData: JsonObject): JsonObject {
-  const cardsDir = path.join(
-    process.cwd(),
-    "../frontend/public/cards"
-  );
+  const cardsDir = path.join(process.cwd(), "../frontend/public/cards");
 
   function walk(obj: JsonObject): void {
-    if (!obj || typeof obj !== "object") {
-      return;
-    }
+    if (!obj || typeof obj !== "object") return;
 
     for (const key of Object.keys(obj)) {
       const value = obj[key];
 
-      // detect card object
-      if (
-        value &&
-        typeof value === "object" &&
-        value.display_name
-      ) {
-        // no image field
+      if (value && typeof value === "object" && value.display_name) {
         if (!value.image) {
           delete obj[key];
           continue;
         }
 
-        // image filename
-        const filename = path.basename(value.image);
+        const images = Array.isArray(value.image)
+          ? value.image
+          : [value.image];
 
-        // full image path
-        const imagePath = path.join(cardsDir, filename);
+        const validImages = images.filter((img: unknown) => {
+          if (typeof img !== "string") return false;
 
-        // remove missing-image cards
-        if (!fs.existsSync(imagePath)) {
-          console.log(
-            `Removing card "${key}" because image missing`
-          );
+          const filename = path.basename(img);
+          const imagePath = path.join(cardsDir, filename);
 
+          return fs.existsSync(imagePath);
+        });
+
+        if (validImages.length === 0) {
+          console.log(`Removing card "${key}" because all images are missing`);
           delete obj[key];
+        } else {
+          value.image = validImages;
         }
       } else {
-        // recursive
-        walk(value);
+        walk(value as JsonObject);
       }
     }
   }
@@ -92,6 +84,10 @@ export function getCards(
       "./src/prompts/imagination_cards.json"
     );
 
+    let specialEffectData = loadJson(
+      "./src/prompts/specialEffect_cards.json"
+    );
+
     // remove cards with missing PNG
     styleData = filterMissingImages(styleData);
 
@@ -103,12 +99,18 @@ export function getCards(
       imaginationData
     );
 
+    specialEffectData = filterMissingImages(
+      specialEffectData
+    );
+
     res.json({
       style_cards: styleData.style_cards,
       emotion_cards: emotionData.emotion_cards,
       memory_cards: memoryData.memory_cards,
       imagination_cards:
         imaginationData.imagination_cards,
+      specialEffect_cards:
+        specialEffectData.specialEffect_cards,
     });
   } catch (error) {
     next(error);

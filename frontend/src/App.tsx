@@ -22,6 +22,7 @@ interface CardsResponse {
   memory_cards: CardsGroup;
   imagination_cards: CardsGroup;
   style_cards: CardsGroup;
+  specialEffect_cards: CardsGroup;
 }
 
 interface SelectedCards {
@@ -78,7 +79,8 @@ function createRandomImageMap(
     ["emotion", data.emotion_cards],
     ["memory", data.memory_cards],
     ["imagination", data.imagination_cards],
-    ["style", data.style_cards]
+    ["style", data.style_cards],
+    ["specialEffect", data.specialEffect_cards]
   ];
 
   categories.forEach(([categoryKey, cards]) => {
@@ -202,6 +204,11 @@ export default function App() {
       key: "style_card",
       title: "Choose a Style",
       cards: buildCards(cardsData.style_cards, "style")
+    },
+    {
+      key: "specialEffect_card",
+      title: "Choose a Special Effect",
+      cards: buildCards(cardsData.specialEffect_cards, "specialEffect")
     }
   ];
 

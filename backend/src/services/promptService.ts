@@ -42,21 +42,28 @@ export async function buildPrompt(body: any) {
       style: weightedPrompt(
         parsed_cards.style?.prompt_hint,
         parsed_cards.category_weights?.style
-      )
+      ),
+
+      specialEffect: weightedPrompt(
+        parsed_cards.specialEffect?.prompt_hint,
+        parsed_cards.category_weights?.specialEffect
+      ),
     },
 
     raw_cards: {
       memory_type: parsed_cards.memory?.display_name || null,
-      emotion: parsed_cards.emotion?.display_name || null,
-      imagination_style: parsed_cards.imagination?.display_name || null,
-      art_style: parsed_cards.style?.display_name || null
+      emotion_type: parsed_cards.emotion?.display_name || null,
+      imagination_type: parsed_cards.imagination?.display_name || null,
+      style_type: parsed_cards.style?.display_name || null,
+      specialEffect_type: parsed_cards.specialEffect?.display_name || null,
     },
 
     negative_prompt: [
       parsed_cards.memory?.negative_prompt_hint,
       parsed_cards.emotion?.negative_prompt_hint,
       parsed_cards.imagination?.negative_prompt_hint,
-      parsed_cards.style?.negative_prompt_hint
+      parsed_cards.style?.negative_prompt_hint,
+      parsed_cards.specialEffect?.negative_prompt_hint,
     ]
       .filter(Boolean)
       .join(", ")
@@ -76,6 +83,7 @@ Rules:
 - Emotion should define the mood and atmosphere.
 - Imagination should add dreamlike, symbolic, or surreal details.
 - Style should define the final artistic rendering.
+- SpecialEffect should add visual effects such as glow, particles, sparkles, motion blur, mist, magical light, or cinematic effects.
 - If mode is "image_to_image", treat the uploaded image as the subject and apply the card effects to transform it.
 - If mode is "text_to_image", use the subject text as the main subject.
 - If mode is "card_only", create an abstract fine-art image using only the card prompt parts.
