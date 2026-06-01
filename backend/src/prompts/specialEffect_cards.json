@@ -2,57 +2,111 @@
   "category": "style",
   "category_weight": 1,
   "specialEffect_cards": {
-    "watercolour_style": {
-      "id": "watercolour_style",
-      "display_name": "Watercolour Style",
-      "description": "A delicate and expressive watercolor painting style featuring soft pigment blending, transparency, and natural paint diffusion.",
+    "sparkling_effect": {
+      "id": "sparkling_effect",
+      "display_name": "Sparkling",
+      "description": "Adds sparkling highlights, glitter particles, shimmering light effects, and magical glowing reflections.",
       "image": [
-        "watercolour_style_1.png",
-        "watercolour_style_2.png",
-        "watercolour_style_3.png",
-        "watercolour_style_4.png",
-        "watercolour_style_5.png"
+        "sparkling_effect_1.png",
+        "sparkling_effect_2.png",
+        "sparkling_effect_3.png",
+        "sparkling_effect_4.png",
+        "sparkling_effect_5.png"
       ],
       "prompt_hints": [
-        "soft watercolor blending, flowing pigment edges, wet-on-wet texture, transparent paint layering, paper absorption texture, soft color transitions, organic paint movement",
-        "expressive watercolor splashes, blooming pigment effects, loose brush movement, transparent layered colors, natural paint bleeding, artistic imperfections, textured watercolor paper",
-        "light watercolor washes, soft flowing pigments, subtle paper grain, gentle color fading, loose artistic edges, hand-painted feeling, natural transparency",
-        "layered watercolor pigments, natural paint diffusion, wet textured surfaces, expressive brush flow, visible watercolor stains, traditional watercolor paper feel, soft atmospheric blending",
-        "airy transparent colors, soft brush transitions, delicate watercolor texture, flowing organic paint forms, light artistic layering, soft atmospheric depth, natural paint irregularities"
+        "glittery shimmering highlights, glowing sparkling effects, twinkling light, sparks",
+        "small glowing sparkles, soft shimmering lights, floating glitter particles, twinkling reflections, soft glow effects, dreamy light, scattered specks",
+        "bright twinkling stars, radiant shimmers, glitter dust effects, glowing highlights, sparks, light particles scattering",
+        "soft sparkles, elegant glows, subtle glitter textures, scattered glowing particles, small light flares",
+        "dreamlike shimmers, floating glitter specks, soft highlights, ethereal glows"
       ],
       "negative_prompt_hint": [
-        "sharp digital edges, heavy oil paint texture, perfectly smooth gradients, glossy rendering",
-        "photorealistic rendering, vector-like sharpness, 3D CGI appearance, hard airbrush gradients",
-        "heavy opaque paint, mechanical linework, sharp glossy reflections, extreme detail sharpness",
-        "plastic digital texture, sharp geometric rendering, oil brush thickness, perfectly clean edges",
-        "hard comic outlines, dense oil textures, overly saturated neon effects, perfect digital smoothness"
+        "none",
+        "harsh neon lights, heavy glares, overexposure",
+        "matte flat lighting, dark shadows",
+        "harsh contrasts, oversaturated lighting",
+        "hard edge reflections, dark textures"
       ]
     },
 
-    "oil_painting_style": {
-      "id": "oil_painting_style",
-      "display_name": "Oil Painting Style",
-      "description": "A traditional oil painting aesthetic with rich pigments, textured brushwork, layered paint, and classical fine-art atmosphere.",
+    "black_and_white_effect": {
+      "id": "black_and_white_effect",
+      "display_name": "Black & White",
+      "description": "Transforms images into grayscale monochrome styles with dramatic contrasts, tonal depth, and black-and-white aesthetics.",
       "image": [
-        "oil_painting_special_1.png",
-        "oil_painting_style_2.png",
-        "oil_painting_style_3.png",
-        "oil_painting_style_4.png",
-        "oil_painting_style_5.png"
+        "black_and_white_effect_1.png",
+        "black_and_white_effect_2.png",
+        "black_and_white_effect_3.png",
+        "black_and_white_effect_4.png",
+        "black_and_white_effect_5.png"
       ],
       "prompt_hints": [
-        "visible oil brush strokes, layered paint texture, rich pigment depth, canvas texture, painterly blending, traditional fine art feeling, textured highlights",
-        "thick impasto paint, dramatic painterly lighting, visible canvas grain, rich layered colors, detailed brush movement, classical painting atmosphere, oil texture realism",
-        "soft oil blending, expressive brushwork, natural canvas texture, warm layered pigments, painterly depth, artistic imperfections, traditional studio painting feel",
-        "detailed painterly realism, heavy layered pigments, visible textured brush marks, rich canvas depth, complex lighting transitions, traditional oil painting composition, fine art atmosphere",
-        "dynamic brush movement, painterly color mixing, rich textured highlights, deep artistic shadows, canvas surface texture, traditional handcrafted feeling, layered oil pigments"
+        "grayscale tones, monochrome contrast, black and white shading, gray gradients, shadow contrasts",
+        "deep grayscale shadows, old film-style lighting, rich depths in shadows, high monochrome contrasts",
+        "cinematic monochrome lighting, film type contrasts, bright grayscale highlights, high range in tones",
+        "smooth grayscale blending, balanced tone contrasts, black and white photography feel, fine grayscale detailing",
+        "detailed black and white shading, smooth shadow transitions, refined shadow gradients, clean grayscales"
       ],
       "negative_prompt_hint": [
-        "flat digital shading, watercolor diffusion, smooth CGI surfaces, vector graphics",
-        "airbrush gradients, plastic digital surfaces, watercolor bleeding, perfectly clean rendering",
-        "sharp vector edges, photographic realism, glossy CGI lighting, minimal texture surfaces",
-        "anime cel shading, digital smoothing, watercolor transparency, flat lighting",
-        "perfect digital sharpness, smooth vector rendering, plastic textures, minimalist flat coloring"
+        "anything colorful",
+        "any visible color, neon lights",
+        "pastel colors, vibrant colors, glow effects, reflections",
+        "colored accents, rainbow reflections, harsh oversaturations",
+        "rainbow gradients, warm or cool color tints, any colorful elements"
+      ]
+    },
+
+    "soft_fluffy_texture": {
+      "id": "soft_fluffy_texture",
+      "display_name": "Soft & Fluffy",
+      "description": "Adds fluffy, fuzzy, plush-like textures with soft edges, cozy surfaces, and cloud-like softness.",
+      "image": [
+        "soft_fluffy_texture_1.png",
+        "soft_fluffy_texture_2.png",
+        "soft_fluffy_texture_3.png",
+        "soft_fluffy_texture_4.png",
+        "soft_fluffy_texture_5.png"
+      ],
+      "prompt_hints": [
+        "fluffy soft texture, soft like a cloud, fuzzy details, smooth texture",
+        "plush fuzzy textures, soft cloud like surfaces, smooth fluffy layering, soft edges, light airy textures",
+        "dreamy soft surfaces, fine fuzzy fibers, smooth plush textures, airy appearance, soft blended edges",
+        "thick fluffy textures, soft layered fuzziness, smooth rounded textures, cushion like textures, cozy fabric softness",
+        "silky soft textures, light fuzzy details, smooth flowing surfaces, soft appearances, airy fuzzy layers, cloud like softness, delicate fluffy edges"
+      ],
+      "negative_prompt_hint": [
+        "sharp edges, metal or glass surfaces",
+        "sharp edges, glass like textures, rough textures",
+        "jagged outlines, harsh surface contrasts",
+        "sharp corners, metallic reflections, glossy reflections",
+        "glass reflections, rough rocky textures, angled edges, coarse surfaces"
+      ]
+    },
+
+    "shiny_glossy_texture": {
+      "id": "shiny_glossy_texture",
+      "display_name": "Shiny / Glossy",
+      "description": "Adds reflective glossy surfaces, polished highlights, smooth shine, and luminous reflections.",
+      "image": [
+        "shiny_glossy_texture_1.png",
+        "shiny_glossy_texture_2.png",
+        "shiny_glossy_texture_3.png",
+        "shiny_glossy_texture_4.png",
+        "shiny_glossy_texture_5.png"
+      ],
+      "prompt_hints": [
+        "glossy reflections, shiny surfaces, highlights, smooth reflective surfaces, bright glow",
+        "polished reflections, bright highlights, smooth reflective surfaces, shimmering light accents, glass-like reflections",
+        "sleek reflections, highlighted reflections, smooth glossy finishes, reflective glow effects, bright lighting",
+        "glass surfaces, radiant shiny details, smooth polishes, bright surface glow, reflective highlights",
+        "glossy reflections and finishes, reflective smooth surfaces, bright highlights, shimmering light glow, smooth shine gradients"
+      ],
+      "negative_prompt_hint": [
+        "matte or rough textures, fuzzy and soft textures",
+        "matte textures, rough grainy surfaces",
+        "chalky matte textures, fluffy fuzzy textures, rough surfaces",
+        "soft plush textures, matte coatings",
+        "fuzzy fabric, dull matte appearances, rough surfaces, heavy grains, soft cloud surfaces, grainy textures"
       ]
     }
   }
