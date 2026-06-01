@@ -54,6 +54,58 @@
         "anime cel shading, digital smoothing, watercolor transparency, flat lighting",
         "perfect digital sharpness, smooth vector rendering, plastic textures, minimalist flat coloring"
       ]
+    },
+    "colored_pencil_style": {
+      "id": "colored_pencil_style",
+      "display_name": "Colored Pencil",
+      "description": "A colored pencil art style with thin hand-drawn lines, layered shading, visible pencil texture, and natural paper grain.",
+      "image": [
+        "colored_pencil_style_1.png",
+        "colored_pencil_style_2.png",
+        "colored_pencil_style_3.png",
+        "colored_pencil_style_4.png",
+        "colored_pencil_style_5.png"
+      ],
+      "prompt_hints": [
+        "thin detailed pencil lines, layers of shading, grainy paper texture, light crosshatching, hand drawn sketching, colored pencil texture, layered pencil shading",
+        "thin pencil stroke details, visible pencil strokes in different directions, soft blending between colors, detailed edges, slightly uneven coloring, sketchbook texture, sketchbook feeling",
+        "light feathery pencil marks, soft layering based on tones, subtle paper fibers, shading variations, delicate colored pencil texture, natural paper texture",
+        "intricate pencil details, layered pigmentation, visible hand strokes, realistic colored pencil texture, shading in multiple directions, textured paper",
+        "hand-drawn outlines, sketchbook type shading, differences in pencil pressure, textured layered coloring, overlapping strokes, matte paper texture, artistic imperfections"
+      ],
+      "negative_prompt_hint": [
+        "paintbrush texture pattern, glossy or shiny features",
+        "photorealism, airbrush type gradients, digital effects",
+        "paint textures, extreme contrasted lighting, reflections, perfectly smooth fillings",
+        "CGI rendering, overly intense neon colors, paintbrush strokes",
+        "clear vector graphics, glossy digital effects, oil paint textures, perfectly clear rendering"
+      ]
+    },
+    "crayon_style": {
+      "id": "crayon_style",
+      "display_name": "Crayon",
+      "description": "A wax crayon drawing style with bold uneven strokes, rough handmade texture, visible wax buildup, and playful coloring imperfections.",
+      "image": [
+        "crayon_style_1.png",
+        "crayon_style_2.png",
+        "crayon_style_3.png",
+        "crayon_style_4.png",
+        "crayon_style_5.png"
+      ],
+      "prompt_hints": [
+        "wax crayon texture, thick uneven strokes, rough hand-drawn type coloring, textured paper",
+        "visible wax buildup, light colored strokes, rough edges, heavy crayon grain, hand-colored styles, textured sketch paper, bold strong uneven pressure, overlapping wax marks",
+        "scribble marks, chunks of wax texture, uneven color filling, paper grain visibility, dense crayon layering, handmade aesthetic, broken color strokes",
+        "soft wax blending, soft crayon smudges, layered crayon pressures, matte pigments, coloring imperfections, coloring directions visible, rough paper, sketch outlines",
+        "heavy wax buildups, chunky hand drawn strokes, visible crayon marks, rough coloring patterns, imperfect bold outlines, layered matte pigments"
+      ],
+      "negative_prompt_hint": [
+        "smooth texture, gradients, gloss type effects",
+        "clean outlines, soft airbrush type shading, glossy reflections, perfect blending of colors",
+        "photorealism, smooth gradients, digital painting polishes, metallic shines",
+        "highly detailed realism, gloss, perfect edges, airbrush style effects",
+        "smooth blended shading, perfect digital rendering, paintbrush textures"
+      ]
     }
   }
 }
