@@ -28,7 +28,6 @@
         "extreme emotional drama, harsh contrast lighting, violent themes, emotionally empty scenes"
       ]
     },
-
     "happy": {
       "id": "happy",
       "display_name": "Happy",
@@ -55,7 +54,6 @@
         "hostile emotional tension, dark hopeless themes, harsh visual contrast, emotionally empty scenes"
       ]
     },
-
     "sad": {
       "id": "sad",
       "display_name": "Sad",
@@ -82,7 +80,6 @@
         "fast energetic action, bright festive colors, comedic atmosphere, overly dramatic chaos"
       ]
     },
-
     "neutral": {
       "id": "neutral",
       "display_name": "Neutral",

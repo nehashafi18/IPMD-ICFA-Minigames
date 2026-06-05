@@ -120,6 +120,9 @@ export default function App() {
   const [previewUrl, setPreviewUrl] = useState<string>("");
   const [showMiniGame, setShowMiniGame] = useState<boolean>(false);
   const [subject, setSubject] = useState<string>("");
+  const [cardTextColor, setCardTextColor] = useState<
+    Record<string, "light" | "dark">
+  >({});
 
   const [cardImageMap, setCardImageMap] = useState<Record<string, string>>({});
 
@@ -152,11 +155,81 @@ export default function App() {
   if (!cardsData) {
     return (
       <div className="appPage">
+        <div className="animatedBg">
+          <div className="bgBlob bgBlobOne" />
+          <div className="bgBlob bgBlobTwo" />
+
+          <div className="particles">
+            {Array.from({ length: 24 }).map((_, index) => (
+              <span
+                key={index}
+                className="particle"
+                style={{
+                  left: `${Math.random() * 100}%`,
+                  animationDelay: `${Math.random() * 10}s`,
+                  animationDuration: `${8 + Math.random() * 8}s`,
+                }}
+              />
+            ))}
+          </div>
+        </div>
         <div className="appShell">
           <h1 className="appTitle">Loading cards...</h1>
         </div>
       </div>
     );
+  }
+  function detectBrightness(
+    image: HTMLImageElement,
+    category: string,
+    cardId: string
+  ) {
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+
+    if (!ctx) return;
+
+    canvas.width = 50;
+    canvas.height = 50;
+
+    ctx.drawImage(
+      image,
+      0,
+      image.naturalHeight * 0.75,
+      image.naturalWidth,
+      image.naturalHeight * 0.25,
+      0,
+      0,
+      50,
+      50
+    );
+
+    const data = ctx.getImageData(
+      0,
+      0,
+      50,
+      50
+    ).data;
+
+    let totalBrightness = 0;
+
+    for (let i = 0; i < data.length; i += 4) {
+      const r = data[i];
+      const g = data[i + 1];
+      const b = data[i + 2];
+
+      totalBrightness +=
+        (r * 299 + g * 587 + b * 114) / 1000;
+    }
+
+    const average =
+      totalBrightness / (data.length / 4);
+
+    setCardTextColor((prev) => ({
+      ...prev,
+      [`${category}_${cardId}`]:
+        average < 130 ? "light" : "dark",
+    }));
   }
 
   function buildCards(
@@ -214,18 +287,25 @@ export default function App() {
 
   const currentStep = cardSteps[stepIndex];
 
-  async function handleCardClick(cardId: string) {
-    const updatedCards: SelectedCards = {
-      ...selectedCards,
+  function handleCardClick(cardId: string) {
+    setSelectedCards((prev) => ({
+      ...prev,
       [currentStep.key]: cardId,
-    };
+    }));
+  }
 
-    setSelectedCards(updatedCards);
+  async function handleNext() {
+    const selected = selectedCards[currentStep.key];
+
+    if (!selected) {
+      alert("Please select a card first");
+      return;
+    }
 
     if (stepIndex < cardSteps.length - 1) {
-      setStepIndex(stepIndex + 1);
+      setStepIndex((prev) => prev + 1);
     } else {
-      await generatePrompt(updatedCards);
+      await generatePrompt(selectedCards);
     }
   }
 
@@ -317,6 +397,24 @@ export default function App() {
   if (generatedPrompt) {
     return (
       <div className="appPage">
+        <div className="animatedBg">
+          <div className="bgBlob bgBlobOne" />
+          <div className="bgBlob bgBlobTwo" />
+
+          <div className="particles">
+            {Array.from({ length: 24 }).map((_, index) => (
+              <span
+                key={index}
+                className="particle"
+                style={{
+                  left: `${Math.random() * 100}%`,
+                  animationDelay: `${Math.random() * 10}s`,
+                  animationDuration: `${8 + Math.random() * 8}s`,
+                }}
+              />
+            ))}
+          </div>
+        </div>
         <div className="appShell">
           <h1 className="appTitle">Generated Prompt</h1>
 
@@ -336,30 +434,66 @@ export default function App() {
 
   return (
     <div className="appPage">
-      <div className="appShell">
-        <h1 className="artTitle">Image Cards to Fine Art</h1>
+      <div className="animatedBg">
+        <div className="bgBlob bgBlobOne" />
+        <div className="bgBlob bgBlobTwo" />
 
-        <div className="instructionBox">
-          <h2>How to use</h2>
-          <p>
-            Upload an image, enter a subject if needed, choose an output size,
-            then select one card from each category. You can skip a category or
-            go back to change your previous choice.
-          </p>
+        <div className="particles">
+          {Array.from({ length: 24 }).map((_, index) => (
+            <span
+              key={index}
+              className="particle"
+              style={{
+                left: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 10}s`,
+                animationDuration: `${8 + Math.random() * 8}s`,
+              }}
+            />
+          ))}
+        </div>
+      </div>
+
+      <div className="appShell">
+        <div className="titleContainer">
+          <h1 className="artTitle">
+            Image Cards to Fine Art
+          </h1>
+          <div className="helpWrapper">
+            <button className="helpButton" type="button">
+              ?
+            </button>
+            <div className="helpTooltip">
+              Upload an image or enter a subject if needed,
+              choose an output size, then select one card
+              from each category. You can skip a category
+              or go back to change your previous choice.
+            </div>
+          </div>
         </div>
 
         <div className="controlPanel">
-          <input
-            className="subjectInput"
-            type="text"
-            placeholder="Optional subject, e.g. a cat, a castle, a robot..."
-            value={subject}
-            onChange={(e) => setSubject(e.target.value)}
-          />
+          <div className="uploadArea">
+            <div className="fieldLabel">Upload Image</div>
 
-          <div className="controlRow">
             <label className="uploadButton">
-              Upload Image
+              <div className="uploadContent">
+                <svg
+                  className="uploadIcon"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M20 16.5A4.5 4.5 0 0 0 18 8h-1.3A7 7 0 1 0 4 14.3" />
+                  <path d="M12 12V21" />
+                  <path d="M8 16L12 12L16 16" />
+                </svg>
+
+                <span>Drag image here or browse</span>
+              </div>
+
               <input
                 type="file"
                 accept="image/*"
@@ -374,6 +508,19 @@ export default function App() {
                 }}
               />
             </label>
+
+          </div>
+          <div className="promptArea">
+            <textarea
+              className="subjectInput"
+              placeholder="Describe your art prompt..."
+              value={subject}
+              onChange={(e) => setSubject(e.target.value)}
+            />
+          </div>
+
+          <div className="sizeArea">
+            <div className="fieldLabel">Size</div>
 
             <select
               className="selectBox"
@@ -404,7 +551,11 @@ export default function App() {
           {currentStep.cards.map((card) => (
             <button
               key={card.id}
-              className="imageCard"
+              className={`imageCard ${
+                selectedCards[currentStep.key] === card.id
+                  ? "selected"
+                  : ""
+              }`}
               onClick={() => handleCardClick(card.id)}
             >
               <img
@@ -413,19 +564,22 @@ export default function App() {
                 alt={card.label}
               />
 
-              <span className="cardName">{card.label}</span>
+              <span
+                className={`cardName ${
+                  cardTextColor[
+                    `${currentStep.key}_${card.id}`
+                  ] === "dark"
+                    ? "darkText"
+                    : "lightText"
+                }`}
+              >
+                {card.label}
+              </span>
             </button>
           ))}
         </div>
 
         <div className="bottomActions">
-          <button
-            className="miniGameOpenButton"
-            onClick={() => setShowMiniGame(true)}
-          >
-            🎮 Play Mini Game
-          </button>
-
           <button
             className="secondaryButton"
             onClick={handleBack}
@@ -434,24 +588,48 @@ export default function App() {
             ← Back
           </button>
 
-          <button className="primaryButton" onClick={handleSkip}>
-            Skip →
+          <button
+            className="secondaryButton"
+            onClick={handleSkip}
+          >
+            Skip
+          </button>
+
+          <button
+            className="primaryButton nextButton"
+            onClick={handleNext}
+            disabled={!selectedCards[currentStep.key]}
+          >
+            Next Step →
+          </button>
+
+          <button
+            className="miniGameOpenButton"
+            onClick={() => setShowMiniGame(true)}
+          >
+            🎮 Mini Game
           </button>
         </div>
       </div>
 
-      {(loading || showMiniGame) && (
+      {loading && (
         <div className="loadingScreen">
-          {!loading && (
+          <div className="miniGameWrapper">
+            <MiniGame />
+          </div>
+        </div>
+      )}
+
+      {showMiniGame && (
+        <div className="miniGameModal">
+          <div className="miniGamePanel">
             <button
               className="closeMiniGameButton"
               onClick={() => setShowMiniGame(false)}
             >
               ✕
             </button>
-          )}
 
-          <div className="miniGameWrapper">
             <MiniGame />
           </div>
         </div>

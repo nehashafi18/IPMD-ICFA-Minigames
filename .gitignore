@@ -14,3 +14,4 @@ frontend/dist/
 frontend/tsconfig.tsbuildinfo
 backend/dist/
 qwen-backend/.env
+test/

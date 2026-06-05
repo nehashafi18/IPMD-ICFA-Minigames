@@ -1,327 +1,613 @@
+html,
+
 body {
   margin: 0;
-  background: #fafaf7;
+  background: #120f2e;
 }
 
 #root {
-  min-height: 100vh;
-}
-
-.appPage {
-  min-height: 100vh;
-  background: #fafaf7;
-  color: #3a2060;
-  display: flex;
-  justify-content: center;
-  padding: 24px;
-  box-sizing: border-box;
+  width: 100%;
+  min-height: 100%;
+  overflow-x: hidden;
 }
 
 .appShell {
-  width: 100%;
-  max-width: 860px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 18px;
-}
+  position: relative;
+  z-index: 2;
 
-.appTitle {
-  margin: 0;
-  text-align: center;
-  font-size: 34px;
-  font-weight: 800;
-}
-
-.instructionBox {
-  width: 100%;
-  max-width: 620px;
-  padding: 18px 22px;
-  border-radius: 24px;
-  background: rgba(255, 255, 255, 0.72);
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.07);
-  backdrop-filter: blur(10px);
-  text-align: center;
-}
-
-.instructionBox h2,
-.instructionBox p {
-  margin: 0;
-}
-
-.instructionBox p {
-  margin-top: 8px;
-  font-size: 14px;
-  opacity: 0.75;
-}
-
-.controlPanel {
-  width: 100%;
-  max-width: 620px;
-  display: flex;
-  flex-direction: column;
   gap: 12px;
-}
-
-.subjectInput {
   width: 100%;
-  box-sizing: border-box;
+  max-width: 1100px;
 
-  border-radius: 16px;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-
-  background: white;
-  padding: 12px 16px;
-  font-size: 14px;
-}
-
-.controlRow {
-  width: 100%;
+  margin: 0 auto;
 
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
   align-items: center;
+  overflow: visible;
 }
 
-.uploadButton {
-  border: 0;
-  border-radius: 18px;
+.titleContainer {
+  position: relative;
+  display: inline-block;
+  margin-bottom:12px;
+}
 
-  padding: 10px 18px;
+.helpWrapper {
+  position: absolute;
+  left: calc(100% + 8px);
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 9999;
+}
 
-  background: #3a2060;
+.helpButton {
+  width: 48px;
+  height: 48px;
+
+  border-radius: 50%;
+
+  border: 1px solid rgba(255,255,255,0.35);
+
+  background: rgba(255,255,255,0.12);
+
+  backdrop-filter: blur(10px);
+
   color: white;
 
-  font-size: 14px;
+  font-size: 24px;
   font-weight: 700;
 
   cursor: pointer;
 }
 
-.selectBox {
-  border-radius: 16px;
-  border: 1px solid rgba(0, 0, 0, 0.08);
+.helpButton:hover {
+  background: rgba(255,255,255,0.2);
 
-  background: white;
-  padding: 10px 14px;
-
-  font-size: 14px;
+  transform: scale(1.08);
 }
 
-.previewImage {
-  width: 100%;
-  max-width: 260px;
+.helpTooltip {
+  position: absolute;
+  top: 56px;
+  right: 0;
+
+  width: 360px;
+  padding: 20px;
+
+  border-radius: 18px;
+  background: rgba(20, 20, 40, 0.96);
+  color: white;
+
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+
+  z-index: 10000;
+
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+.helpWrapper:hover .helpTooltip {
+  opacity: 1;
+  visibility: visible;
+}
+
+.appTitle,
+.artTitle {
+  margin: 0;
+  text-align: center;
+  font-family: "Cinzel", Georgia, serif;
+  font-size: clamp(2rem, 4.5vw, 3.4rem);
+  font-weight: 500;
+  color: #f5e8d0;
+  text-shadow: 0 4px 18px rgba(0, 0, 0, 0.6);
+  -webkit-text-fill-color: unset;
+  background: none;
+  animation: none;
+}
+
+.controlPanel {
+  width: 92%;
+  max-width: 980px;
+
+  display: grid;
+  grid-template-columns: 1.1fr 1.3fr 0.65fr;
+
+  gap: 24px;
+
+  padding: 24px 36px;
+
   border-radius: 24px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+
+  background: rgba(255,255,255,0.12);
+  backdrop-filter: blur(16px);
+
+  margin: 0 auto;
 }
 
-.stepHeader {
+.uploadArea,
+.promptArea,
+.sizeArea {
+  display: flex;
+  flex-direction: column;
+}
+
+.fieldLabel {
+  margin-bottom: 8px;
+
+  color: white;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.uploadButton,
+.subjectInput {
+  height: 160px;
+  border-radius: 8px;
+}
+
+.uploadButton {
+  height: 128px;
+
+  border: 2px dashed rgba(255, 255, 255, 0.45);
+  border-radius: 10px;
+
+  background: rgba(20, 20, 40, 0.25);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+}
+
+.uploadContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  gap: 8px;
+
+  color: white;
+}
+
+.uploadIcon {
+  width: 18px;
+  height: 18px;
+}
+
+.uploadContent span {
+  font-size: 15px;
   text-align: center;
 }
 
+.subjectInput {
+  background: #ffffff;
+  color: #222;
+
+  border: 0;
+  border-radius: 12px;
+
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.selectBox {
+  background: #ffffff;
+  color: #222;
+  height: 46px;
+  border: 0;
+  border-radius: 12px;
+
+  padding: 0 16px;
+
+  font-size: 18px;
+}
+
 .stepHeader h2 {
-  margin: 4px 0 0;
+  margin: 0;
+  font-family: Georgia, serif;
   font-size: 24px;
+  font-weight: 400;
+  color: #fff7e8;
+  text-shadow: 0 3px 14px rgba(0, 0, 0, 0.55);
 }
 
 .stepText {
-  margin: 0;
-  font-size: 13px;
-  opacity: 0.5;
+  display: none;
 }
 
 .cardGrid {
   width: 100%;
-  max-height: 52vh;
-  overflow-y: auto;
+  max-width: 1000px;
+
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 170px));
+
+  grid-template-columns: repeat(
+    auto-fit,
+    220px
+  );
+
   justify-content: center;
-  gap: 16px;
+
+  gap: 18px;
+
   padding: 8px;
   box-sizing: border-box;
+
+  max-height: 60vh;
+  overflow-y: auto;
 }
 
 .imageCard {
-  height: 230px;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  border-radius: 24px;
+  border: 3px solid rgba(255, 235, 200, 0.8);
+
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+  
+  position: relative;
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.76);
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-  transition: transform 0.18s ease, box-shadow 0.18s ease;
+
+  width: 190px;
+  height: 275px;
+}
+
+.imageCard.selected {
+  border-color: #9d4cff;
+
+  box-shadow:
+    0 0 0 3px rgba(157, 76, 255, 0.35),
+    0 0 20px rgba(157, 76, 255, 0.8);
+
+  transform: translateY(-3px);
 }
 
 .imageCard:hover {
-  transform: translateY(-4px) scale(1.02);
-  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.12);
+  transform: translateY(-4px);
+
+  border-color: #ffd89c;
+
+  box-shadow:
+    0 12px 30px rgba(0, 0, 0, 0.3),
+    0 0 18px rgba(255, 216, 156, 0.5);
 }
 
-.imageCard:active {
-  transform: scale(0.97);
+.imageCard:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 0 22px rgba(188, 91, 255, 0.7);
+}
+
+.imageCard.selected {
+  border-color: #9d4cff;
+  box-shadow:
+    0 0 0 3px rgba(157, 76, 255, 0.45),
+    0 0 28px rgba(157, 76, 255, 0.85);
 }
 
 .cardImage {
   width: 100%;
-  height: 168px;
-  object-fit: contain;
-  background: #f7f4ef;
+  height: 275px;
+
+  object-fit: cover;
 }
 
 .cardName {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 10px;
-  font-size: 14px;
-  font-weight: 700;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  z-index: 2;
+
+  padding: 12px 8px;
+
+  color: white;
+  font-size: 20px;
+  font-weight: 800;
   text-align: center;
+
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.85),
+    rgba(0, 0, 0, 0.45),
+    transparent
+  );
+
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.9);
 }
 
 .bottomActions {
   width: 100%;
-  max-width: 360px;
+
   display: flex;
   justify-content: center;
+
+  align-items: center;
+
   gap: 12px;
-  padding-bottom: 12px;
+
+  margin-top: 8px;
 }
 
-.primaryButton,
+.nextButton {
+  min-width: 240px;
+
+  padding: 12px 30px;
+
+  border-radius: 999px;
+
+  border: 2px solid rgba(255, 220, 170, 0.9);
+
+  background: rgba(92, 57, 180, 0.85);
+
+  color: white;
+
+  font-size: 17px;
+  font-weight: 700;
+
+  box-shadow:
+    0 0 18px rgba(168, 85, 247, 0.35);
+
+  transition: all 0.2s ease;
+}
+
+.nextButton:hover {
+  transform: translateY(-2px);
+
+  box-shadow:
+    0 0 28px rgba(168, 85, 247, 0.6);
+}
+.miniGameOpenButton {
+  min-width: 180px;
+
+  padding: 10px 18px;
+
+  border-radius: 999px;
+
+  border: 1px solid rgba(255, 235, 200, 0.45);
+
+  background: rgba(255, 255, 255, 0.12);
+
+  backdrop-filter: blur(10px);
+
+  color: #f5e8d0;
+
+  font-size:14px;
+
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition: all 0.2s ease;
+}
+
+.miniGameOpenButton:hover {
+  background: rgba(255, 255, 255, 0.18);
+
+  border-color: rgba(255, 235, 200, 0.8);
+
+  transform: translateY(-2px);
+}
+
 .secondaryButton {
   min-width: 120px;
-  border: 0;
-  border-radius: 18px;
-  padding: 12px 18px;
-  font-size: 14px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: transform 0.15s ease, opacity 0.15s ease;
-}
 
-.primaryButton {
-  background: #3a2060;
+  padding: 12px 20px;
+
+  border-radius: 999px;
+
+  border: 1px solid rgba(255, 235, 200, 0.45);
+
+  background: rgba(255, 255, 255, 0.12);
+
+  backdrop-filter: blur(10px);
+
   color: white;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: all 0.2s ease;
 }
 
-.secondaryButton {
-  background: rgba(255, 255, 255, 0.75);
-  color: #3a2060;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-}
-
-.primaryButton:hover,
 .secondaryButton:hover {
-  transform: scale(1.03);
+  background: rgba(255, 255, 255, 0.18);
+
+  border-color: rgba(255, 235, 200, 0.8);
+
+  transform: translateY(-2px);
 }
 
-.primaryButton:active,
-.secondaryButton:active {
-  transform: scale(0.96);
-}
-
+.nextButton:disabled,
 .secondaryButton:disabled {
-  opacity: 0.35;
+  opacity: 0.45;
+
   cursor: not-allowed;
+
   transform: none;
+
+  box-shadow: none;
 }
 
-.promptBox {
-  width: 100%;
-  max-width: 720px;
-  min-height: 180px;
-  border-radius: 20px;
-  padding: 16px;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-}
-
-.generatedImage {
-  max-width: 100%;
-  width: auto;
-  height: auto;
-  border-radius: 24px;
-}
-
-.loadingScreen {
+.miniGameModal {
   position: fixed;
   inset: 0;
   z-index: 50;
+
   display: flex;
   justify-content: center;
   align-items: center;
-  overflow: hidden;
-  background: rgba(250, 250, 247, 0.96);
-  padding: 16px;
+
+  background: rgba(10, 8, 30, 0.72);
+  backdrop-filter: blur(8px);
 }
 
-.miniGameWrapper {
-  width: 100%;
-  max-width: 520px;
-  max-height: 92vh;
+.miniGamePanel {
+  position: relative;
+
+  width: min(92vw, 560px);
+  max-height: 86vh;
   overflow: hidden;
+
   border-radius: 28px;
-  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.18);
+  background: #ffffff;
+
+  box-shadow: 0 20px 70px rgba(0, 0, 0, 0.45);
 }
 
-.artTitle {
-  margin: 0;
-  width: 100%;
-  white-space: nowrap;
-  text-align: center;
-
-  font-size: clamp(1.6rem, 6vw, 4rem);
-  font-weight: 900;
-  letter-spacing: 0.02em;
-
-  background: linear-gradient(135deg, #6f3cc3, #b47cff, #ff9bd2, #7c4dff);
-  background-size: 300% 300%;
-
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-
-  animation: gradientFlow 8s ease infinite;
-  font-family: "Cinzel", "Trebuchet MS", sans-serif;
-}
-
-@keyframes gradientFlow {
-  0% {
-    background-position: 0% 50%;
-  }
-
-  50% {
-    background-position: 100% 50%;
-  }
-
-  100% {
-    background-position: 0% 50%;
-  }
-}
-
-.miniGameOpenButton,
 .closeMiniGameButton {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 60;
+
+  width: 36px;
+  height: 36px;
+
   border: 0;
-  border-radius: 18px;
-  padding: 10px 16px;
-  font-weight: 700;
+  border-radius: 50%;
+
+  background: rgba(20, 15, 45, 0.9);
+  color: white;
+
   cursor: pointer;
 }
 
-.miniGameOpenButton {
-  background: #3a2060;
-  color: white;
+.appPage {
+  position: relative;
+  overflow: hidden;
+  min-height: 100vh;
+  padding: 18px 24px;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+
+  background:
+    linear-gradient(rgba(15, 12, 45, 0.45), rgba(15, 12, 45, 0.65)),
+    url("/background.png");
+
+  background-size: 110%;
+  background-position: center;
+
+  animation: backgroundMove 22s ease-in-out infinite;
 }
 
-.closeMiniGameButton {
+.animatedBg {
   position: fixed;
-  top: 18px;
-  right: 18px;
-  z-index: 60;
-  background: white;
-  color: #3a2060;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.bgBlob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: 0.55;
+  animation: floatBlob 14s ease-in-out infinite;
+}
+
+.bgBlobOne {
+  width: 520px;
+  height: 520px;
+  background: rgba(138, 43, 226, 0.45);
+  top: -120px;
+  left: -120px;
+}
+
+.bgBlobTwo {
+  width: 620px;
+  height: 620px;
+  background: rgba(255, 105, 180, 0.28);
+  right: -180px;
+  bottom: -180px;
+  animation-delay: -7s;
+}
+
+.particles {
+  position: absolute;
+  inset: 0;
+}
+
+.particle {
+  position: absolute;
+  bottom: -20px;
+
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+
+  background: rgba(255, 255, 255, 0.45);
+
+  animation-name: floatUp;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+@keyframes backgroundMove {
+  0% {
+    background-size: 110%;
+    background-position: center;
+  }
+
+  50% {
+    background-size: 118%;
+    background-position: 52% 48%;
+  }
+
+  100% {
+    background-size: 110%;
+    background-position: center;
+  }
+}
+
+@keyframes floatBlob {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  50% {
+    transform: translate(80px, 60px) scale(1.08);
+  }
+
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+}
+
+@keyframes floatUp {
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+
+  20% {
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(-120vh);
+    opacity: 0;
+  }
+}
+
+.lightText {
+  color: white;
+  text-shadow:
+    0 2px 6px rgba(0,0,0,.9);
+}
+
+.darkText {
+  color: #111;
+  text-shadow:
+    0 1px 3px rgba(255,255,255,.7);
 }

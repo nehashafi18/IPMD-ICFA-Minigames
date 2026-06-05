@@ -1,4 +1,4 @@
-FROM image-cards-python-ai-base:latest
+FROM python:3.11-slim
 
 WORKDIR /app
 

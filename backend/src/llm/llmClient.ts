@@ -215,7 +215,30 @@ export async function generatePromptWithLLM(
       const attempts = qwenConfig.retry_attempts ?? 3;
 
       return await retry(
-        () => generateWithQwen(llmInstruction),
+        () => {
+          const deployment =
+            process.env.QWEN_DEPLOYMENT || qwenConfig.deployment;
+
+          if (
+            deployment === "local" ||
+            deployment === "docker" ||
+            deployment === "remote"
+          ) {
+            console.log(
+              "Using custom Qwen server:",
+              process.env.QWEN_LOCAL_URL || qwenConfig.base_url
+            );
+
+            return generateWithLocalQwenServer(llmInstruction);
+          }
+
+          console.log(
+            "Using OpenAI-compatible Qwen server:",
+            process.env.QWEN_BASE_URL || qwenConfig.base_url
+          );
+
+          return generateWithQwen(llmInstruction);
+        },
         attempts
       );
     } catch (error: unknown) {
