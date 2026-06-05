@@ -56,9 +56,7 @@ Each card contains:
 ## AI Prompt Generation
 
 Supports:
-- Gemini API
-- Qwen API
-- Ollama local models
+- Local Qwen models
 - Local Gemma models
 
 The LLM combines:
@@ -104,17 +102,15 @@ Supports:
 ```txt
 Frontend (React + TypeScript + Vite)
         ↓
-Backend API Server (Node.js + Express)
+Backend API (Node.js + Express + TypeScript)
         ↓
-Card Parsing Pipeline
+Card Parsing & Prompt Builder
         ↓
-LLM Prompt Generation
-(Gemini / Qwen / Ollama)
+Qwen Service (FastAPI)
         ↓
-Stable Diffusion Pipeline
-(FastAPI / Diffusers)
+Stable Diffusion Service (FastAPI)
         ↓
-Generated Image
+Generated Artwork
 ```
 
 ---
@@ -125,52 +121,58 @@ Generated Image
 Image_Cards_to_Fine_Arts/
 │
 ├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── miniGames/
+│   │   │   └── ui/
+│   │   ├── App.tsx
+│   │   ├── main.tsx
+│   │   ├── vite-env.d.ts
+│   │   └── App.css
 │   ├── public/
 │   │   ├── cards/
 │   │   └── icons/
-│   │
-│   ├── src/
-│   │   ├── App.tsx
-│   │   ├── main.tsx
-│   │   ├── App.css
-│   │   └── components/
-│   │       └── miniGames/
-│   │
-│   ├── package.json
-│   ├── tsconfig.json
 │   ├── Dockerfile
-│   └── vite.config.ts
+│   ├── index.html
+│   ├── tsconfig.json
+│   ├── vite.config.ts
+│   ├── package-lock.json
+│   └── package.json
 │
 ├── backend/
-│   │
-│   ├── server.js
-│   │
-│   ├── routes/
-│   ├── middleware/
-│   ├── utils/
-│   ├── prompts/
-│   │   ├── style_cards.json
-│   │   ├── emotion_cards.json
-│   │   ├── memory_cards.json
-│   │   └── imagination_cards.json
-│   │
-│   ├── llm/
+│   ├── src/
+│   │   ├── controllers/
+│   │   ├── routes/
+│   │   ├── services/
+│   │   ├── scripts/
+│   │   ├── llm/
+│   │   ├── prompts/
+│   │   ├── middleware/
+│   │   └── app.ts
 │   ├── uploads/
-│   ├── package.json
+│   ├── Dockerfile
+│   ├── tsconfig.json
+│   ├── .env.example
+│   └── package.json
+│
+├── qwen-backend/
+│   ├── local_qwen_server.py
+│   ├── requirements.txt
 │   ├── Dockerfile
 │   └── .env
 │
 ├── sd-backend/
-│   ├── app.py
-│   ├── generate.py
+│   ├── main.py
+│   ├── sd_inference.py
+│   ├── sd_model_loader.py
 │   ├── requirements.txt
 │   ├── Dockerfile
 │   └── outputs/
 │
 ├── deploy/
-│   ├── docker-compose.yml
 │   ├── healthcheck.sh
-│   └── README_DEPLOY.md
+│   ├── README_DEPLOY.md
+│   └── docker-compose.yml
 │
 └── README.md
 ```

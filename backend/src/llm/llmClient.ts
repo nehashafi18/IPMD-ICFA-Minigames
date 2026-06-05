@@ -2,6 +2,7 @@ import fs from "fs";
 import axios from "axios";
 import { GoogleGenAI } from "@google/genai";
 import OpenAI from "openai";
+import path from "path";
 
 import { AIProviderException } from "../utils/exceptions.js";
 
@@ -18,15 +19,21 @@ type LLMConfig = {
   timeout?: number;
   retry_attempts?: number;
   base_url?: string;
-  local?: boolean;
+  deployment?: "local" | "docker" | "remote";
 };
 
 const gemmaConfig: LLMConfig = JSON.parse(
-  fs.readFileSync("./src/llm/gemma_config.json", "utf-8")
+  fs.readFileSync(
+    path.resolve("src/llm/gemma_config.json"),
+    "utf-8"
+  )
 );
 
 const qwenConfig: LLMConfig = JSON.parse(
-  fs.readFileSync("./src/llm/qwen_config.json", "utf-8")
+  fs.readFileSync(
+    path.resolve("src/llm/qwen_config.json"),
+    "utf-8"
+  )
 );
 
 function cleanJsonText(text: string): string {
@@ -78,6 +85,29 @@ async function generateWithRemoteGemma(
   return parseLLMJson(response.text ?? "");
 }
 
+async function generateWithLocalQwenServer(
+  llmInstruction: string
+): Promise<LLMResponse> {
+  const response = await axios.post(
+    process.env.QWEN_LOCAL_URL ||
+      qwenConfig.base_url ||
+      "http://localhost:8001/generate",
+    {
+      instruction: llmInstruction
+    },
+    {
+      timeout: qwenConfig.timeout ?? 120000
+    }
+  );
+
+  const content =
+    response.data?.response ??
+    response.data?.content ??
+    "";
+
+  return parseLLMJson(content);
+}
+
 async function generateWithLocalGemma(
   llmInstruction: string
 ): Promise<LLMResponse> {
@@ -116,29 +146,34 @@ async function generateWithQwen(
   const qwen = new OpenAI({
     apiKey:
       process.env.QWEN_API_KEY ||
-      "ollama",
+      "local-qwen",
+
     baseURL:
       process.env.QWEN_BASE_URL ||
-      qwenConfig.base_url
+      qwenConfig.base_url,
+
+    timeout:
+      qwenConfig.timeout ?? 120000,
+
+    maxRetries:
+      qwenConfig.retry_attempts ?? 2,
   });
 
   const response = await qwen.chat.completions.create({
-    model:
-      process.env.QWEN_MODEL ||
-      qwenConfig.model,
+    model: process.env.QWEN_MODEL || qwenConfig.model,
     messages: [
       {
         role: "user",
-        content: llmInstruction
-      }
+        content: llmInstruction,
+      },
     ],
     temperature: qwenConfig.temperature ?? 0.7,
-    max_tokens: qwenConfig.max_tokens ?? 512
+    max_tokens: qwenConfig.max_tokens ?? 512,
   });
 
-  return parseLLMJson(
-    response.choices[0].message.content ?? ""
-  );
+  const content = response.choices[0]?.message?.content ?? "";
+
+  return parseLLMJson(content);
 }
 
 export async function generatePromptWithLLM(
@@ -154,7 +189,8 @@ export async function generatePromptWithLLM(
         () => {
           const useLocalGemma =
             process.env.GEMMA_LOCAL === "true" ||
-            gemmaConfig.local === true;
+            gemmaConfig.deployment === "local" ||
+            gemmaConfig.deployment === "docker";
 
           if (useLocalGemma) {
             return generateWithLocalGemma(llmInstruction);

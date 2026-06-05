@@ -1,7 +1,7 @@
 {
   "category": "style",
   "category_weight": 1,
-  "style_cards": {
+  "specialEffect_cards": {
     "watercolour_style": {
       "id": "watercolour_style",
       "display_name": "Watercolour Style",
@@ -34,7 +34,7 @@
       "display_name": "Oil Painting Style",
       "description": "A traditional oil painting aesthetic with rich pigments, textured brushwork, layered paint, and classical fine-art atmosphere.",
       "image": [
-        "oil_painting_style_1.png",
+        "oil_painting_special_1.png",
         "oil_painting_style_2.png",
         "oil_painting_style_3.png",
         "oil_painting_style_4.png",
