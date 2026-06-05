@@ -10,10 +10,29 @@ let memoryData: any;
 let imaginationData: any;
 
 try {
-  styleData = JSON.parse(fs.readFileSync("./src/prompts/style_cards.json", "utf-8"));
-  emotionData = JSON.parse(fs.readFileSync("./src/prompts/emotion_cards.json", "utf-8"));
-  memoryData = JSON.parse(fs.readFileSync("./src/prompts/memory_cards.json", "utf-8"));
-  imaginationData = JSON.parse(fs.readFileSync("./src/prompts/imagination_cards.json", "utf-8"));
+  const files = [
+    "./src/prompts/style_cards.json",
+    "./src/prompts/emotion_cards.json",
+    "./src/prompts/memory_cards.json",
+    "./src/prompts/imagination_cards.json"
+  ].map((pathname) =>
+    JSON.parse(fs.readFileSync(pathname, "utf-8"))
+  );
+
+  const findGroup = (groupName: string) => {
+    const data = files.find((file) => file[groupName]);
+
+    if (!data) {
+      throw new Error(`Prompt group not found: ${groupName}`);
+    }
+
+    return data;
+  };
+
+  styleData = findGroup("style_cards");
+  emotionData = findGroup("emotion_cards");
+  memoryData = findGroup("memory_cards");
+  imaginationData = findGroup("imagination_cards");
 } catch {
   throw new InternalServerErrorException("Failed to load prompt JSON files");
 }

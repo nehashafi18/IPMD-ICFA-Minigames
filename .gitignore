@@ -1,10 +1,13 @@
 venv/
 sd-backend/venv/
 node_modules/
+dist/
 outputs/
 .env
 backend/.env
+backend/data/
 .DS_Store
+*.tsbuildinfo
 __pycache__/
 *.pyc
 *.safetensors

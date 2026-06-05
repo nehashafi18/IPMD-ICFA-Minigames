@@ -17,6 +17,37 @@ function loadJson(pathname: string): JsonObject {
   return JSON.parse(content);
 }
 
+function loadPromptGroups(): {
+  styleData: JsonObject;
+  emotionData: JsonObject;
+  memoryData: JsonObject;
+  imaginationData: JsonObject;
+} {
+  const files = [
+    "./src/prompts/style_cards.json",
+    "./src/prompts/emotion_cards.json",
+    "./src/prompts/memory_cards.json",
+    "./src/prompts/imagination_cards.json"
+  ].map(loadJson);
+
+  const findGroup = (groupName: string): JsonObject => {
+    const data = files.find((file) => file[groupName]);
+
+    if (!data) {
+      throw new Error(`Prompt group not found: ${groupName}`);
+    }
+
+    return data;
+  };
+
+  return {
+    styleData: findGroup("style_cards"),
+    emotionData: findGroup("emotion_cards"),
+    memoryData: findGroup("memory_cards"),
+    imaginationData: findGroup("imagination_cards")
+  };
+}
+
 // frontend/public/cards
 function filterMissingImages(cardsData: JsonObject): JsonObject {
   const cardsDir = path.join(
@@ -76,21 +107,12 @@ export function getCards(
   next: NextFunction
 ): void {
   try {
-    let styleData = loadJson(
-      "./src/prompts/style_cards.json"
-    );
-
-    let emotionData = loadJson(
-      "./src/prompts/emotion_cards.json"
-    );
-
-    let memoryData = loadJson(
-      "./src/prompts/memory_cards.json"
-    );
-
-    let imaginationData = loadJson(
-      "./src/prompts/imagination_cards.json"
-    );
+    let {
+      styleData,
+      emotionData,
+      memoryData,
+      imaginationData
+    } = loadPromptGroups();
 
     // remove cards with missing PNG
     styleData = filterMissingImages(styleData);

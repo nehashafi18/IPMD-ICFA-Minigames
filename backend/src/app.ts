@@ -5,27 +5,50 @@ import express, {
 } from "express";
 
 import cors from "cors";
+import fs from "node:fs";
+import path from "node:path";
 
 import cardRoutes from "./routes/cardRoutes.js";
 import promptRoutes from "./routes/promptRoutes.js";
 import artRoutes from "./routes/artRoutes.js";
+import { config } from "./config.js";
+import { requireGallerySession } from "./middleware/requireGallerySession.js";
+import { vmsRouter } from "./vms/routes.js";
 
 import { logger } from "./middleware/logger.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 
 const app: Application = express();
 
+app.set("trust proxy", true);
+
 app.use(logger);
 
-app.use(cors());
+app.use(cors({
+  origin: config.frontendOrigin,
+  credentials: true
+}));
 
 app.use(express.json());
 
-app.use("/api/cards", cardRoutes);
+app.use("/api/vms", vmsRouter);
 
-app.use("/api/prompt", promptRoutes);
+if (fs.existsSync(config.vmsAdminDistPath)) {
+  app.use(
+    "/vms-admin",
+    express.static(config.vmsAdminDistPath)
+  );
 
-app.use("/api/art", artRoutes);
+  app.get("/vms-admin/*", (_req: Request, res: Response) => {
+    res.sendFile(path.join(config.vmsAdminDistPath, "index.html"));
+  });
+}
+
+app.use("/api/cards", requireGallerySession, cardRoutes);
+
+app.use("/api/prompt", requireGallerySession, promptRoutes);
+
+app.use("/api/art", requireGallerySession, artRoutes);
 
 app.use(errorHandler);
 

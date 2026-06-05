@@ -11,16 +11,24 @@ services:
 
   backend:
     build: 
-      context: ../backend
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: backend/Dockerfile
     container_name: ic-fineart-backend
     ports:
       - "5001:5001"
-    env_file:
-      - ../backend/.env
-
     environment:
       - PORT=5001
+      - FRONTEND_ORIGIN=http://localhost:5173
+      - PUBLIC_APP_URL=http://localhost:5173
+      - DATABASE_URL=/app/data/vms.sqlite
+      - VMS_ADMIN_API_KEY=${VMS_ADMIN_API_KEY:-dev-admin-key}
+      - ALLOW_SIMULATED_PAYMENTS=${ALLOW_SIMULATED_PAYMENTS:-true}
+      - DISABLE_GALLERY_GATE=${DISABLE_GALLERY_GATE:-false}
+      - ACCESS_TOKEN_TTL_HOURS=${ACCESS_TOKEN_TTL_HOURS:-720}
+      - GALLERY_SESSION_TTL_HOURS=${GALLERY_SESSION_TTL_HOURS:-12}
+      - GALLERY_SESSION_SECRET=${GALLERY_SESSION_SECRET:-development-gallery-session-secret-change-me}
+      - DEFAULT_GALLERY_ID=image-cards
+      - VMS_ADMIN_DIST_PATH=/app/vms-admin-dist
 
       # Stable Diffusion
       - SD_TXT2IMG_URL=http://sd-backend:8000/generate-text-to-image
@@ -35,6 +43,7 @@ services:
     volumes:
       - ../backend/uploads:/app/uploads
       - ../backend/outputs:/app/outputs
+      - vms_data:/app/data
 
     depends_on:
       - sd-backend
@@ -65,3 +74,4 @@ services:
 
 volumes:
   ollama_data:
+  vms_data:
