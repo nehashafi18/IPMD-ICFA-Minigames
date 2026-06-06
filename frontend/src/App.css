@@ -325,3 +325,34 @@ body {
   color: #3a2060;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
 }
+.publicShell {
+  width: min(560px, calc(100vw - 32px));
+  margin: 0 auto;
+  padding: 40px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 8px;
+  background: rgba(10, 16, 28, 0.72);
+  color: #f7f2e9;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.24);
+}
+
+.publicEyebrow {
+  margin: 0 0 8px;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: uppercase;
+  color: #f1c76b;
+}
+
+.publicTitle {
+  margin: 0 0 12px;
+  font-size: 40px;
+  line-height: 1.05;
+}
+
+.publicCopy {
+  margin: 0;
+  color: #d9d3c7;
+  line-height: 1.6;
+}

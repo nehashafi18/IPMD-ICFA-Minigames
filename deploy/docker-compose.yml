@@ -12,13 +12,34 @@ services:
 
   backend:
     build:
-      context: ../backend
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: backend/Dockerfile
     container_name: image-cards-backend
     ports:
       - "5001:5001"
-    env_file:
-      - ../backend/.env
+    environment:
+      - PORT=5001
+      - FRONTEND_ORIGIN=http://localhost:5173
+      - PUBLIC_APP_URL=http://localhost:5173
+      - DATABASE_URL=/app/data/vms.sqlite
+      - VMS_ADMIN_API_KEY=${VMS_ADMIN_API_KEY:-dev-admin-key}
+      - ALLOW_SIMULATED_PAYMENTS=${ALLOW_SIMULATED_PAYMENTS:-true}
+      - DISABLE_GALLERY_GATE=${DISABLE_GALLERY_GATE:-false}
+      - ACCESS_TOKEN_TTL_HOURS=${ACCESS_TOKEN_TTL_HOURS:-720}
+      - GALLERY_SESSION_TTL_HOURS=${GALLERY_SESSION_TTL_HOURS:-12}
+      - GALLERY_SESSION_SECRET=${GALLERY_SESSION_SECRET:-development-gallery-session-secret-change-me}
+      - DEFAULT_GALLERY_ID=image-cards
+      - VMS_ADMIN_DIST_PATH=/app/vms-admin-dist
+      - LLM_PROVIDER=qwen
+      - QWEN_BASE_URL=http://qwen-local:8001/v1
+      - QWEN_API_KEY=local-qwen
+      - QWEN_MODEL=Qwen/Qwen2.5-1.5B-Instruct
+      - SD_TXT2IMG_URL=http://sd-backend:8000/generate-text-to-image
+      - SD_IMG2IMG_URL=http://sd-backend:8000/generate-image-to-image
+    volumes:
+      - ../backend/uploads:/app/uploads
+      - ../backend/outputs:/app/outputs
+      - vms_data:/app/data
     depends_on:
       - qwen-local
       - sd-backend
@@ -31,10 +52,9 @@ services:
     container_name: image-cards-qwen-local
     ports:
       - "8001:8001"
-    env_file:
-      - ../qwen-backend/.env
     environment:
       - QWEN_MODEL=Qwen/Qwen2.5-1.5B-Instruct
+      - HF_TOKEN=${HF_TOKEN:-}
     volumes:
       - ~/hf_cache:/root/.cache/huggingface
     restart: unless-stopped
@@ -46,9 +66,12 @@ services:
     container_name: ic-fineart-sd-backend
     ports:
       - "8000:8000"
-    env_file:
-      - ../sd-backend/.env
+    environment:
+      - HF_TOKEN=${HF_TOKEN:-}
     volumes:
       - ~/hf_cache:/root/.cache/huggingface
       - ../sd-backend/outputs:/app/outputs
     restart: unless-stopped
+
+volumes:
+  vms_data:

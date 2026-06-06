@@ -11,18 +11,47 @@ let imaginationData: any;
 let specialEffectData: any;
 
 try {
-  styleData = JSON.parse(fs.readFileSync("./src/prompts/style_cards.json", "utf-8"));
-  emotionData = JSON.parse(fs.readFileSync("./src/prompts/emotion_cards.json", "utf-8"));
-  memoryData = JSON.parse(fs.readFileSync("./src/prompts/memory_cards.json", "utf-8"));
-  imaginationData = JSON.parse(fs.readFileSync("./src/prompts/imagination_cards.json", "utf-8"));
-  specialEffectData = JSON.parse(fs.readFileSync("./src/prompts/specialEffect_cards.json", "utf-8"));
+  const files = [
+    "./src/prompts/style_cards.json",
+    "./src/prompts/emotion_cards.json",
+    "./src/prompts/memory_cards.json",
+    "./src/prompts/imagination_cards.json",
+    "./src/prompts/specialEffect_cards.json"
+  ].map((pathname) =>
+    JSON.parse(fs.readFileSync(pathname, "utf-8"))
+  );
+
+  const findGroup = (groupName: string) => {
+    const data = files.find((file) => file[groupName]);
+
+    if (!data) {
+      throw new Error(`Prompt group not found: ${groupName}`);
+    }
+
+    return data;
+  };
+
+  styleData = findGroup("style_cards");
+  emotionData = findGroup("emotion_cards");
+  memoryData = findGroup("memory_cards");
+  imaginationData = findGroup("imagination_cards");
+  specialEffectData = findGroup("specialEffect_cards");
 } catch {
   throw new InternalServerErrorException("Failed to load prompt JSON files");
 }
 
-function pickRandom(list?: string[]): string | null {
-  if (!Array.isArray(list) || list.length === 0) return null;
-  return list[Math.floor(Math.random() * list.length)];
+function pickRandom(value?: string | string[]): string | null {
+  if (!value) return null;
+
+  if (typeof value === "string") {
+    return value;
+  }
+
+  if (!Array.isArray(value) || value.length === 0) {
+    return null;
+  }
+
+  return value[Math.floor(Math.random() * value.length)];
 }
 
 function getCardPrompt(data: any, groupName: string, cardId?: string) {
@@ -42,8 +71,10 @@ function getCardPrompt(data: any, groupName: string, cardId?: string) {
 
   return {
     ...card,
-    prompt_hint: pickRandom(card.prompt_hints),
-    negative_prompt_hint: pickRandom(card.negative_prompt_hints)
+    prompt_hint: pickRandom(card.prompt_hints ?? card.prompt_hint),
+    negative_prompt_hint: pickRandom(
+      card.negative_prompt_hints ?? card.negative_prompt_hint
+    )
   };
 }
 
@@ -67,7 +98,7 @@ export function parseCards(body: any) {
       emotion: emotionData.category_weight,
       memory: memoryData.category_weight,
       imagination: imaginationData.category_weight,
-      specialEffect: specialEffectData.category_weight,
+      specialEffect: specialEffectData.category_weight
     }
   };
 }

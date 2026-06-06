@@ -305,43 +305,150 @@ Final Artwork Output
 
 # Running the Application
 
-## Build & Start
+## Build & Start With Docker Compose
 
 From project root:
 
-```bash
-docker compose up --build
+```powershell
+docker compose -f deploy\docker-compose.yml up --build
 ```
 
 ---
 
 # Local URLs
 
-## Frontend
-
 ```txt
-http://localhost:5173
-```
-
-## Backend API
-
-```txt
-http://localhost:5001
-```
-
-## Stable Diffusion Backend
-
-```txt
-http://localhost:8000
+Frontend:              http://localhost:5173
+Backend API:           http://localhost:5001
+Backend-hosted admin:  http://localhost:5001/vms-admin
+Stable Diffusion API:  http://localhost:8000
 ```
 
 ---
 
 # Stop Containers
 
-```bash
-docker compose down
+```powershell
+docker compose -f deploy\docker-compose.yml down
 ```
+
+---
+
+# Visitor Management System
+
+This project includes a Visitor Management System (VMS) for gated MVP access.
+
+The main Image Cards experience is protected by one-time entry tokens:
+
+```txt
+/                       Public access-required page
+/enter?token=<uuid>     Token redemption page
+/image-cards            Protected Image Cards app
+/vms-admin              VMS admin console served by backend after Docker/backend build
+```
+
+The VMS admin console is used to:
+
+- Generate internal demo/MVP entry tokens.
+- View donation/token records.
+- View visitor entry logs.
+- Revoke or restore token access.
+- Edit token/session settings.
+
+The admin console does not manage artwork upload/download in this project.
+
+Detailed VMS documentation is in:
+
+```txt
+docs/VMS.md
+```
+
+## Token Flow
+
+1. Open the VMS admin console.
+2. Generate an entry token for a visitor.
+3. Share the generated entry URL:
+
+```txt
+http://localhost:5173/enter?token=<uuid>
+```
+
+4. The backend validates and redeems the token.
+5. The backend sets a signed HttpOnly cookie named `gallery_session`.
+6. The visitor is redirected to `/image-cards`.
+
+Tokens are one-time redeemable. After first redemption, the token is marked as used and cannot be redeemed again. The browser session remains valid until the `gallery_session` cookie expires.
+
+## Admin Key
+
+The VMS admin "password" is currently a shared API key, not a full user account system.
+
+Default local key:
+
+```txt
+dev-admin-key
+```
+
+Change it with:
+
+```env
+VMS_ADMIN_API_KEY=replace-with-a-private-admin-key
+```
+
+For npm development, put it in `backend/.env`.
+
+For Docker Compose:
+
+```powershell
+$env:VMS_ADMIN_API_KEY="replace-with-a-private-admin-key"
+docker compose -f deploy\docker-compose.yml up --build
+```
+
+Do not use the default key in production or commit real keys to GitHub.
+
+## Enable Or Disable Gated Access
+
+Gated access is enabled by default.
+
+To disable the gate for local development only:
+
+```env
+DISABLE_GALLERY_GATE=true
+```
+
+Then restart the backend. You can directly open:
+
+```txt
+http://localhost:5173/image-cards
+```
+
+To enable the gate again:
+
+```env
+DISABLE_GALLERY_GATE=false
+```
+
+or remove the variable.
+
+Never enable `DISABLE_GALLERY_GATE=true` in production or public demo deployments.
+
+## VMS Data Storage
+
+The VMS uses SQLite.
+
+Local npm path:
+
+```txt
+backend/data/vms.sqlite
+```
+
+Docker Compose volume:
+
+```txt
+vms_data:/app/data
+```
+
+This stores generated tokens, donation records, visitor logs, and VMS settings.
 
 ---
 
@@ -351,6 +458,17 @@ Example backend `.env`:
 
 ```env
 PORT=5001
+FRONTEND_ORIGIN=http://localhost:5173
+PUBLIC_APP_URL=http://localhost:5173
+
+DATABASE_URL=./data/vms.sqlite
+VMS_ADMIN_API_KEY=dev-admin-key
+ALLOW_SIMULATED_PAYMENTS=true
+DISABLE_GALLERY_GATE=false
+ACCESS_TOKEN_TTL_HOURS=720
+GALLERY_SESSION_TTL_HOURS=12
+GALLERY_SESSION_SECRET=replace-with-a-long-random-secret
+DEFAULT_GALLERY_ID=image-cards
 
 LLM_PROVIDER=qwen
 
@@ -361,3 +479,96 @@ SD_TXT2IMG_URL=http://sd-backend:8000/generate-text-to-image
 SD_IMG2IMG_URL=http://sd-backend:8000/generate-image-to-image
 ```
 
+Important:
+
+- `GALLERY_SESSION_SECRET` must be long, random, and private.
+- Changing `GALLERY_SESSION_SECRET` invalidates existing visitor sessions.
+- `VMS_ADMIN_API_KEY` must not be the default value in production.
+- `DISABLE_GALLERY_GATE` must be false or unset in production.
+- `PUBLIC_APP_URL` must match the frontend URL used in generated entry links.
+- `FRONTEND_ORIGIN` must match the frontend origin allowed to send cookies.
+
+---
+
+# Local Development Without Docker
+
+Backend:
+
+```powershell
+cd backend
+npm install
+npm run dev
+```
+
+Frontend:
+
+```powershell
+cd frontend
+npm install
+npm run dev
+```
+
+VMS admin:
+
+```powershell
+cd vms-admin
+npm install
+npm run dev
+```
+
+Open:
+
+```txt
+Frontend:  http://localhost:5173
+Admin:     http://localhost:5174
+Backend:   http://localhost:5001
+```
+
+The VMS gate can be developed without Ollama or Stable Diffusion models. Token generation, token redemption, and protected route access still work. Final prompt/image generation may fail until LLM and Stable Diffusion services are available.
+
+---
+
+# Future Improvements
+
+Planned future features include:
+
+- Stripe payment integration for automatic token issuing
+- stronger admin authentication beyond shared API key
+- OpenVINO acceleration
+- ONNX inference optimization
+- image history system
+- user authentication
+- cloud deployment
+- art sharing/community system
+- prompt fine-tuning
+- advanced image editing
+- multi-image generation
+- distributed AI inference
+
+---
+
+# Technologies Used
+
+Frontend:
+- React
+- TypeScript
+- Vite
+- Tailwind CSS
+- Framer Motion
+
+Backend:
+- Node.js
+- Express
+- Multer
+- python
+
+AI / ML:
+- Gemini
+- Qwen
+- Stable Diffusion 1.5
+- Diffusers
+- PyTorch
+
+Deployment:
+- Docker
+- Docker Compose
