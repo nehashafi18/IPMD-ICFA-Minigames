@@ -2,261 +2,109 @@
   "category": "emotion",
   "category_weight": 1.1,
   "emotion_cards": {
-      "positive": {
-        "id": "positive",
-        "display_name": "Positive",
-        "description": "General uplifting and emotionally positive atmosphere.",
-        "image": "positive.png",
-        "prompt_hints": [
-          "warm uplifting lighting, vibrant harmonious tones",
-          "bright cheerful atmosphere, soft golden highlights",
-          "emotionally positive mood, gentle radiant lighting",
-          "optimistic colorful atmosphere, balanced warm contrast",
-          "peaceful joyful tones, soft comforting light"
-        ],
-        "negative_prompt_hint": "dark gloomy mood, emotionally heavy atmosphere, harsh visual tension"
-      },
-
-      "negative": {
-        "display_name": "Negative",
-        "description": "General emotionally tense or unpleasant atmosphere.",
-        "image": "negative.png",
-        "prompt_hint": "dramatic emotional contrast, tense muted lighting, emotionally heavy atmosphere",
-        "negative_prompt_hint": "warm cheerful lighting, peaceful harmonious tones, uplifting atmosphere"
-      },
-      "happy": {
-        "id": "happy",
-        "display_name": "Happy",
-        "description": "Bright uplifting emotional atmosphere.",
-        "image" : "happy.png",
-        "prompt_hints": [
-          "warm cheerful lighting, vibrant uplifting tones",
-          "bright joyful atmosphere, soft golden highlights",
-          "uplifting colors, lively positive visual mood",
-          "sunlit cheerful composition, gentle warm glow",
-          "vibrant happy atmosphere, bright optimistic lighting"
-        ],
-        "negative_prompt_hint": [
-          "dark gloomy lighting, muted lifeless colors, heavy emotional tension, cold sad atmosphere, low-energy dull lighting"
-        ]
-      },
-
-      "excited": {
-        "display_name": "Excited",
-        "description": "Energetic and lively emotional atmosphere.",
-        "image" : "excited.png",
-        "prompt_hint": "dynamic energetic lighting, vivid saturated colors, lively visual motion",
-        "negative_prompt_hint": "flat muted atmosphere, low energy composition, dull lighting"
-      },
-
-      "proud": {
-        "display_name": "Proud",
-        "description": "Confident and uplifting emotional feeling.",
-        "image" : "proud.png",
-        "prompt_hint": "confident radiant lighting, strong uplifting atmosphere, balanced vibrant contrast",
-        "negative_prompt_hint": "weak emotional tone, gloomy shadows, defeated atmosphere"
-      },
-
-      "calm": {
-        "display_name": "Calm",
-        "description": "Peaceful and relaxed emotional atmosphere.",
-        "image" : "calm.png",
-        "prompt_hint": "soft gentle lighting, peaceful muted tones, relaxed balanced atmosphere",
-        "negative_prompt_hint": "harsh contrast, chaotic motion, intense dramatic lighting"
-      },
-
-      "loved": {
-        "display_name": "Loved",
-        "description": "Warm affectionate emotional feeling.",
-        "image" : "loved.png",
-        "prompt_hint": "warm tender lighting, soft comforting tones, affectionate peaceful atmosphere",
-        "negative_prompt_hint": "cold emotional distance, harsh shadows, lonely atmosphere"
-      },
-
-      "hopeful": {
-        "display_name": "Hopeful",
-        "description": "Optimistic and forward-looking emotional atmosphere.",
-        "image" : "hopeful.png",
-        "prompt_hint": "soft golden lighting, uplifting airy atmosphere, gentle optimistic tones",
-        "negative_prompt_hint": "dark hopeless mood, oppressive shadows, emotionally heavy atmosphere"
-      },
-
-      "grateful": {
-        "display_name": "Grateful",
-        "description": "Warm appreciative emotional atmosphere.",
-        "image" : "grateful.png",
-        "prompt_hint": "warm glowing light, peaceful harmonious tones, emotionally comforting atmosphere",
-        "negative_prompt_hint": "cold detached atmosphere, emotional emptiness, harsh visual tension"
-      },
-      "sad": {
-        "id": "sad",
-        "display_name": "Sad",
-        "description": "Quiet melancholic emotional atmosphere.",
-        "image" : "sad.png",
-        "prompt_hints": [
-          "sharp dramatic contrast, intense red-orange tones",
-          "aggressive visual energy, harsh emotional lighting",
-          "dark fiery atmosphere, strong shadow tension",
-          "emotionally explosive mood, vivid heated colors",
-          "rough dramatic memorys, intense visual conflict"
-        ],
-        "negative_prompt_hint": "bright energetic lighting, vivid cheerful colors, playful atmosphere"
-      },
-
-      "angry": {
-        "id": "angry",
-        "display_name": "Angry",
-        "description": "Intense and emotionally charged atmosphere.",
-        "image": "angry.png",
-        "prompt_hints": [
-          "sharp dramatic contrast, intense red-orange tones",
-          "aggressive visual energy, harsh emotional lighting",
-          "dark fiery atmosphere, strong shadow tension",
-          "emotionally explosive mood, vivid heated colors",
-          "rough dramatic memorys, intense visual conflict"
-        ],
-        "negative_prompt_hint": "soft peaceful lighting, gentle pastel tones, calm atmosphere"
-      },
-
-      "scared": {
-        "display_name": "Scared",
-        "description": "Uneasy and tense emotional atmosphere.",
-        "image": "scared.png",
-        "prompt_hint": "dim dramatic lighting, cold desaturated tones, tense shadowy atmosphere",
-        "negative_prompt_hint": "warm comforting light, open cheerful atmosphere, emotional safety"
-      },
-
-      "frustrated": {
-        "display_name": "Frustrated",
-        "description": "Emotionally tense and conflicted atmosphere.",
-        "image": "frustrated.png",
-        "prompt_hint": "uneven harsh lighting, emotional visual tension, rough contrasting tones",
-        "negative_prompt_hint": "balanced peaceful mood, harmonious colors, relaxed atmosphere"
-      },
-
-      "tired": {
-        "display_name": "Tired",
-        "description": "Low-energy and exhausted emotional atmosphere.",
-        "image": "tired.png",
-        "prompt_hint": "soft dim lighting, faded muted tones, low-energy atmosphere",
-        "negative_prompt_hint": "vivid energetic colors, sharp vibrant contrast, lively motion"
-      },
-
-      "worried": {
-        "display_name": "Worried",
-        "description": "Anxious and uncertain emotional atmosphere.",
-        "image": "worried.png",
-        "prompt_hint": "subtle cold shadows, uneasy muted lighting, emotionally tense atmosphere",
-        "negative_prompt_hint": "confident warm lighting, emotionally relaxed mood, uplifting atmosphere"
-      },
-
-      "disappointed": {
-        "display_name": "Disappointed",
-        "description": "Emotionally subdued and discouraged atmosphere.",
-        "image": "disappointed.png",
-        "prompt_hint": "soft gray muted tones, emotionally heavy lighting, subdued atmosphere",
-        "negative_prompt_hint": "bright hopeful lighting, energetic emotional tone, cheerful atmosphere"
-      },
-      "bored": {
-        "display_name": "Bored",
-        "description": "Low-energy and emotionally disengaged atmosphere.",
-        "image": "bored.png",
-        "prompt_hint": "flat muted lighting, low-energy atmosphere, subdued neutral tones",
-        "negative_prompt_hint": "dynamic energetic lighting, vivid emotional contrast, lively atmosphere"
-      },
-
-      "confused": {
-        "display_name": "Confused",
-        "description": "Uncertain and mentally disoriented emotional atmosphere.",
-        "image": "confused.png",
-        "prompt_hint": "uneven lighting balance, ambiguous visual tension, scattered muted tones",
-        "negative_prompt_hint": "clear harmonious composition, emotionally confident atmosphere, balanced lighting"
-      },
-
-      "surprised": {
-        "display_name": "Surprised",
-        "description": "Sudden emotionally heightened atmosphere.",
-        "image": "suprised.png",
-        "prompt_hint": "bright dramatic highlights, sudden visual contrast, energetic emotional atmosphere",
-        "negative_prompt_hint": "flat predictable lighting, emotionally static mood, muted atmosphere"
-      },
-
-      "focused": {
-        "display_name": "Focused",
-        "description": "Concentrated and mentally attentive atmosphere.",
-        "image": "focused.png",
-        "prompt_hint": "clean directional lighting, sharp visual clarity, controlled balanced tones",
-        "negative_prompt_hint": "chaotic composition, distracting visual noise, emotionally scattered atmosphere"
-      },
-
-      "relaxed": {
-        "display_name": "Relaxed",
-        "description": "Comfortable and stress-free atmosphere.",
-        "image": "relaxed.png",
-        "prompt_hint": "soft ambient lighting, warm comfortable tones, peaceful open atmosphere",
-        "negative_prompt_hint": "harsh dramatic contrast, tense emotional energy, chaotic lighting"
-      },
-
-      "neutral": {
-        "id": "neutral",
-        "display_name": "Neutral",
-        "description": "Balanced emotionally steady atmosphere.",
-        "image": "neutral.png",
-        "prompt_hints": [
-          "muted blue-gray tones, soft diffused shadows",
-          "low-saturation atmosphere, emotionally subdued lighting",
-          "quiet melancholic mood, gentle cold lighting",
-          "soft emotional haze, desaturated muted colors",
-          "dim peaceful shadows, emotionally distant atmosphere"
-        ],
-        "negative_prompt_hint": "extreme emotional contrast, intense dramatic mood, overwhelming color saturation"
-      },
-      "lonely": {
-        "display_name": "Lonely",
-        "description": "Emotionally isolated and distant atmosphere.",
-        "image": "lonely.png",
-        "prompt_hint": "cold isolated lighting, quiet empty atmosphere, muted desaturated tones",
-        "negative_prompt_hint": "warm social atmosphere, emotionally connected mood, vibrant comforting tones"
-      },
-
-      "embarrassed": {
-        "display_name": "Embarrassed",
-        "description": "Emotionally awkward and self-conscious atmosphere.",
-        "image": "embarrassed.png",
-        "prompt_hint": "soft uneasy lighting, subtle emotional tension, restrained warm tones",
-        "negative_prompt_hint": "confident emotional presence, relaxed social atmosphere, bold expressive lighting"
-      },
-
-      "shy": {
-        "display_name": "Shy",
-        "description": "Quiet reserved emotional atmosphere.",
-        "image": "shy.png",
-        "prompt_hint": "soft gentle shadows, delicate muted lighting, emotionally reserved atmosphere",
-        "negative_prompt_hint": "bold expressive contrast, loud energetic atmosphere, dramatic visual intensity"
-      },
-
-      "connected": {
-        "display_name": "Connected",
-        "description": "Emotionally warm and socially bonded atmosphere.",
-        "image": "connected.png",
-        "prompt_hint": "warm harmonious lighting, emotionally unified atmosphere, comforting balanced tones",
-        "negative_prompt_hint": "cold emotional distance, isolated atmosphere, disconnected visual mood"
-      },
-
-      "jealous": {
-        "display_name": "Jealous",
-        "description": "Emotionally tense and conflicted atmosphere.",
-        "image": "jealous.png",
-        "prompt_hint": "sharp emotional contrast, uneasy dramatic lighting, tense saturated tones",
-        "negative_prompt_hint": "peaceful emotional harmony, relaxed atmosphere, balanced comforting tones"
-      },
-
-      "caring": {
-        "display_name": "Caring",
-        "description": "Warm supportive emotional atmosphere.",
-        "image": "caring.png",
-        "prompt_hint": "soft nurturing lighting, warm comforting tones, emotionally gentle atmosphere",
-        "negative_prompt_hint": "cold detached mood, harsh emotional contrast, emotionally distant atmosphere"
-      }
+    "positive": {
+      "id": "positive",
+      "display_name": "Positive",
+      "description": "A positive emotional atmosphere featuring warmth, optimism, hope, encouragement, and uplifting emotional energy.",
+      "image": [
+        "positive_emotion_1.png",
+        "positive_emotion_2.png",
+        "positive_emotion_3.png",
+        "positive_emotion_4.png",
+        "positive_emotion_5.png"
+      ],
+      "prompt_hints": [
+        "soft uplifting mood, warm lighting atmosphere, comfortable and hopeful feeling, gentle smiles and positive expressions, inviting environment, subtle emotional warmth, balanced cheerful composition",
+        "bright lively atmosphere, energetic body language, encouraging emotional tone, fresh and vibrant feeling, natural emotional connection, light colorful accents, open and welcoming composition",
+        "peaceful emotional harmony, gentle soft lighting, relaxed comforting mood, natural emotional flow, subtle happiness, balanced scene composition, warm human connection",
+        "inspiring atmosphere, confident emotional tone, clean vibrant visuals, hopeful expressions, radiant environmental lighting, joyful movement, emotionally uplifting composition",
+        "soft emotional warmth, comfortable visual tone, gentle interaction between subjects, subtle emotional storytelling, natural pleasant colors, peaceful environment, friendly atmosphere"
+      ],
+      "negative_prompt_hint": [
+        "dark depressive mood, aggressive expressions, heavy shadows, disturbing emotional tension",
+        "cold detached emotions, violent emotional tension, empty lifeless scenes, muted hopeless atmosphere",
+        "harsh dramatic shadows, chaotic emotional intensity, extreme sadness, fearful atmosphere",
+        "negative emotional tension, oppressive environments, overly dark tones, emotionless characters",
+        "extreme emotional drama, harsh contrast lighting, violent themes, emotionally empty scenes"
+      ]
+    },
+    "happy": {
+      "id": "happy",
+      "display_name": "Happy",
+      "description": "A cheerful and joyful emotional style featuring lively energy, smiles, warmth, celebration, and positive interactions.",
+      "image": [
+        "happy_emotion_1.png",
+        "happy_emotion_2.png",
+        "happy_emotion_3.png",
+        "happy_emotion_4.png",
+        "happy_emotion_5.png"
+      ],
+      "prompt_hints": [
+        "bright joyful expressions, energetic movement, warm sunlight tones, playful atmosphere, vibrant emotional energy, smiling faces, colorful uplifting environment",
+        "lively cheerful mood, dynamic happy movement, bright colorful highlights, carefree emotional energy, expressive smiling gestures, festive atmosphere, warm inviting lighting",
+        "gentle joyful expressions, natural emotional connection, comfortable atmosphere, light warm colors, relaxed happiness, friendly interactions, balanced cheerful composition",
+        "expressive happiness, dynamic body movement, exciting visual rhythm, bright vibrant environment, celebration feeling, radiant lighting, positive emotional storytelling",
+        "wholesome emotional warmth, friendly interactions, soft glowing lighting, positive human connection, comfortable colorful scenes, playful joyful details, emotionally uplifting visuals"
+      ],
+      "negative_prompt_hint": [
+        "sad emotional tones, dark environments, emotionless expressions, heavy dramatic shadows",
+        "muted emotional tone, fearful expressions, cold atmosphere, tense emotional composition",
+        "harsh emotional conflict, heavy darkness, lonely atmosphere, aggressive body language",
+        "still lifeless scenes, depressive emotional tone, muted colors, cold detached atmosphere",
+        "hostile emotional tension, dark hopeless themes, harsh visual contrast, emotionally empty scenes"
+      ]
+    },
+    "sad": {
+      "id": "sad",
+      "display_name": "Sad",
+      "description": "A melancholic emotional atmosphere featuring loneliness, introspection, emotional depth, and subdued visual storytelling.",
+      "image": [
+        "sad_emotion_1.png",
+        "sad_emotion_2.png",
+        "sad_emotion_3.png",
+        "sad_emotion_4.png",
+        "sad_emotion_5.png"
+      ],
+      "prompt_hints": [
+        "soft muted lighting, lonely emotional tone, quiet reflective mood, subtle emotional expressions, cool desaturated colors, gentle emotional storytelling, empty surrounding space",
+        "emotional isolation, moody lighting, rainy or overcast feeling, reflective emotional atmosphere, subtle tears or sorrow, dark soft shadows, quiet stillness",
+        "gentle sadness, soft cool tones, emotional fragility, subtle facial emotion, quiet composition, natural emotional realism, delicate lighting",
+        "heavy emotional atmosphere, deep emotional storytelling, dramatic shadows, lonely environments, emotionally expressive posture, muted cinematic colors, reflective composition",
+        "peaceful loneliness, subtle emotional weight, soft environmental lighting, calm reflective scenes, gentle muted textures, slow emotional pacing, atmospheric stillness"
+      ],
+      "negative_prompt_hint": [
+        "bright cheerful energy, overly colorful visuals, excited body language, festive atmosphere",
+        "bright optimism, comedic expressions, overly energetic scenes, vibrant festival colors",
+        "harsh aggressive visuals, strong joyful energy, overly saturated colors, chaotic movement",
+        "playful visual tone, warm celebratory mood, bright energetic lighting, cartoonish expressions",
+        "fast energetic action, bright festive colors, comedic atmosphere, overly dramatic chaos"
+      ]
+    },
+    "neutral": {
+      "id": "neutral",
+      "display_name": "Neutral",
+      "description": "A balanced emotional style with realism, restraint, everyday atmosphere, and minimal emotional exaggeration.",
+      "image": [
+        "neutral_emotion_1.png",
+        "neutral_emotion_2.png",
+        "neutral_emotion_3.png",
+        "neutral_emotion_4.png",
+        "neutral_emotion_5.png"
+      ],
+      "prompt_hints": [
+        "balanced emotional tone, natural realistic lighting, calm environment, minimal emotional exaggeration, clean composition, subtle visual storytelling, everyday atmosphere",
+        "simple realistic mood, balanced color palette, natural body posture, soft environmental details, stable composition, relaxed atmosphere, everyday visual tone",
+        "soft balanced lighting, moderate emotional tone, neutral facial expressions, clean environment, subtle details, natural realism, comfortable visual pacing",
+        "realistic scene balance, natural environment, everyday visual detail, emotionally stable presentation, simple composition, natural shadows, minimal visual drama",
+        "restrained emotional presentation, balanced composition, natural texture details, subtle lighting transitions, relaxed atmosphere, realistic scene structure, minimal emotional emphasis"
+      ],
+      "negative_prompt_hint": [
+        "extreme happiness, heavy sadness, aggressive tension, dramatic emotional effects",
+        "intense dramatic contrast, strong emotional storytelling, exaggerated expressions, highly stylized effects",
+        "overly emotional visuals, chaotic composition, heavy shadows, bright celebratory colors",
+        "fantasy emotional effects, excessive emotional intensity, overly cinematic lighting, stylized emotional exaggeration",
+        "overly expressive emotions, intense visual effects, harsh contrast, extreme color saturation"
+      ]
+    }
   }
 }
