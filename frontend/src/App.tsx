@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import GalleryApp from "./routes/GalleryApp";
 import { EnterPage } from "./routes/EnterPage";
 import { HomePage } from "./routes/HomePage";
+import ImageCardsPage from "./routes/ImageCardsPage";
 import { ProtectedRoute } from "./routes/ProtectedRoute";
 
 function currentPath() {
@@ -10,7 +11,7 @@ function currentPath() {
 }
 
 export default function App() {
-  const [path, setPath] = useState(currentPath);
+  const [path, setPath] = useState(currentPath());
 
   const navigate = useCallback((nextPath: string, replace = false) => {
     if (replace) {
@@ -34,6 +35,10 @@ export default function App() {
   }
 
   if (path === "/image-cards") {
+    return <ImageCardsPage />;
+  }
+
+  if (path === "/gallery") {
     return (
       <ProtectedRoute navigate={navigate}>
         <GalleryApp />
@@ -41,5 +46,5 @@ export default function App() {
     );
   }
 
-  return <HomePage />;
+  return <HomePage navigate={navigate} />;
 }
