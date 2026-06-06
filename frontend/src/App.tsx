@@ -1,111 +1,12 @@
-import { useEffect, useState } from "react";
-import "./App.css";
-import MiniGame from "./components/miniGames/src/MiniGames";
+import { useCallback, useEffect, useState } from "react";
 
-interface CardData {
-  display_name: string;
-  description: string;
+import GalleryApp from "./routes/GalleryApp";
+import { EnterPage } from "./routes/EnterPage";
+import { HomePage } from "./routes/HomePage";
+import { ProtectedRoute } from "./routes/ProtectedRoute";
 
-  image?: string;
-  images?: string[];
-
-  prompt_hints?: string[];
-  negative_prompt_hints?: string[];
-}
-
-interface CardsGroup {
-  [key: string]: CardData;
-}
-
-interface CardsResponse {
-  emotion_cards: CardsGroup;
-  memory_cards: CardsGroup;
-  imagination_cards: CardsGroup;
-  style_cards: CardsGroup;
-  specialEffect_cards: CardsGroup;
-}
-
-interface SelectedCards {
-  [key: string]: string | null;
-}
-
-interface StepCard {
-  id: string;
-  label: string;
-  image: string;
-  description: string;
-}
-
-interface CardStep {
-  key: string;
-  title: string;
-  cards: StepCard[];
-}
-
-interface GenerateResponse {
-  data: {
-    prompt: string;
-    image_url: string;
-  };
-  error?: string;
-}
-
-function pickRandomImage(
-  images: string[] = [],
-  previousImage?: string
-): string {
-  if (!images.length) return "";
-
-  const availableImages = images.filter(
-    (img) => img !== previousImage
-  );
-
-  if (!availableImages.length) {
-    return images[0];
-  }
-
-  return availableImages[
-    Math.floor(Math.random() * availableImages.length)
-  ];
-}
-
-function createRandomImageMap(
-  data: CardsResponse,
-  previousMap: Record<string, string> = {}
-): Record<string, string> {
-  const newMap: Record<string, string> = {};
-
-  const categories: [string, CardsGroup][] = [
-    ["emotion", data.emotion_cards],
-    ["memory", data.memory_cards],
-    ["imagination", data.imagination_cards],
-    ["style", data.style_cards],
-    ["specialEffect", data.specialEffect_cards]
-  ];
-
-  categories.forEach(([categoryKey, cards]) => {
-    if (!cards) {
-      console.warn(`Missing category: ${categoryKey}`);
-      return;
-    }
-    Object.entries(cards).forEach(([id, card]) => {
-      const mapKey = `${categoryKey}_${id}`;
-
-      const imageList =
-        card.images && card.images.length > 0
-          ? card.images
-          : card.image
-          ? [card.image]
-          : [];
-
-      newMap[mapKey] = pickRandomImage(
-        imageList,
-        previousMap[mapKey]
-      );
-    });
-  });
-
-  return newMap;
+function currentPath() {
+  return window.location.pathname;
 }
 
 export default function App() {
@@ -319,82 +220,30 @@ export default function App() {
 
     if (stepIndex < cardSteps.length - 1) {
       setStepIndex(stepIndex + 1);
+  const [path, setPath] = useState(currentPath);
+
+  const navigate = useCallback((nextPath: string, replace = false) => {
+    if (replace) {
+      window.history.replaceState({}, "", nextPath);
     } else {
-      await generatePrompt(updatedCards);
-    }
-  }
-
-  function handleBack() {
-    if (stepIndex === 0) return;
-
-    setSelectedCards((prev) => {
-      const updated = { ...prev };
-      delete updated[cardSteps[stepIndex - 1].key];
-      return updated;
-    });
-
-    setStepIndex((prev) => prev - 1);
-  }
-
-  async function generatePrompt(cards: SelectedCards) {
-    const [width, height] = imageSize.split("x").map(Number);
-
-    const formData = new FormData();
-
-    formData.append("subject", subject || "");
-    formData.append("language", "en");
-    formData.append("width", width.toString());
-    formData.append("height", height.toString());
-
-    if (uploadedImage) {
-      formData.append("image", uploadedImage);
+      window.history.pushState({}, "", nextPath);
     }
 
-    Object.entries(cards).forEach(([key, value]) => {
-      if (value) {
-        formData.append(key, value);
-      }
-    });
+    setPath(currentPath());
+  }, []);
 
-    setLoading(true);
+  useEffect(() => {
+    const onPopState = () => setPath(currentPath());
+    window.addEventListener("popstate", onPopState);
 
-    try {
-      const response = await fetch("http://localhost:5001/api/prompts/generate", {
-        method: "POST",
-        body: formData,
-      });
+    return () => window.removeEventListener("popstate", onPopState);
+  }, []);
 
-      const result: GenerateResponse = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || "Failed to generate");
-      }
-
-      setGeneratedPrompt(result.data.prompt);
-      setImageUrl(result.data.image_url);
-    } catch (error) {
-      if (error instanceof Error) {
-        alert(error.message);
-      }
-    } finally {
-      setLoading(false);
-    }
+  if (path === "/enter") {
+    return <EnterPage navigate={navigate} />;
   }
 
-  function restart() {
-    setStepIndex(0);
-    setSelectedCards({});
-    setGeneratedPrompt("");
-    setImageUrl("");
-
-    if (cardsData) {
-      setCardImageMap((previousMap) =>
-        createRandomImageMap(cardsData, previousMap)
-      );
-    }
-  }
-
-  if (generatedPrompt) {
+  if (path === "/image-cards") {
     return (
       <div className="appPage">
         <div className="animatedBg">
@@ -636,4 +485,12 @@ export default function App() {
       )}
     </div>
   );
+}
+      <ProtectedRoute navigate={navigate}>
+        <GalleryApp />
+      </ProtectedRoute>
+    );
+  }
+
+  return <HomePage />;
 }

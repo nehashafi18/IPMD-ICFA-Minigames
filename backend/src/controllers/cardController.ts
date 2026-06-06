@@ -17,6 +17,40 @@ function loadJson(pathname: string): JsonObject {
   return JSON.parse(content);
 }
 
+function loadPromptGroups(): {
+  styleData: JsonObject;
+  emotionData: JsonObject;
+  memoryData: JsonObject;
+  imaginationData: JsonObject;
+  specialEffectData: JsonObject;
+} {
+  const files = [
+    "./src/prompts/style_cards.json",
+    "./src/prompts/emotion_cards.json",
+    "./src/prompts/memory_cards.json",
+    "./src/prompts/imagination_cards.json",
+    "./src/prompts/specialEffect_cards.json"
+  ].map(loadJson);
+
+  const findGroup = (groupName: string): JsonObject => {
+    const data = files.find((file) => file[groupName]);
+
+    if (!data) {
+      throw new Error(`Prompt group not found: ${groupName}`);
+    }
+
+    return data;
+  };
+
+  return {
+    styleData: findGroup("style_cards"),
+    emotionData: findGroup("emotion_cards"),
+    memoryData: findGroup("memory_cards"),
+    imaginationData: findGroup("imagination_cards"),
+    specialEffectData: findGroup("specialEffect_cards")
+  };
+}
+
 function filterMissingImages(cardsData: JsonObject): JsonObject {
   const cardsDir = path.join(process.cwd(), "../frontend/public/cards");
 
@@ -50,6 +84,7 @@ function filterMissingImages(cardsData: JsonObject): JsonObject {
           delete obj[key];
         } else {
           value.image = validImages;
+          value.images = validImages;
         }
       } else {
         walk(value as JsonObject);
@@ -68,49 +103,26 @@ export function getCards(
   next: NextFunction
 ): void {
   try {
-    let styleData = loadJson(
-      "./src/prompts/style_cards.json"
-    );
-
-    let emotionData = loadJson(
-      "./src/prompts/emotion_cards.json"
-    );
-
-    let memoryData = loadJson(
-      "./src/prompts/memory_cards.json"
-    );
-
-    let imaginationData = loadJson(
-      "./src/prompts/imagination_cards.json"
-    );
-
-    let specialEffectData = loadJson(
-      "./src/prompts/specialEffect_cards.json"
-    );
-
-    // remove cards with missing PNG
-    styleData = filterMissingImages(styleData);
-
-    emotionData = filterMissingImages(emotionData);
-
-    memoryData = filterMissingImages(memoryData);
-
-    imaginationData = filterMissingImages(
-      imaginationData
-    );
-
-    specialEffectData = filterMissingImages(
+    let {
+      styleData,
+      emotionData,
+      memoryData,
+      imaginationData,
       specialEffectData
-    );
+    } = loadPromptGroups();
+
+    styleData = filterMissingImages(styleData);
+    emotionData = filterMissingImages(emotionData);
+    memoryData = filterMissingImages(memoryData);
+    imaginationData = filterMissingImages(imaginationData);
+    specialEffectData = filterMissingImages(specialEffectData);
 
     res.json({
       style_cards: styleData.style_cards,
       emotion_cards: emotionData.emotion_cards,
       memory_cards: memoryData.memory_cards,
-      imagination_cards:
-        imaginationData.imagination_cards,
-      specialEffect_cards:
-        specialEffectData.specialEffect_cards,
+      imagination_cards: imaginationData.imagination_cards,
+      specialEffect_cards: specialEffectData.specialEffect_cards
     });
   } catch (error) {
     next(error);
