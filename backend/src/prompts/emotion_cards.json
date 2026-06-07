@@ -105,6 +105,32 @@
         "fantasy emotional effects, excessive emotional intensity, overly cinematic lighting, stylized emotional exaggeration",
         "overly expressive emotions, intense visual effects, harsh contrast, extreme color saturation"
       ]
+    },
+    "anger": {
+      "id": "anger",
+      "display_name": "Anger",
+      "description": "An intense emotional style with tension, frustration, determination, conflict, and strong emotional energy.",
+      "image": [
+        "anger_emotion_1.png",
+        "anger_emotion_2.png",
+        "anger_emotion_3.png",
+        "anger_emotion_4.png",
+        "anger_emotion_5.png"
+      ],
+      "prompt_hints": [
+        "intense emotional tension, determined facial expression, dramatic atmosphere, strong body language, emotional energy, dynamic composition, subtle conflict",
+        "frustrated mood, powerful emotional presence, focused gaze, tense posture, realistic emotional storytelling, dramatic lighting, heightened atmosphere",
+        "anger-driven determination, emotional intensity, strong visual contrast, expressive gestures, dynamic environment, realistic conflict, cinematic composition",
+        "heated emotional atmosphere, restrained aggression, dramatic shadows, powerful stance, emotional realism, visual tension, strong storytelling focus",
+        "passionate emotional energy, intense expression, forceful movement, dramatic scene structure, realistic emotional conflict, focused composition, heightened visual impact"
+      ],
+      "negative_prompt_hint": [
+        "happy smiling expressions, peaceful atmosphere, cheerful mood, playful emotions",
+        "soft romantic feelings, calm relaxation, joyful celebration, positive emotional warmth",
+        "neutral emotional tone, gentle expressions, serene environment, emotionally detached presentation",
+        "dreamy fantasy atmosphere, whimsical emotions, overly cute expressions, comedic mood",
+        "extreme violence, graphic injury, gore, horror elements, disturbing content"
+      ]
     }
   }
 }

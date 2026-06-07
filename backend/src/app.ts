@@ -44,11 +44,11 @@ if (fs.existsSync(config.vmsAdminDistPath)) {
   });
 }
 
-app.use("/api/cards", requireGallerySession, cardRoutes);
+app.use("/api/cards", cardRoutes);
 
-app.use("/api/prompt", requireGallerySession, promptRoutes);
+app.use("/api/prompt", promptRoutes);
 
-app.use("/api/art", requireGallerySession, artRoutes);
+app.use("/api/art", artRoutes);
 
 app.use(errorHandler);
 
