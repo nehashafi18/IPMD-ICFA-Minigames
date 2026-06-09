@@ -4,8 +4,11 @@ import torch
 from diffusers import StableDiffusionPipeline
 import uuid
 import os
+from fastapi.staticfiles import StaticFiles
 
 app = FastAPI()
+
+app.mount("/outputs", StaticFiles(directory="outputs"), name="outputs")
 
 MODEL_ID = "runwayml/stable-diffusion-v1-5"
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
