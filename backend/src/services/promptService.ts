@@ -25,6 +25,7 @@ export async function buildPrompt(body: any) {
 
     prompt_parts: {
       memory: weightedPrompt(
+        
         parsed_cards.memory?.prompt_hint,
         parsed_cards.category_weights?.memory
       ),
@@ -75,9 +76,10 @@ You are an expert AI prompt engineer for Stable Diffusion 1.5.
 Your job is to generate short, beautiful, emotionally rich image prompts.
 
 Rules:
-- Keep the prompt under 75 words.
+- Keep the prompt under 60 words.
 - Use strong nouns and clear visual descriptors.
-- Use short phrases, not long paragraphs.
+- Use comma-separated short phrases, not long paragraphs.
+- Do not repeat similar adjectives.
 - Always include subject, emotion or mood, art style, lighting, and color palette.
 - Memory should define the main scene or remembered place.
 - Emotion should define the mood and atmosphere.

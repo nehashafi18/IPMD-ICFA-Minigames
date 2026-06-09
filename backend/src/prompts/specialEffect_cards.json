@@ -57,15 +57,15 @@
     },
 
     "soft_fluffy_texture": {
-      "id": "soft_fluffy_texture",
+      "id": "soft_fluffy_effect",
       "display_name": "Soft & Fluffy",
       "description": "Adds fluffy, fuzzy, plush-like textures with soft edges, cozy surfaces, and cloud-like softness.",
       "image": [
-        "soft_fluffy_texture_1.png",
-        "soft_fluffy_texture_2.png",
-        "soft_fluffy_texture_3.png",
-        "soft_fluffy_texture_4.png",
-        "soft_fluffy_texture_5.png"
+        "soft_fluffy_effect_1.png",
+        "soft_fluffy_effect_2.png",
+        "soft_fluffy_effect_3.png",
+        "soft_fluffy_effect_4.png",
+        "soft_fluffy_effect_5.png"
       ],
       "prompt_hints": [
         "fluffy soft texture, soft like a cloud, fuzzy details, smooth texture",
@@ -84,15 +84,15 @@
     },
 
     "shiny_glossy_texture": {
-      "id": "shiny_glossy_texture",
+      "id": "shiny_glossy_effect",
       "display_name": "Shiny / Glossy",
       "description": "Adds reflective glossy surfaces, polished highlights, smooth shine, and luminous reflections.",
       "image": [
-        "shiny_glossy_texture_1.png",
-        "shiny_glossy_texture_2.png",
-        "shiny_glossy_texture_3.png",
-        "shiny_glossy_texture_4.png",
-        "shiny_glossy_texture_5.png"
+        "shiny_glossy_effect_1.png",
+        "shiny_glossy_effect_2.png",
+        "shiny_glossy_effect_3.png",
+        "shiny_glossy_effect_4.png",
+        "shiny_glossy_effect_5.png"
       ],
       "prompt_hints": [
         "glossy reflections, shiny surfaces, highlights, smooth reflective surfaces, bright glow",

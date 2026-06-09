@@ -120,6 +120,8 @@ export default function ImageCardsPage() {
   const [previewUrl, setPreviewUrl] = useState<string>("");
   const [showMiniGame, setShowMiniGame] = useState<boolean>(false);
   const [subject, setSubject] = useState<string>("");
+  const [generationReady, setGenerationReady] = useState(false);
+  const [showResultPage, setShowResultPage] = useState(false);
   const [cardTextColor, setCardTextColor] = useState<
     Record<string, "light" | "dark">
   >({});
@@ -256,17 +258,17 @@ export default function ImageCardsPage() {
 
   const cardSteps: CardStep[] = [
     {
-      key: "emotion_card",
+      key: "emotion",
       title: "Choose an Emotion",
       cards: buildCards(cardsData.emotion_cards, "emotion")
     },
     {
-      key: "memory_card",
+      key: "memory",
       title: "Choose a memory",
       cards: buildCards(cardsData.memory_cards, "memory")
     },
     {
-      key: "imagination_card",
+      key: "imagination",
       title: "Choose a imagination",
       cards: buildCards(
         cardsData.imagination_cards,
@@ -274,12 +276,12 @@ export default function ImageCardsPage() {
       )
     },
     {
-      key: "style_card",
+      key: "style",
       title: "Choose a Style",
       cards: buildCards(cardsData.style_cards, "style")
     },
     {
-      key: "specialEffect_card",
+      key: "specialEffect",
       title: "Choose a Special Effect",
       cards: buildCards(cardsData.specialEffect_cards, "specialEffect")
     }
@@ -347,37 +349,40 @@ export default function ImageCardsPage() {
     formData.append("height", height.toString());
 
     if (uploadedImage) {
-      formData.append("image", uploadedImage);
+        formData.append("image", uploadedImage);
     }
 
     Object.entries(cards).forEach(([key, value]) => {
-      if (value) {
+        if (value) {
         formData.append(key, value);
-      }
+        }
     });
 
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:5001/api/prompts/generate", {
+        const response = await fetch("http://localhost:5001/api/art/generate", {
         method: "POST",
         body: formData,
-      });
+        });
 
-      const result: GenerateResponse = await response.json();
+        const result: GenerateResponse = await response.json();
 
-      if (!response.ok) {
+        if (!response.ok) {
         throw new Error(result.error || "Failed to generate");
-      }
+        }
 
-      setGeneratedPrompt(result.data.prompt);
-      setImageUrl(result.data.image_url);
+        setGeneratedPrompt(result.data.prompt);
+        setImageUrl(`http://localhost:5001${result.data.image_url}`);
+        setGenerationReady(true);
+
+        new Audio("/notification.mp3")
+          .play()
+          .catch(() => {});
     } catch (error) {
-      if (error instanceof Error) {
+        if (error instanceof Error) {
         alert(error.message);
-      }
-    } finally {
-      setLoading(false);
+        }
     }
   }
 
@@ -386,15 +391,17 @@ export default function ImageCardsPage() {
     setSelectedCards({});
     setGeneratedPrompt("");
     setImageUrl("");
+    setGenerationReady(false);
+    setShowResultPage(false);
 
     if (cardsData) {
-      setCardImageMap((previousMap) =>
+        setCardImageMap((previousMap) =>
         createRandomImageMap(cardsData, previousMap)
-      );
+        );
     }
   }
 
-  if (generatedPrompt) {
+  if (showResultPage && generatedPrompt) {
     return (
       <div className="appPage">
         <div className="animatedBg">
@@ -613,10 +620,27 @@ export default function ImageCardsPage() {
       </div>
 
       {loading && (
-        <div className="loadingScreen">
-          <div className="miniGameWrapper">
+        <div className="miniGameModal">
+          <div className="miniGamePanel">
+            {generationReady && (
+              <div className="generationOverlay">
+                <span>🎉 Generation Complete!</span>
+
+                <button
+                  className="viewResultButton"
+                  onClick={() => {
+                    setLoading(false);
+                    setGenerationReady(false);
+                    setShowResultPage(true);
+                  }}
+                >
+                  View Result
+                </button>
+              </div>
+            )}
+
             <MiniGame />
-          </div>
+            </div>
         </div>
       )}
 

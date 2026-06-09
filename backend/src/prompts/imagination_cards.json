@@ -1,34 +1,110 @@
 {
   "category": "imagination",
-  "category_weight": 0.9,
+  "category_weight": 1,
   "imagination_cards": {
-    "soft_fluffy": {
-      "id": "softfluffy",
-      "display_name": "Soft & Fluffy",
-      "description": "Gentle soft-memoryd visual atmosphere.",
-      "image": "soft_fluffy.png",
-      "prompt_hints": [
-        "soft fuzzy surface memory, gentle plush shading",
-        "velvety soft atmosphere, light cotton-like memory",
-        "fluffy tactile surfaces, warm comforting softness",
-        "smooth plush material feel, soft diffused lighting",
-        "airy soft memorys, delicate comforting atmosphere"
+    "surreal_dream_imagination": {
+      "id": "surreal_dream_imagination",
+      "display_name": "Surreal Dream",
+      "description": "A surreal and dreamlike expansion that bends reality, featuring floating objects, impossible physics, and bizarre magical elements.",
+      "image": [
+        "surreal_dream_imagination_1.png",
+        "surreal_dream_imagination_2.png",
+        "surreal_dream_imagination_3.png",
+        "surreal_dream_imagination_4.png",
+        "surreal_dream_imagination_5.png"
       ],
-      "negative_prompt_hint": "sharp rough surfaces, metallic memorys, harsh visual edges"
+      "prompt_hints": [
+        "floating islands suspended in sky, giant glowing moon defying scale, surreal dreamscape physics, objects drifting without gravity, bizarre impossible landscape",
+        "melting architecture dissolving into clouds, staircases leading to nowhere, oversized symbolic objects, dreamlike warped perspective, impossible surreal geometry",
+        "fragmented reality with scattered floating elements, dream logic spatial relationships, morphing organic forms, surreal atmosphere of wonder and unease",
+        "gravity-defying scene with levitating objects, distorted dreamlike proportions, infinite horizon bending upward, fragmented surreal narrative, ghostly doubled imagery",
+        "reality fracturing at the edges, impossible doors and windows opening into sky, dream-state visual logic, surreal object collisions, ethereal weightless atmosphere"
+      ],
+      "negative_prompt_hint": [
+        "ordinary realistic photography, mundane everyday setting, strict laws of physics, documentary realism",
+        "boring realistic architecture, factual scientific imagery, grounded literal composition, normal proportions",
+        "photojournalism style, practical functional objects only, flat literal environment, conventional scene logic",
+        "historical realism, architectural accuracy, plain undecorated backgrounds, strict representational art",
+        "clinical documentary style, rigid geometric realism, unimaginative literal depiction, plain matter-of-fact setting"
+      ]
     },
-    "shiny_glossy": {
-      "id": "shinyglossy",
-      "display_name": "Shiny / Glossy",
-      "description": "Reflective glossy visual surface effect.",
-      "image": "shiny_glossy.png",
-      "prompt_hints": [
-        "glossy reflective surfaces, bright polished highlights",
-        "smooth shiny materials, radiant reflective lighting",
-        "high-gloss visual memory, luminous surface reflections",
-        "polished glossy finish, clean reflective contrast",
-        "sleek shiny atmosphere, soft metallic highlights"
+    "cyber_future_imagination": {
+      "id": "cyber_future_imagination",
+      "display_name": "Cyber Future",
+      "description": "A high-tech sci-fi expansion injecting futuristic elements, holographic projections, and glowing advanced technology into the scene.",
+      "image": [
+        "cyber_future_imagination_1.png",
+        "cyber_future_imagination_2.png",
+        "cyber_future_imagination_3.png",
+        "cyber_future_imagination_4.png",
+        "cyber_future_5imagination_.png"
       ],
-      "negative_prompt_hint": "matte rough memorys, dusty surfaces, dull low-reflection lighting"
+      "prompt_hints": [
+        "glowing holographic projections floating in air, futuristic sci-fi environment, advanced technology interfaces, neon-lit cyberpunk elements, floating data streams",
+        "cybernetic enhancements integrated into scene, holographic neon signs, dense layered technology aesthetic, blue and cyan high-tech lighting, futuristic urban overlay",
+        "translucent digital interfaces overlaid on scene, glowing circuit patterns, sleek metallic futuristic surfaces, high-tech ambient neon glow, advanced sci-fi atmosphere",
+        "floating neon symbols and data panels, cyberpunk city layers, glowing technological nodes, immersive futuristic visual system, electric blue-purple neon tones",
+        "sci-fi holographic overlays, advanced digital architecture, glowing energy conduits running through scene, cybernetic visual language, neon techno-light atmosphere"
+      ],
+      "negative_prompt_hint": [
+        "rustic antique setting, medieval historical fantasy, aged weathered materials, candlelit old-world atmosphere",
+        "traditional natural landscape, handmade crafts aesthetic, rough organic textures, pastoral countryside setting",
+        "old-fashioned vintage aesthetics, sepia-toned historical imagery, wooden hand-carved details, pre-industrial setting",
+        "dark nature forest, rough stone textures, aged parchment and dust, low-tech analog environment",
+        "earthy natural palette, simple hand-drawn aesthetics, worn traditional clothing, unelectrified simple environments"
+      ]
+    },
+    "enchanted_magic_imagination": {
+      "id": "enchanted_magic_imagination",
+      "display_name": "Enchanted Magic",
+      "description": "A mystical fantasy expansion bringing glowing runes, fairy lights, ethereal plants, and an ancient magical aura to the scene.",
+      "image": [
+        "enchanted_magic_imagination_1.png",
+        "enchanted_magic_imagination_2.png",
+        "enchanted_magic_imagination_3.png",
+        "enchanted_magic_imagination_4.png",
+        "enchanted_magic_imagination_5.png"
+      ],
+      "prompt_hints": [
+        "glowing magical runes etched into surfaces, ethereal fairy lights drifting through scene, mystical golden-green ambient light, ancient enchanted atmosphere",
+        "floating enchanted dust particles catching light, mystical glowing plants and vines, soft bioluminescent magical glow, fantasy aura suffusing the scene",
+        "ancient magical symbols softly illuminated, gossamer light threads weaving through air, enchanted forest-like atmosphere, warm golden magical radiance",
+        "sparkling magical energy trails, ethereal glowing orbs drifting upward, soft mystical color wash of violet and gold, fantasy enchantment layered into scene",
+        "delicate light wisps and magical particles, glowing enchanted objects integrated into setting, soft otherworldly shimmer, ancient mystical presence filling the space"
+      ],
+      "negative_prompt_hint": [
+        "harsh industrial machinery, modern mundane city environment, sterile clinical lighting, cold grey concrete",
+        "realistic gritty urban setting, neon sci-fi technology, fluorescent office lighting, hard-edged modern surfaces",
+        "documentary realism, plain undecorated interior, practical everyday objects only, mundane artificial lighting",
+        "sci-fi techno elements, cold blue-white LED light, mechanical robot aesthetics, hard metallic surfaces",
+        "brutalist architecture, utilitarian functional design, flat unadorned backgrounds, harsh unfiltered light"
+      ]
+    },
+    "cosmic_space_imagination": {
+      "id": "cosmic_space_imagination",
+      "display_name": "Cosmic Space",
+      "description": "An expansive cosmic expansion blending the subject into galaxies, nebulas, stardust, and the deep infinite beauty of outer space.",
+      "image": [
+        "cosmic_space_imagination_1.png",
+        "cosmic_space_imagination_2.png",
+        "cosmic_space_imagination_3.png",
+        "cosmic_space_imagination_4.png",
+        "cosmic_space_imagination_5.png"
+      ],
+      "prompt_hints": [
+        "swirling purple and blue nebulas filling the background, shimmering stardust scattered across scene, deep galactic cosmic backdrop, ethereal glowing constellations",
+        "floating in vast outer space, infinite starfield stretching behind subject, glowing cosmic dust clouds, distant galaxies visible on horizon, ethereal space atmosphere",
+        "deep space nebula colors bleeding into scene, luminous star clusters, cosmic scale and vastness implied, rich purple-blue-gold galactic palette",
+        "bioluminescent cosmic light washing over scene, swirling galaxy arms in background, glowing asteroid fields, infinite space depth, celestial ethereal atmosphere",
+        "milky way band arching across scene, glowing cosmic fog drifting in, dense star fields layered in deep background, otherworldly galactic color palette, vast cosmic stillness"
+      ],
+      "negative_prompt_hint": [
+        "enclosed indoor room, bright daylight blue sky, earthly domestic setting, ordinary ceiling overhead",
+        "underwater ocean depths, dense forest canopy, busy city streets, crowded human environment",
+        "sunny outdoor park, warm natural daylight, green earthly landscape, clear terrestrial sky",
+        "underground cave setting, suburban neighborhood, familiar domestic objects, ordinary earthly materials",
+        "claustrophobic enclosed space, bright artificial interior lighting, flat white ceiling, everyday human-scale environment"
+      ]
     }
   }
 }

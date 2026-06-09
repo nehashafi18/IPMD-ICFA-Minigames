@@ -63,7 +63,14 @@ async function retry<T>(
 }
 
 function parseLLMJson(text: string): LLMResponse {
-  return JSON.parse(cleanJsonText(text)) as LLMResponse;
+  const cleaned = cleanJsonText(text);
+
+  const match = cleaned.match(/\{[\s\S]*\}/);
+  if (!match) {
+    throw new Error(`No JSON object found in LLM response: ${cleaned}`);
+  }
+
+  return JSON.parse(match[0]) as LLMResponse;
 }
 
 async function generateWithRemoteGemma(
@@ -88,10 +95,15 @@ async function generateWithRemoteGemma(
 async function generateWithLocalQwenServer(
   llmInstruction: string
 ): Promise<LLMResponse> {
-  const response = await axios.post(
+  const url =
     process.env.QWEN_LOCAL_URL ||
-      qwenConfig.base_url ||
-      "http://localhost:8001/generate",
+    qwenConfig.base_url ||
+    "http://localhost:8001/generate";
+
+  console.log("Calling Qwen URL:", url);
+
+  const response = await axios.post(
+    url,
     {
       instruction: llmInstruction
     },
@@ -100,12 +112,27 @@ async function generateWithLocalQwenServer(
     }
   );
 
+  console.log("Qwen status:", response.status);
+
   const content =
     response.data?.response ??
     response.data?.content ??
+    response.data?.text ??
+    response.data?.result ??
     "";
 
-  return parseLLMJson(content);
+  if (!content) {
+    throw new Error(
+      `Qwen returned empty content. Raw response: ${JSON.stringify(response.data)}`
+    );
+  }
+
+  try {
+    return parseLLMJson(content);
+  } catch (error) {
+    console.error("Failed to parse Qwen JSON:", content);
+    throw error;
+  }
 }
 
 async function generateWithLocalGemma(

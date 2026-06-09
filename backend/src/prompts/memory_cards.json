@@ -1,34 +1,84 @@
 {
   "category": "memory",
-  "category_weight": 0.9,
+  "category_weight": 1,
   "memory_cards": {
-    "sparking": {
-      "id": "sparking",
-      "display_name": "Sparking",
-      "description": "Bright shimmering visual enhancement effect.",
-      "image": "sparking.png",
-      "prompt_hints": [
-        "subtle sparkling highlights, glowing light particles",
-        "tiny shimmering reflections, glittering visual accents",
-        "radiant sparkle effects, delicate glowing details",
-        "soft twinkling highlights, luminous particle effects",
-        "bright reflective sparkles, magical glowing atmosphere"
+    "childhood_home_memory": {
+      "id": "childhood_home_memory",
+      "display_name": "Childhood Home",
+      "description": "A comforting, nostalgic setting reminiscent of a warm childhood home with familiar textures and sunlit spaces.",
+      "image": [
+        "childhood_home_memory_1.png",
+        "childhood_home_memory_2.png",
+        "childhood_home_memory_3.png",
+        "childhood_home_memory_4.png",
+        "childhood_home_memory_5.png"
       ],
-      "negative_prompt_hint": "flat matte surfaces, dull lighting, low visual contrast"
+      "prompt_hints": [
+        "old wooden house background, sunlit porch in golden afternoon light, dust motes drifting in warm rays, nostalgic vintage home setting, faded paint textures",
+        "warm childhood home interior, soft window light casting long shadows, worn wooden floorboards, familiar objects on shelves, cozy intimate domestic scene",
+        "sunlit backyard with overgrown garden, weathered fence, childhood toys scattered on grass, warm hazy summer afternoon, nostalgic suburban setting",
+        "vintage kitchen with worn countertops, soft morning light through thin curtains, faded family photographs on wall, comforting domestic warmth, lived-in textures",
+        "old staircase with worn carpet, afternoon light filtering through frosted window, familiar childhood objects, quiet still home atmosphere, warm amber tones"
+      ],
+      "negative_prompt_hint": [
+        "modern glass architecture, futuristic city skyline, cold industrial environment, sterile clinical spaces",
+        "busy urban crowds, neon city lights, contemporary minimalist interiors, high-rise buildings",
+        "harsh fluorescent lighting, grey concrete surfaces, empty lifeless rooms, cold blue tones",
+        "ultra-modern furniture, sleek digital interfaces, impersonal office environment, anonymous public spaces",
+        "cold night scenes, overly bright studio lighting, unfamiliar foreign settings, emotionally sterile spaces"
+      ]
     },
-    "black_white": {
-      "id":"blackwhite",
-      "display_name": "Black & White",
-      "description": "Monochrome visual style with grayscale tones.",
-      "image": "black_and_white.png",
-      "prompt_hints": [
-        "monochrome grayscale tones, dramatic black and white contrast",
-        "classic black ink shading, soft grayscale atmosphere",
-        "high-contrast monochrome lighting, cinematic grayscale memory",
-        "minimal black and white palette, elegant tonal balance",
-        "vintage monochrome rendering, deep grayscale shadows"
+    "rainy_city_memory": {
+      "id": "rainy_city_memory",
+      "display_name": "Rainy City Walk",
+      "description": "An atmospheric, rain-slicked urban environment perfect for reflective or melancholic moods, with neon reflections in wet streets.",
+      "image": [
+        "rainy_city_memory_1.png",
+        "rainy_city_memory_2.png",
+        "rainy_city_memory_3.png",
+        "rainy_city_memory_4.png",
+        "rainy_city_memory_5.png"
       ],
-      "negative_prompt_hint": "vivid saturated colors, rainbow lighting, colorful gradients"
+      "prompt_hints": [
+        "wet city streets at night, neon light reflections shimmering in puddles, rain-soaked pavement, soft urban glow through fog, quiet atmospheric alleyway",
+        "glistening rain-slicked sidewalk, blurred bokeh city lights, overcast dark sky, lone figure under umbrella, cinematic rainy urban night",
+        "narrow rain-drenched street, warm shopfront light spilling onto wet ground, mist hanging in the air, reflective puddles, melancholic city atmosphere",
+        "urban night scene in heavy rain, streaks of neon color across wet asphalt, quiet empty boulevard, moody atmospheric city lighting, cool blue-grey tones",
+        "rain-soaked city intersection, glowing traffic lights reflected in puddles, hazy foggy distance, isolated urban solitude, cold reflective surfaces"
+      ],
+      "negative_prompt_hint": [
+        "bright sunny beach, clear blue sky, dry desert landscape, cheerful outdoor festival",
+        "lush natural forest, warm golden countryside, open rural fields, clear midday sunlight",
+        "vivid tropical colors, warm sunbaked surfaces, joyful crowded market, dry dust and heat",
+        "crisp clean architecture, sterile empty white spaces, cheerful daytime park, bright pastel tones",
+        "snowy winter wonderland, cozy warm interiors, green spring meadows, soft daylight landscapes"
+      ]
+    },
+    "summer_beach_memory": {
+      "id": "summer_beach_memory",
+      "display_name": "Summer Beach",
+      "description": "A bright, open seaside setting representing carefree summer memories, with crashing waves, warm sand, and expansive skies.",
+      "image": [
+        "summer_beach_memory_1.png",
+        "summer_beach_memory_2.png",
+        "summer_beach_memory_3.png",
+        "summer_beach_memory_4.png",
+        "summer_beach_memory_5.png"
+      ],
+      "prompt_hints": [
+        "wide sandy beach stretching to the horizon, crashing ocean waves, clear bright summer sky, sunlit coastline, breezy open seaside atmosphere",
+        "golden sandy shore with gentle surf, vibrant blue sea meeting sky, warm afternoon sun, light sea breeze, carefree summer beach setting",
+        "shallow turquoise water lapping at sand, bright midday light, distant sun-drenched horizon, airy beach atmosphere, vast open coastal scenery",
+        "beachside scene with foamy waves, warm saturated sunlight, pale golden sand, wispy clouds in blue sky, expansive carefree summer feeling",
+        "sun-drenched beach at low tide, reflective wet sand, vivid blue-green ocean, open bright sky, warm glowing coastal light"
+      ],
+      "negative_prompt_hint": [
+        "dark enclosed indoor setting, heavy overcast night sky, claustrophobic narrow spaces, cold rainy streets",
+        "dense city buildings, gritty urban environment, cold winter snowscape, grey overcast skies",
+        "dark forest canopy, underground cave setting, dim artificial lighting, cold industrial environment",
+        "snowy blizzard landscape, dark moody interiors, foggy rain-soaked streets, heavy storm atmosphere",
+        "nighttime darkness, cold blue shadows, enclosed windowless rooms, harsh artificial overhead lighting"
+      ]
     }
   }
 }

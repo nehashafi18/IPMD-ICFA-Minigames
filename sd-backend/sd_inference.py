@@ -1,6 +1,8 @@
 import os
 import uuid
 from PIL import Image
+import base64
+from io import BytesIO
 
 from sd_model_loader import txt2img_pipe, img2img_pipe
 
@@ -15,7 +17,18 @@ def save_image(image):
 
     image.save(path)
 
-    return path
+    buffer = BytesIO()
+    image.save(buffer, format="PNG")
+
+    image_base64 = base64.b64encode(
+        buffer.getvalue()
+    ).decode("utf-8")
+
+    return {
+        "filename": filename,
+        "path": path,
+        "image_base64": image_base64
+    }
 
 
 def generate_text_to_image(
