@@ -1,0 +1,1986 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Memory Gallery — Cognitive Training</title>
+<style>
+/* ===== BASE ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; height: 100%; overflow: hidden; }
+body {
+  font-family: 'Georgia', 'Times New Roman', serif;
+  background: #0a0612;
+  color: #e8d5b7;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+:root {
+  --gold: #c9a96e;
+  --gold-light: #e8c97e;
+  --gold-dim: #8b6914;
+  --cream: #e8d5b7;
+  --correct: #4ade80;
+  --wrong: #f87171;
+  --highlight: #fbbf24;
+  --accent: #9b72e8;
+  --bg-dark: #0a0612;
+}
+
+/* ===== SCREENS ===== */
+.screen {
+  position: absolute;
+  inset: 0;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.screen.active { display: flex; }
+
+/* ===== TITLE SCREEN ===== */
+#screen-title {
+  background:
+    radial-gradient(ellipse at 50% 20%, #2d1a4a 0%, transparent 60%),
+    radial-gradient(ellipse at 20% 80%, #1a1030 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 80%, #1a0820 0%, transparent 50%),
+    #0a0612;
+}
+.title-frame {
+  border: 1px solid rgba(201,169,110,0.3);
+  border-radius: 4px;
+  padding: 48px 56px;
+  text-align: center;
+  max-width: 480px;
+  width: 90%;
+  background: rgba(0,0,0,0.3);
+  box-shadow: 0 0 80px rgba(155,114,232,0.1), inset 0 0 40px rgba(0,0,0,0.4);
+  position: relative;
+}
+.title-frame::before, .title-frame::after {
+  content: '◆';
+  position: absolute;
+  color: var(--gold-dim);
+  font-size: 10px;
+}
+.title-frame::before { top: 8px; left: 14px; }
+.title-frame::after  { bottom: 8px; right: 14px; }
+.title-eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.35em;
+  font-size: 0.65rem;
+  color: var(--gold-dim);
+  font-family: 'Helvetica Neue', sans-serif;
+  margin-bottom: 12px;
+}
+.title-heading {
+  font-size: clamp(2.4rem, 6vw, 3.6rem);
+  font-weight: normal;
+  color: var(--gold-light);
+  text-shadow: 0 0 40px rgba(232,201,126,0.4);
+  letter-spacing: 0.02em;
+  line-height: 1.1;
+}
+.title-sub {
+  font-size: 0.85rem;
+  color: rgba(232,213,183,0.55);
+  margin-top: 8px;
+  font-style: italic;
+  letter-spacing: 0.04em;
+}
+.title-divider {
+  width: 60px;
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--gold-dim), transparent);
+  margin: 24px auto;
+}
+.title-btn {
+  display: block;
+  width: 100%;
+  padding: 14px 20px;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 0.8rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 600;
+  transition: all 0.2s;
+  margin-top: 10px;
+}
+.title-btn-primary {
+  background: linear-gradient(135deg, #c9a96e, #9b6f3a);
+  color: #0a0612;
+}
+.title-btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(201,169,110,0.3); }
+.title-btn-secondary {
+  background: transparent;
+  color: rgba(232,213,183,0.6);
+  border: 1px solid rgba(201,169,110,0.2);
+}
+.title-btn-secondary:hover { border-color: rgba(201,169,110,0.5); color: var(--cream); }
+.title-stats-row {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(201,169,110,0.12);
+}
+.title-stat { text-align: center; }
+.title-stat-val {
+  display: block;
+  font-size: 1.4rem;
+  color: var(--gold);
+}
+.title-stat-label {
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: rgba(232,213,183,0.4);
+  font-family: 'Helvetica Neue', sans-serif;
+}
+
+/* ===== GAME SCREEN ===== */
+#screen-game {
+  flex-direction: column;
+  background: #0a0612;
+  padding: 0;
+  justify-content: flex-start;
+}
+
+/* ===== HUD ===== */
+#hud {
+  width: 100%;
+  flex-shrink: 0;
+  padding: 10px 16px 8px;
+  background: rgba(5,3,12,0.9);
+  border-bottom: 1px solid rgba(201,169,110,0.15);
+  display: flex;
+  align-items: center;
+  gap: 0;
+  z-index: 10;
+}
+.hud-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 14px;
+  border-right: 1px solid rgba(201,169,110,0.12);
+}
+.hud-section:first-child { padding-left: 0; }
+.hud-section:last-child { border-right: none; }
+.hud-label {
+  font-size: 0.52rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: rgba(201,169,110,0.5);
+  font-family: 'Helvetica Neue', sans-serif;
+}
+.hud-value {
+  font-size: 1.1rem;
+  color: var(--cream);
+  font-weight: normal;
+  line-height: 1.1;
+}
+.hud-value.gold { color: var(--gold); }
+#hud-timer {
+  font-size: 1.3rem;
+  font-family: 'Helvetica Neue', sans-serif;
+  font-weight: 300;
+  color: var(--cream);
+  transition: color 0.3s;
+}
+#hud-timer.urgent { color: #f87171; animation: pulse-timer 0.5s ease-in-out infinite alternate; }
+@keyframes pulse-timer { to { transform: scale(1.05); } }
+.hud-spacer { flex: 1; }
+.hud-icon-btn {
+  background: none;
+  border: 1px solid rgba(201,169,110,0.2);
+  color: rgba(201,169,110,0.6);
+  width: 32px; height: 32px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+  margin-left: 8px;
+}
+.hud-icon-btn:hover { border-color: var(--gold); color: var(--gold); }
+.hud-streak {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.streak-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: rgba(201,169,110,0.2);
+  transition: all 0.3s;
+}
+.streak-dot.filled { background: var(--gold); box-shadow: 0 0 8px rgba(201,169,110,0.6); }
+.accuracy-bar {
+  width: 70px;
+  height: 4px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 2px;
+}
+.accuracy-fill {
+  height: 100%;
+  background: linear-gradient(to right, #f87171, #fbbf24, #4ade80);
+  border-radius: 2px;
+  transition: width 0.5s ease;
+}
+
+/* ===== INSTRUCTION BAR ===== */
+#instruction-bar {
+  width: 100%;
+  flex-shrink: 0;
+  padding: 8px 20px;
+  background: rgba(0,0,0,0.5);
+  border-top: 1px solid rgba(201,169,110,0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 46px;
+  z-index: 10;
+}
+#instruction-phase {
+  font-size: 0.58rem;
+  text-transform: uppercase;
+  letter-spacing: 0.25em;
+  color: var(--gold);
+  font-family: 'Helvetica Neue', sans-serif;
+  font-weight: 600;
+  background: rgba(201,169,110,0.1);
+  border: 1px solid rgba(201,169,110,0.25);
+  padding: 2px 8px;
+  border-radius: 2px;
+}
+#instruction-text {
+  font-size: 0.8rem;
+  color: rgba(232,213,183,0.75);
+  font-style: italic;
+}
+.seq-preview {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.seq-item {
+  background: rgba(201,169,110,0.15);
+  border: 1px solid rgba(201,169,110,0.3);
+  border-radius: 2px;
+  padding: 1px 6px;
+  font-size: 0.65rem;
+  color: var(--gold-light);
+  font-family: 'Helvetica Neue', sans-serif;
+}
+.seq-arrow { color: rgba(201,169,110,0.4); font-size: 0.6rem; }
+
+/* ===== ROOM ===== */
+#room-wrapper {
+  flex: 1;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+}
+#room {
+  position: absolute;
+  inset: 0;
+  /* Gallery wall gradient */
+  background:
+    linear-gradient(to bottom,
+      #130d22 0%,
+      #1a1235 30%,
+      #1f1638 55%,
+      #1a1030 65%,
+      #2a1a10 80%,
+      #3d2a18 100%
+    );
+}
+/* Ceiling trim */
+#room::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 6px;
+  background: linear-gradient(to bottom, rgba(201,169,110,0.2), transparent);
+}
+/* Floor horizon line */
+#room::after {
+  content: '';
+  position: absolute;
+  bottom: 22%;
+  left: 0; right: 0;
+  height: 1px;
+  background: rgba(201,169,110,0.08);
+}
+.room-floor {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 22%;
+  background:
+    linear-gradient(to bottom, #2a1a10, #1a0e08);
+  border-top: 1px solid rgba(201,169,110,0.12);
+}
+.room-floor::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    90deg,
+    transparent,
+    transparent 59px,
+    rgba(255,255,255,0.015) 60px
+  );
+}
+.room-wainscot {
+  position: absolute;
+  bottom: 22%;
+  left: 0; right: 0;
+  height: 18%;
+  background: linear-gradient(to bottom, #2d1f40, #221638);
+  border-top: 2px solid rgba(201,169,110,0.18);
+  border-bottom: 1px solid rgba(201,169,110,0.08);
+}
+.room-sconce {
+  position: absolute;
+  width: 24px;
+  top: 28%;
+}
+.room-sconce::before {
+  content: '◈';
+  font-size: 18px;
+  color: rgba(201,169,110,0.3);
+}
+/* Ambient spotlights */
+.room-spotlight {
+  position: absolute;
+  pointer-events: none;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.06;
+}
+
+/* ===== GALLERY OBJECTS ===== */
+.gallery-object {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  z-index: 5;
+  transition: transform 0.2s ease;
+}
+.gallery-object:hover { transform: translate(-50%, -50%) scale(1.04); }
+.gallery-object.in-recall:hover { transform: translate(-50%, -50%) scale(1.06); }
+.obj-icon-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+}
+.obj-img {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.7)) drop-shadow(0 1px 2px rgba(0,0,0,0.9));
+  transition: filter 0.35s ease, transform 0.35s ease;
+  display: block;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+.obj-glow {
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+.obj-number {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #fbbf24;
+  color: #0a0612;
+  font-size: 0.65rem;
+  font-weight: 700;
+  font-family: 'Helvetica Neue', sans-serif;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 10px rgba(251,191,36,0.7);
+  z-index: 10;
+}
+.obj-number.visible { display: flex; }
+.obj-label {
+  font-size: 0.6rem;
+  color: rgba(232,213,183,0.45);
+  letter-spacing: 0.06em;
+  text-align: center;
+  margin-top: 2px;
+  font-family: 'Helvetica Neue', sans-serif;
+  max-width: 70px;
+  line-height: 1.2;
+  transition: color 0.3s;
+}
+.obj-click-ring {
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  pointer-events: none;
+  transition: border-color 0.2s;
+}
+
+/* Object states */
+.gallery-object.highlighted .obj-img {
+  filter:
+    drop-shadow(0 0 18px #fbbf24)
+    drop-shadow(0 0 32px rgba(251,191,36,0.5))
+    drop-shadow(0 4px 8px rgba(0,0,0,0.5));
+  transform: scale(1.12);
+}
+.gallery-object.highlighted .obj-glow {
+  opacity: 1;
+  background: radial-gradient(circle, rgba(251,191,36,0.4) 0%, transparent 70%);
+  animation: glow-pulse 0.8s ease-in-out infinite alternate;
+}
+.gallery-object.highlighted .obj-label { color: rgba(251,191,36,0.9); }
+
+.gallery-object.correct .obj-img {
+  filter:
+    drop-shadow(0 0 16px #4ade80)
+    drop-shadow(0 0 28px rgba(74,222,128,0.4))
+    drop-shadow(0 4px 8px rgba(0,0,0,0.5));
+}
+.gallery-object.correct .obj-glow {
+  opacity: 1;
+  background: radial-gradient(circle, rgba(74,222,128,0.35) 0%, transparent 70%);
+}
+.gallery-object.correct .obj-click-ring { border-color: #4ade80; }
+
+.gallery-object.wrong .obj-img {
+  filter:
+    drop-shadow(0 0 16px #f87171)
+    drop-shadow(0 4px 8px rgba(0,0,0,0.5));
+  animation: wrong-shake 0.4s ease;
+}
+.gallery-object.wrong .obj-glow {
+  opacity: 1;
+  background: radial-gradient(circle, rgba(248,113,113,0.35) 0%, transparent 70%);
+}
+
+.gallery-object.completed .obj-img { opacity: 0.5; }
+.gallery-object.in-recall .obj-click-ring {
+  border-color: rgba(201,169,110,0.25);
+  animation: ring-breathe 2s ease-in-out infinite;
+}
+
+@keyframes glow-pulse { to { opacity: 0.7; } }
+@keyframes wrong-shake {
+  0%,100% { transform: translateX(0); }
+  25% { transform: translateX(-6px); }
+  75% { transform: translateX(6px); }
+}
+@keyframes ring-breathe {
+  0%,100% { border-color: rgba(201,169,110,0.2); }
+  50% { border-color: rgba(201,169,110,0.5); }
+}
+
+/* Wall objects (paintings, mirrors) get frames */
+.gallery-object[data-type="wall"] .obj-icon-wrap {
+  border: 2px solid rgba(139,105,20,0.5);
+  background: rgba(15,10,30,0.7);
+  border-radius: 2px;
+  width: 72px; height: 72px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05);
+}
+/* Floor objects get a pedestal base */
+.gallery-object[data-type="floor"] .obj-base,
+.gallery-object[data-type="shelf"] .obj-base {
+  width: 48px;
+  height: 6px;
+  background: linear-gradient(to bottom, rgba(139,105,20,0.5), rgba(80,60,15,0.3));
+  border-radius: 1px;
+  margin-top: 1px;
+}
+
+/* ===== OVERLAYS ===== */
+.overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(5,3,12,0.85);
+  backdrop-filter: blur(6px);
+}
+.overlay.active { display: flex; }
+
+.overlay-card {
+  background: #12091e;
+  border: 1px solid rgba(201,169,110,0.2);
+  border-radius: 4px;
+  padding: 36px 40px;
+  max-width: 420px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+}
+.overlay-title {
+  font-size: 1.5rem;
+  color: var(--gold-light);
+  margin-bottom: 6px;
+}
+.overlay-sub {
+  font-size: 0.8rem;
+  color: rgba(232,213,183,0.5);
+  font-style: italic;
+  margin-bottom: 24px;
+}
+.overlay-divider {
+  width: 40px;
+  height: 1px;
+  background: rgba(201,169,110,0.25);
+  margin: 16px auto;
+}
+.overlay-btn {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 600;
+  margin-top: 8px;
+  transition: all 0.2s;
+}
+.overlay-btn-primary {
+  background: linear-gradient(135deg, #c9a96e, #9b6f3a);
+  color: #0a0612;
+}
+.overlay-btn-primary:hover { box-shadow: 0 4px 16px rgba(201,169,110,0.3); transform: translateY(-1px); }
+.overlay-btn-ghost {
+  background: transparent;
+  color: rgba(232,213,183,0.55);
+  border: 1px solid rgba(201,169,110,0.18);
+}
+.overlay-btn-ghost:hover { color: var(--cream); border-color: rgba(201,169,110,0.4); }
+
+/* ===== FEEDBACK OVERLAY ===== */
+.feedback-items {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 20px 0;
+  max-height: 200px;
+  overflow-y: auto;
+}
+.feedback-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 3px;
+  font-size: 0.8rem;
+  background: rgba(255,255,255,0.04);
+}
+.feedback-item.hit  { border-left: 2px solid #4ade80; }
+.feedback-item.miss { border-left: 2px solid #f87171; }
+.feedback-icon { font-size: 1.1rem; }
+.feedback-step {
+  font-size: 0.6rem;
+  color: rgba(232,213,183,0.4);
+  font-family: 'Helvetica Neue', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  margin-left: auto;
+}
+.score-delta {
+  font-size: 2.5rem;
+  color: var(--gold);
+  text-shadow: 0 0 30px rgba(201,169,110,0.5);
+  font-weight: normal;
+}
+.score-label {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: rgba(201,169,110,0.5);
+  font-family: 'Helvetica Neue', sans-serif;
+}
+
+/* ===== LEVEL UP OVERLAY ===== */
+#overlay-levelup .overlay-card {
+  border-color: rgba(201,169,110,0.5);
+  box-shadow: 0 0 60px rgba(201,169,110,0.12), 0 20px 60px rgba(0,0,0,0.6);
+}
+.levelup-number {
+  font-size: 4rem;
+  color: var(--gold-light);
+  text-shadow: 0 0 40px rgba(232,201,126,0.6);
+  line-height: 1;
+}
+.levelup-label {
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.35em;
+  color: rgba(201,169,110,0.6);
+  font-family: 'Helvetica Neue', sans-serif;
+  margin-bottom: 16px;
+}
+
+/* ===== STATS OVERLAY ===== */
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 20px 0;
+}
+.stat-box {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(201,169,110,0.1);
+  border-radius: 3px;
+  padding: 12px;
+  text-align: center;
+}
+.stat-box-val {
+  font-size: 1.6rem;
+  color: var(--gold);
+  display: block;
+}
+.stat-box-label {
+  font-size: 0.58rem;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: rgba(201,169,110,0.45);
+  font-family: 'Helvetica Neue', sans-serif;
+  margin-top: 2px;
+  display: block;
+}
+
+/* ===== ACHIEVEMENTS ===== */
+.achievement-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 16px 0;
+  max-height: 260px;
+  overflow-y: auto;
+}
+.achievement-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 3px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.05);
+  text-align: left;
+  transition: border-color 0.3s;
+}
+.achievement-item.unlocked { border-color: rgba(201,169,110,0.3); }
+.achievement-item.locked { opacity: 0.4; }
+.achievement-icon { font-size: 1.5rem; }
+.achievement-name {
+  font-size: 0.8rem;
+  color: var(--cream);
+}
+.achievement-desc {
+  font-size: 0.65rem;
+  color: rgba(232,213,183,0.45);
+  font-style: italic;
+}
+
+/* ===== SETTINGS ===== */
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(201,169,110,0.08);
+}
+.settings-label {
+  font-size: 0.8rem;
+  color: rgba(232,213,183,0.7);
+}
+.toggle {
+  width: 40px; height: 22px;
+  border-radius: 11px;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.15);
+  position: relative;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.toggle.on { background: #c9a96e; border-color: #c9a96e; }
+.toggle::after {
+  content: '';
+  position: absolute;
+  top: 2px; left: 2px;
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: white;
+  transition: transform 0.2s;
+}
+.toggle.on::after { transform: translateX(18px); }
+
+/* ===== PHASE TRANSITION ===== */
+#phase-transition {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(5,3,12,0.8);
+  backdrop-filter: blur(4px);
+  flex-direction: column;
+  gap: 12px;
+}
+#phase-transition.active { display: flex; }
+.phase-msg {
+  font-size: clamp(1.2rem, 4vw, 1.8rem);
+  color: var(--gold-light);
+  text-shadow: 0 0 30px rgba(232,201,126,0.4);
+  letter-spacing: 0.04em;
+}
+.phase-sub-msg {
+  font-size: 0.8rem;
+  color: rgba(232,213,183,0.5);
+  font-style: italic;
+}
+
+/* ===== PARTICLES ===== */
+.particle {
+  position: absolute;
+  pointer-events: none;
+  border-radius: 50%;
+  animation: float-particle 1.2s ease-out forwards;
+}
+@keyframes float-particle {
+  0%   { opacity: 1; transform: translate(0,0) scale(1); }
+  100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(0); }
+}
+
+/* ===== DAILY BADGE ===== */
+.daily-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(155,114,232,0.15);
+  border: 1px solid rgba(155,114,232,0.3);
+  border-radius: 2px;
+  padding: 2px 8px;
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: #c4a8ff;
+  font-family: 'Helvetica Neue', sans-serif;
+  margin-bottom: 12px;
+}
+
+/* ===== PROGRESS BAR ===== */
+.level-progress {
+  width: 100%;
+  height: 3px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 8px;
+}
+.level-progress-fill {
+  height: 100%;
+  background: linear-gradient(to right, #9b72e8, #c9a96e);
+  border-radius: 2px;
+  transition: width 0.6s ease;
+}
+
+/* ===== MEMORY STRENGTH METER ===== */
+.strength-meter {
+  display: flex;
+  gap: 2px;
+}
+.strength-bar {
+  width: 8px;
+  height: 14px;
+  border-radius: 1px;
+  background: rgba(255,255,255,0.08);
+  transition: background 0.4s, box-shadow 0.4s;
+}
+.strength-bar.filled {
+  background: linear-gradient(to top, #c9a96e, #e8c97e);
+  box-shadow: 0 0 6px rgba(201,169,110,0.5);
+}
+
+/* ===== MODAL CLOSE ===== */
+.modal-close {
+  position: absolute;
+  top: 10px; right: 12px;
+  background: none;
+  border: none;
+  color: rgba(232,213,183,0.3);
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: color 0.2s;
+  padding: 4px;
+}
+.modal-close:hover { color: var(--cream); }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 600px) {
+  .title-frame { padding: 32px 24px; }
+  .overlay-card { padding: 24px 20px; }
+  .hud-section { padding: 0 8px; }
+  .hud-value { font-size: 0.95rem; }
+  .obj-img { width: 44px; height: 44px; }
+  .obj-icon-wrap { width: 52px; height: 52px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ===== TITLE SCREEN ===== -->
+<div id="screen-title" class="screen active">
+  <div class="title-frame">
+    <div class="title-eyebrow">Cognitive Training · Working Memory</div>
+    <h1 class="title-heading">Memory<br>Gallery</h1>
+    <div class="title-sub">Explore. Remember. Recall.</div>
+    <div class="title-divider"></div>
+    <button class="title-btn title-btn-primary" onclick="startGame('normal')">Enter the Gallery</button>
+    <button class="title-btn title-btn-secondary" onclick="startGame('daily')" style="margin-top:8px">
+      <span id="daily-indicator">◈ Daily Challenge</span>
+    </button>
+    <button class="title-btn title-btn-secondary" onclick="startGame('endless')">∞ Endless Mode</button>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button class="title-btn title-btn-secondary" style="flex:1" onclick="showStats()">Statistics</button>
+      <button class="title-btn title-btn-secondary" style="flex:1" onclick="showAchievements()">Achievements</button>
+    </div>
+    <div class="title-stats-row" id="title-stats-row">
+      <div class="title-stat">
+        <span class="title-stat-val" id="ts-best">—</span>
+        <span class="title-stat-label">Best Score</span>
+      </div>
+      <div class="title-stat">
+        <span class="title-stat-val" id="ts-sessions">0</span>
+        <span class="title-stat-label">Sessions</span>
+      </div>
+      <div class="title-stat">
+        <span class="title-stat-val" id="ts-maxlevel">1</span>
+        <span class="title-stat-label">Peak Level</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== GAME SCREEN ===== -->
+<div id="screen-game" class="screen">
+  <!-- HUD -->
+  <div id="hud">
+    <div class="hud-section">
+      <span class="hud-label">Level</span>
+      <span class="hud-value gold" id="hud-level">1</span>
+    </div>
+    <div class="hud-section">
+      <span class="hud-label">Score</span>
+      <span class="hud-value" id="hud-score">0</span>
+    </div>
+    <div class="hud-section">
+      <span class="hud-label">Streak</span>
+      <div class="hud-streak" id="hud-streak">
+        <div class="streak-dot"></div>
+        <div class="streak-dot"></div>
+        <div class="streak-dot"></div>
+        <div class="streak-dot"></div>
+        <div class="streak-dot"></div>
+      </div>
+    </div>
+    <div class="hud-section">
+      <span class="hud-label">Accuracy</span>
+      <div class="accuracy-bar">
+        <div class="accuracy-fill" id="hud-accuracy" style="width:100%"></div>
+      </div>
+    </div>
+    <div class="hud-section">
+      <span class="hud-label">Memory</span>
+      <div class="strength-meter" id="hud-strength">
+        <div class="strength-bar"></div>
+        <div class="strength-bar"></div>
+        <div class="strength-bar"></div>
+        <div class="strength-bar"></div>
+        <div class="strength-bar"></div>
+      </div>
+    </div>
+    <div class="hud-spacer"></div>
+    <div id="hud-timer">8.0</div>
+    <button class="hud-icon-btn" onclick="togglePause()" title="Pause">⏸</button>
+    <button class="hud-icon-btn" onclick="showSettings()" title="Settings">⚙</button>
+  </div>
+
+  <!-- Room -->
+  <div id="room-wrapper">
+    <div id="room">
+      <div class="room-wainscot"></div>
+      <div class="room-floor"></div>
+      <!-- Sconces -->
+      <div class="room-sconce" style="left:20%"></div>
+      <div class="room-sconce" style="left:50%"></div>
+      <div class="room-sconce" style="left:80%"></div>
+      <!-- Spotlights -->
+      <div class="room-spotlight" style="width:200px;height:200px;background:#c9a96e;top:10%;left:30%;"></div>
+      <div class="room-spotlight" style="width:180px;height:180px;background:#9b72e8;top:5%;left:65%;"></div>
+      <!-- Objects container -->
+      <div id="objects-container"></div>
+    </div>
+    <!-- Phase transition overlay (inside room) -->
+    <div id="phase-transition">
+      <div class="phase-msg" id="phase-msg-text">Now — Recall the Sequence</div>
+      <div class="phase-sub-msg" id="phase-msg-sub">Click the objects in the order they were highlighted</div>
+    </div>
+  </div>
+
+  <!-- Instruction bar -->
+  <div id="instruction-bar">
+    <span id="instruction-phase">Explore</span>
+    <span id="instruction-text">Watch as objects are highlighted in sequence...</span>
+  </div>
+</div>
+
+<!-- ===== PAUSE OVERLAY ===== -->
+<div id="overlay-pause" class="overlay">
+  <div class="overlay-card" style="position:relative">
+    <div class="overlay-title">Paused</div>
+    <div class="overlay-sub">The gallery awaits your return</div>
+    <div class="overlay-divider"></div>
+    <button class="overlay-btn overlay-btn-primary" onclick="togglePause()">Continue</button>
+    <button class="overlay-btn overlay-btn-ghost" onclick="showSettings()">Settings</button>
+    <button class="overlay-btn overlay-btn-ghost" onclick="returnToTitle()">Exit to Menu</button>
+  </div>
+</div>
+
+<!-- ===== FEEDBACK OVERLAY ===== -->
+<div id="overlay-feedback" class="overlay">
+  <div class="overlay-card" style="position:relative">
+    <div id="feedback-headline" class="overlay-title">Well Done</div>
+    <div id="feedback-sub" class="overlay-sub"></div>
+    <div class="score-delta" id="feedback-score-delta">+200</div>
+    <div class="score-label">points earned</div>
+    <div class="overlay-divider"></div>
+    <div class="feedback-items" id="feedback-items"></div>
+    <div id="level-progress-wrap" style="margin: 12px 0 4px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+        <span style="font-size:0.6rem;color:rgba(201,169,110,0.5);font-family:'Helvetica Neue',sans-serif;letter-spacing:0.15em;text-transform:uppercase">Progress</span>
+        <span style="font-size:0.6rem;color:rgba(201,169,110,0.5);font-family:'Helvetica Neue',sans-serif" id="progress-text"></span>
+      </div>
+      <div class="level-progress"><div class="level-progress-fill" id="level-progress-fill" style="width:0%"></div></div>
+    </div>
+    <button class="overlay-btn overlay-btn-primary" id="feedback-next-btn" onclick="nextRound()">Next Round →</button>
+    <button class="overlay-btn overlay-btn-ghost" onclick="returnToTitle()">Exit</button>
+  </div>
+</div>
+
+<!-- ===== LEVEL UP OVERLAY ===== -->
+<div id="overlay-levelup" class="overlay">
+  <div class="overlay-card">
+    <div class="levelup-label">Gallery Wing Unlocked</div>
+    <div class="levelup-number" id="levelup-num">2</div>
+    <div class="overlay-sub" id="levelup-desc" style="margin-top:8px">The challenge deepens...</div>
+    <div class="overlay-divider"></div>
+    <div class="stats-grid" id="levelup-stats"></div>
+    <button class="overlay-btn overlay-btn-primary" onclick="dismissLevelUp()">Enter Next Wing →</button>
+  </div>
+</div>
+
+<!-- ===== STATS OVERLAY ===== -->
+<div id="overlay-stats" class="overlay">
+  <div class="overlay-card" style="position:relative;max-width:480px">
+    <button class="modal-close" onclick="hideOverlay('overlay-stats')">✕</button>
+    <div class="overlay-title">Session Statistics</div>
+    <div class="overlay-sub">Your cognitive training record</div>
+    <div class="stats-grid" id="stats-grid"></div>
+    <div style="margin-top:12px">
+      <div style="font-size:0.6rem;text-transform:uppercase;letter-spacing:0.2em;color:rgba(201,169,110,0.4);font-family:'Helvetica Neue',sans-serif;margin-bottom:8px">All-Time Bests</div>
+      <div class="stats-grid" id="stats-alltime"></div>
+    </div>
+    <button class="overlay-btn overlay-btn-ghost" style="margin-top:16px" onclick="hideOverlay('overlay-stats')">Close</button>
+  </div>
+</div>
+
+<!-- ===== ACHIEVEMENTS OVERLAY ===== -->
+<div id="overlay-achievements" class="overlay">
+  <div class="overlay-card" style="position:relative;max-width:460px">
+    <button class="modal-close" onclick="hideOverlay('overlay-achievements')">✕</button>
+    <div class="overlay-title">Achievements</div>
+    <div class="overlay-sub" id="ach-progress-text"></div>
+    <div class="achievement-list" id="achievement-list"></div>
+    <button class="overlay-btn overlay-btn-ghost" style="margin-top:12px" onclick="hideOverlay('overlay-achievements')">Close</button>
+  </div>
+</div>
+
+<!-- ===== SETTINGS OVERLAY ===== -->
+<div id="overlay-settings" class="overlay">
+  <div class="overlay-card" style="position:relative">
+    <button class="modal-close" onclick="hideOverlay('overlay-settings')">✕</button>
+    <div class="overlay-title">Settings</div>
+    <div class="overlay-divider"></div>
+    <div class="settings-row">
+      <span class="settings-label">Sound Effects</span>
+      <div class="toggle on" id="toggle-sfx" onclick="toggleSetting('sfx')"></div>
+    </div>
+    <div class="settings-row">
+      <span class="settings-label">Ambient Music</span>
+      <div class="toggle" id="toggle-music" onclick="toggleSetting('music')"></div>
+    </div>
+    <div class="settings-row">
+      <span class="settings-label">Particle Effects</span>
+      <div class="toggle on" id="toggle-particles" onclick="toggleSetting('particles')"></div>
+    </div>
+    <div class="settings-row">
+      <span class="settings-label">Reduced Motion</span>
+      <div class="toggle" id="toggle-reduced" onclick="toggleSetting('reduced')"></div>
+    </div>
+    <div class="settings-row">
+      <span class="settings-label">Show Object Labels</span>
+      <div class="toggle on" id="toggle-labels" onclick="toggleSetting('labels')"></div>
+    </div>
+    <button class="overlay-btn overlay-btn-ghost" style="margin-top:20px" onclick="hideOverlay('overlay-settings')">Done</button>
+  </div>
+</div>
+
+<script>
+'use strict';
+/* =========================================================
+   MEMORY GALLERY — COGNITIVE TRAINING GAME
+   =========================================================
+   Architecture:
+   - OBJECTS:     Object pool definitions
+   - SLOTS:       Room position grid
+   - DIFFICULTY:  Level progression config
+   - Audio:       Web Audio API synthesizer
+   - State:       Central game state
+   - Renderer:    DOM mutations
+   - Engine:      Game logic, sequences, scoring
+   - UI:          Screen management
+   - Storage:     LocalStorage persistence
+   ========================================================= */
+
+/* ===== OBJECT DEFINITIONS ===================================================
+   Each object has: id, emoji, label, type (wall|floor|shelf), hue (for glow) */
+const OBJECTS = [
+  { id:'portrait',  img:'/memory-gallery/objects/portrait.png',  label:'Blue Portrait',  type:'wall',  hue:'210' },
+  { id:'vase',      img:'/memory-gallery/objects/vase.png',      label:'Ancient Vase',   type:'floor', hue:'200' },
+  { id:'clock',     img:'/memory-gallery/objects/clock.png',     label:'Grand Clock',    type:'floor', hue:'30'  },
+  { id:'fern',      img:'/memory-gallery/objects/fern.png',      label:'Potted Fern',    type:'floor', hue:'120' },
+  { id:'bust',      img:'/memory-gallery/objects/bust.png',      label:'Marble Bust',    type:'shelf', hue:'0'   },
+  { id:'books',     img:'/memory-gallery/objects/books.png',     label:'Ancient Tomes',  type:'shelf', hue:'15'  },
+  { id:'lantern',   img:'/memory-gallery/objects/lantern.png',   label:'Brass Lantern',  type:'wall',  hue:'40'  },
+  { id:'mask',      img:'/memory-gallery/objects/mask.png',      label:'Venetian Mask',  type:'wall',  hue:'340' },
+  { id:'orb',       img:'/memory-gallery/objects/orb.png',       label:'Crystal Orb',    type:'shelf', hue:'270' },
+  { id:'globe',     img:'/memory-gallery/objects/globe.png',     label:'Antique Globe',  type:'shelf', hue:'150' },
+  { id:'owl',       img:'/memory-gallery/objects/owl.png',       label:'Stone Owl',      type:'shelf', hue:'35'  },
+  { id:'elephant',  img:'/memory-gallery/objects/elephant.png',  label:'Jade Elephant',  type:'shelf', hue:'140' },
+  { id:'mirror',    img:'/memory-gallery/objects/mirror.png',    label:'Ornate Mirror',  type:'wall',  hue:'50'  },
+  { id:'hourglass', img:'/memory-gallery/objects/hourglass.png', label:'Gold Hourglass', type:'shelf', hue:'45'  },
+  { id:'crown',     img:'/memory-gallery/objects/crown.png',     label:'Jeweled Crown',  type:'shelf', hue:'55'  },
+  { id:'violin',    img:'/memory-gallery/objects/violin.png',    label:'Classic Violin', type:'wall',  hue:'20'  },
+  { id:'amulet',    img:'/memory-gallery/objects/amulet.png',    label:'Blue Amulet',    type:'wall',  hue:'210' },
+  { id:'moondial',  img:'/memory-gallery/objects/moondial.png',  label:'Moon Dial',      type:'wall',  hue:'220' },
+  { id:'flask',     img:'/memory-gallery/objects/flask.png',     label:'Alchemic Flask', type:'shelf', hue:'180' },
+  { id:'fossil',    img:'/memory-gallery/objects/fossil.png',    label:'Ancient Fossil', type:'shelf', hue:'35'  },
+];
+
+/* ===== SLOT POSITIONS (% of room width/height) ============================
+   Three rows: wall art (top), shelves (mid), floor (bottom) */
+const SLOTS = [
+  // Wall row — y ~20%
+  {x:8,  y:20}, {x:20, y:18}, {x:32, y:20}, {x:44, y:18},
+  {x:56, y:20}, {x:68, y:18}, {x:80, y:20}, {x:92, y:18},
+  // Shelf/mid row — y ~50%
+  {x:10, y:50}, {x:24, y:48}, {x:38, y:50}, {x:52, y:48},
+  {x:65, y:50}, {x:78, y:48}, {x:90, y:50},
+  // Floor row — y ~74%
+  {x:8,  y:74}, {x:22, y:72}, {x:38, y:74}, {x:54, y:72},
+  {x:70, y:74}, {x:85, y:72}, {x:95, y:74},
+];
+
+/* ===== DIFFICULTY LEVELS ================================================== */
+const DIFFICULTY = [
+  { level:1,  objects:4,  seq:2, viewTime:8000, distract:false, move:false },
+  { level:2,  objects:5,  seq:3, viewTime:7500, distract:false, move:false },
+  { level:3,  objects:6,  seq:3, viewTime:7000, distract:false, move:false },
+  { level:4,  objects:7,  seq:4, viewTime:6500, distract:true,  move:false },
+  { level:5,  objects:8,  seq:4, viewTime:6000, distract:true,  move:false },
+  { level:6,  objects:9,  seq:5, viewTime:5500, distract:true,  move:true  },
+  { level:7,  objects:10, seq:5, viewTime:5000, distract:true,  move:true  },
+  { level:8,  objects:11, seq:6, viewTime:4500, distract:true,  move:true  },
+  { level:9,  objects:12, seq:6, viewTime:4000, distract:true,  move:true  },
+  { level:10, objects:12, seq:7, viewTime:3500, distract:true,  move:true  },
+];
+
+/* ===== RECALL MODES ======================================================= */
+const RECALL_MODES = {
+  sequence: 'Click the highlighted objects in the exact order shown',
+  position: 'Click where each highlighted object was located',
+  combined: 'Remember both the object and its position — click in order',
+};
+
+function getRecallMode(level) {
+  if (level <= 3) return 'sequence';
+  if (level <= 6) return Math.random() < 0.6 ? 'sequence' : 'combined';
+  const modes = ['sequence','combined','combined'];
+  return modes[Math.floor(Math.random() * modes.length)];
+}
+
+/* ===== ACHIEVEMENTS ======================================================= */
+const ACHIEVEMENTS = [
+  { id:'first_recall',  icon:'🏛️', name:'First Visitor',     desc:'Complete your first recall round',      cond: s => s.totalRounds >= 1        },
+  { id:'streak_3',      icon:'🔥', name:'On Fire',           desc:'Achieve a 3-round correct streak',       cond: s => s.bestStreak >= 3         },
+  { id:'streak_5',      icon:'⚡', name:'Lightning Mind',    desc:'Achieve a 5-round correct streak',       cond: s => s.bestStreak >= 5         },
+  { id:'level_5',       icon:'🎖️', name:'Fifth Wing',        desc:'Reach gallery level 5',                  cond: s => s.peakLevel >= 5          },
+  { id:'level_10',      icon:'🏆', name:'Master Curator',    desc:'Reach gallery level 10',                 cond: s => s.peakLevel >= 10         },
+  { id:'perfect_round', icon:'💎', name:'Perfect Eye',       desc:'Score 100% on a sequence of 5+',        cond: s => s.perfectHighSeq >= 5     },
+  { id:'score_1000',    icon:'⭐', name:'Rising Scholar',    desc:'Accumulate 1,000 points',                cond: s => s.allTimeScore >= 1000    },
+  { id:'score_10000',   icon:'🌟', name:'Master of Memory',  desc:'Accumulate 10,000 points',               cond: s => s.allTimeScore >= 10000   },
+  { id:'sessions_7',    icon:'📅', name:'Dedicated Curator', desc:'Play 7 sessions',                        cond: s => s.sessions >= 7           },
+  { id:'daily_done',    icon:'🌅', name:'Daily Devotion',    desc:'Complete a daily challenge',             cond: s => s.dailyCompleted >= 1     },
+];
+
+/* ===== AUDIO ENGINE ======================================================= */
+const Audio = (() => {
+  let ctx = null;
+  let settings = { sfx: true, music: false };
+  let musicOsc = null, musicGain = null;
+
+  function ctx_() {
+    if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+    return ctx;
+  }
+
+  function tone(freq, dur, type='sine', vol=0.15, fadeOut=true) {
+    if (!settings.sfx) return;
+    try {
+      const c = ctx_();
+      const o = c.createOscillator();
+      const g = c.createGain();
+      o.connect(g); g.connect(c.destination);
+      o.type = type;
+      o.frequency.setValueAtTime(freq, c.currentTime);
+      g.gain.setValueAtTime(vol, c.currentTime);
+      if (fadeOut) g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + dur);
+      o.start(c.currentTime);
+      o.stop(c.currentTime + dur + 0.05);
+    } catch(e) {}
+  }
+
+  function chord(freqs, dur=0.6, vol=0.1) {
+    freqs.forEach(f => tone(f, dur, 'sine', vol));
+  }
+
+  return {
+    set: (k,v) => { settings[k] = v; },
+    // Highlight sweep — ascending tone
+    highlight: (idx) => tone(440 + idx * 55, 0.4, 'sine', 0.12),
+    // Correct item clicked
+    correct: () => tone(880, 0.25, 'sine', 0.12),
+    // Wrong item clicked
+    wrong: () => { tone(220, 0.3, 'sawtooth', 0.08); },
+    // Round complete (all correct)
+    success: () => { chord([523,659,784], 0.8, 0.1); setTimeout(() => chord([659,784,988],0.6,0.08), 200); },
+    // Level up fanfare
+    levelup: () => {
+      [0,150,300,500].forEach((d,i) => setTimeout(() => tone(440+i*110, 0.5, 'sine', 0.1), d));
+    },
+    // Partial correct
+    partial: () => chord([440,550], 0.4, 0.08),
+    // Timer warning
+    timerWarn: () => tone(660, 0.15, 'square', 0.06),
+    // Tick (each sequence step shown)
+    tick: () => tone(1200, 0.08, 'sine', 0.05),
+  };
+})();
+
+/* ===== STORAGE ============================================================ */
+const Storage = {
+  KEY: 'memory_gallery_v1',
+
+  load() {
+    try {
+      return JSON.parse(localStorage.getItem(this.KEY)) || this.defaults();
+    } catch { return this.defaults(); }
+  },
+
+  save(data) {
+    try { localStorage.setItem(this.KEY, JSON.stringify(data)); } catch {}
+  },
+
+  defaults() {
+    return {
+      sessions: 0,
+      allTimeScore: 0,
+      peakLevel: 1,
+      bestStreak: 0,
+      totalRounds: 0,
+      perfectHighSeq: 0,
+      dailyCompleted: 0,
+      unlockedAchievements: [],
+      currentLevel: 1,
+      dailyDate: '',
+      dailyScore: 0,
+      settings: { sfx: true, music: false, particles: true, reduced: false, labels: true },
+    };
+  },
+};
+
+/* ===== GAME STATE ========================================================= */
+const State = {
+  phase: 'title',      // title|exploring|sequencing|transitioning|recalling|feedback|levelup
+  mode: 'normal',      // normal|daily|endless
+  level: 1,
+  score: 0,
+  streak: 0,
+  roundsThisSession: 0,
+  correctRounds: 0,
+  accuracyHistory: [],  // last 8 round accuracies [0-1]
+  settings: { sfx:true, music:false, particles:true, reduced:false, labels:true },
+
+  room: {
+    objects: [],      // { obj, slot, element }
+    sequence: [],     // indices into room.objects
+    seqIndex: 0,      // current highlight step during sequencing
+    recallMode: 'sequence',
+    playerClicks: [], // object indices clicked during recall
+    seqTimers: [],
+  },
+
+  saved: null,
+
+  init() {
+    this.saved = Storage.load();
+    this.level = Math.min(this.saved.currentLevel || 1, 10);
+    Object.assign(this.settings, this.saved.settings || {});
+    // Apply settings to Audio
+    Audio.set('sfx', this.settings.sfx);
+    Audio.set('music', this.settings.music);
+  },
+};
+
+/* ===== RENDERER =========================================================== */
+const Renderer = {
+  container: null,
+
+  init() {
+    this.container = document.getElementById('objects-container');
+  },
+
+  /* Build the room with N objects at given slots */
+  buildRoom(roomObjects) {
+    this.container.innerHTML = '';
+    roomObjects.forEach(({obj, slot}, i) => {
+      const el = document.createElement('div');
+      el.className = 'gallery-object';
+      el.dataset.index = i;
+      el.dataset.type = obj.type;
+      el.style.cssText = `left:${slot.x}%;top:${slot.y}%`;
+
+      const wrap = document.createElement('div');
+      wrap.className = 'obj-icon-wrap';
+
+      const img = document.createElement('img');
+      img.className = 'obj-img';
+      img.src = obj.img;
+      img.alt = obj.label;
+      img.draggable = false;
+
+      const glow = document.createElement('div');
+      glow.className = 'obj-glow';
+
+      const ring = document.createElement('div');
+      ring.className = 'obj-click-ring';
+
+      const num = document.createElement('div');
+      num.className = 'obj-number';
+
+      wrap.append(img, glow, ring, num);
+      el.appendChild(wrap);
+
+      // Pedestal for floor/shelf objects
+      if (obj.type === 'floor' || obj.type === 'shelf') {
+        const base = document.createElement('div');
+        base.className = 'obj-base';
+        el.appendChild(base);
+      }
+
+      // Label
+      const label = document.createElement('div');
+      label.className = 'obj-label';
+      label.textContent = obj.label;
+      label.style.display = State.settings.labels ? '' : 'none';
+      el.appendChild(label);
+
+      el.addEventListener('click', () => Engine.handleObjectClick(i));
+      this.container.appendChild(el);
+
+      roomObjects[i].element = el;
+    });
+  },
+
+  getEl(idx) {
+    return this.container.querySelector(`[data-index="${idx}"]`);
+  },
+
+  /* Animate a highlight on object at index for duration ms */
+  highlightObject(idx, seqNum, duration) {
+    const el = this.getEl(idx);
+    if (!el) return;
+    el.classList.add('highlighted');
+    const num = el.querySelector('.obj-number');
+    num.textContent = seqNum;
+    num.classList.add('visible');
+    Audio.highlight(seqNum - 1);
+    Audio.tick();
+    // Remove after duration
+    setTimeout(() => {
+      el.classList.remove('highlighted');
+      // Keep number visible until recall phase
+    }, duration);
+  },
+
+  clearHighlights() {
+    this.container.querySelectorAll('.gallery-object').forEach(el => {
+      el.classList.remove('highlighted');
+    });
+  },
+
+  markCorrect(idx) {
+    const el = this.getEl(idx);
+    if (!el) return;
+    el.classList.add('correct');
+    el.classList.remove('in-recall');
+    Audio.correct();
+    Renderer.spawnParticles(el, '#4ade80');
+  },
+
+  markWrong(idx) {
+    const el = this.getEl(idx);
+    if (!el) return;
+    el.classList.add('wrong');
+    setTimeout(() => el.classList.remove('wrong'), 600);
+    Audio.wrong();
+  },
+
+  markCompleted(idx) {
+    const el = this.getEl(idx);
+    if (!el) return;
+    el.classList.add('completed');
+    el.classList.remove('in-recall');
+  },
+
+  setRecallMode(on) {
+    this.container.querySelectorAll('.gallery-object').forEach(el => {
+      if (on) el.classList.add('in-recall');
+      else el.classList.remove('in-recall');
+    });
+  },
+
+  hideNumbers() {
+    this.container.querySelectorAll('.obj-number').forEach(n => {
+      n.classList.remove('visible');
+    });
+  },
+
+  showNumbers(seq) {
+    seq.forEach((objIdx, step) => {
+      const el = this.getEl(objIdx);
+      if (!el) return;
+      const num = el.querySelector('.obj-number');
+      num.textContent = step + 1;
+      num.classList.add('visible');
+    });
+  },
+
+  spawnParticles(el, color) {
+    if (!State.settings.particles) return;
+    const rect = el.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    for (let i = 0; i < 8; i++) {
+      const p = document.createElement('div');
+      p.className = 'particle';
+      const angle = (i / 8) * Math.PI * 2;
+      const dist = 30 + Math.random() * 30;
+      p.style.cssText = `
+        left:${cx}px; top:${cy}px;
+        width:${4+Math.random()*5}px; height:${4+Math.random()*5}px;
+        background:${color};
+        --dx:${Math.cos(angle)*dist}px; --dy:${Math.sin(angle)*dist}px;
+        position:fixed;
+        animation-duration:${0.8+Math.random()*0.5}s;
+      `;
+      document.body.appendChild(p);
+      setTimeout(() => p.remove(), 1400);
+    }
+  },
+
+  updateHUD() {
+    document.getElementById('hud-level').textContent = State.level;
+    document.getElementById('hud-score').textContent = State.score.toLocaleString();
+
+    // Streak dots
+    const dots = document.querySelectorAll('.streak-dot');
+    dots.forEach((d,i) => {
+      d.classList.toggle('filled', i < Math.min(State.streak, 5));
+    });
+
+    // Accuracy fill
+    const acc = State.accuracyHistory.length > 0
+      ? State.accuracyHistory.slice(-5).reduce((a,b)=>a+b,0) / Math.min(State.accuracyHistory.length, 5)
+      : 1;
+    document.getElementById('hud-accuracy').style.width = `${acc * 100}%`;
+
+    // Memory strength (based on current level)
+    const bars = document.querySelectorAll('.strength-bar');
+    const strength = Math.round((State.level / 10) * 5);
+    bars.forEach((b,i) => b.classList.toggle('filled', i < strength));
+  },
+
+  updateTimer(seconds) {
+    const el = document.getElementById('hud-timer');
+    el.textContent = seconds.toFixed(1);
+    el.classList.toggle('urgent', seconds <= 3);
+  },
+
+  setInstruction(phase, text) {
+    document.getElementById('instruction-phase').textContent = phase;
+    document.getElementById('instruction-text').textContent = text;
+  },
+};
+
+/* ===== ENGINE ============================================================= */
+const Engine = {
+  timerInterval: null,
+  seqTimeout: null,
+
+  /* Pick N objects and M slot positions for current level */
+  buildRound() {
+    const diff = DIFFICULTY[State.level - 1];
+    const N = diff.objects;
+    const M = diff.seq;
+
+    // Shuffle objects and slots
+    const objPool = shuffle([...OBJECTS]).slice(0, N);
+    const slotPool = shuffle([...SLOTS]).slice(0, N);
+
+    State.room.objects = objPool.map((obj, i) => ({ obj, slot: slotPool[i], element: null }));
+    State.room.sequence = shuffle([...Array(N).keys()]).slice(0, M);
+    State.room.recallMode = getRecallMode(State.level);
+    State.room.playerClicks = [];
+    State.room.seqIndex = 0;
+  },
+
+  /* Start the exploration (viewing) phase */
+  startExplore() {
+    State.phase = 'exploring';
+    const diff = DIFFICULTY[State.level - 1];
+
+    this.buildRound();
+    Renderer.buildRoom(State.room.objects);
+    Renderer.updateHUD();
+
+    Renderer.setInstruction('Explore', `Memorize the room — ${diff.seq} objects will be highlighted...`);
+
+    // After brief preview, start sequencing
+    this.exploreTimer = setTimeout(() => this.startSequencing(), 1800);
+  },
+
+  /* Play the highlight sequence one by one */
+  startSequencing() {
+    State.phase = 'sequencing';
+    const diff = DIFFICULTY[State.level - 1];
+    const seq = State.room.sequence;
+    const stepDur = Math.min(900, diff.viewTime / seq.length);
+    const gap = stepDur + 300;
+
+    Renderer.setInstruction(
+      'Watch',
+      `Sequence of ${seq.length}: remember the order carefully`
+    );
+
+    // Show each object in sequence
+    seq.forEach((objIdx, step) => {
+      const t = setTimeout(() => {
+        Renderer.highlightObject(objIdx, step + 1, stepDur);
+      }, step * gap + 200);
+      State.room.seqTimers.push(t);
+    });
+
+    // After sequence ends, start countdown timer
+    const seqDone = seq.length * gap + 200;
+    const t2 = setTimeout(() => this.startExploreTimer(diff.viewTime), seqDone);
+    State.room.seqTimers.push(t2);
+  },
+
+  startExploreTimer(viewTime) {
+    State.phase = 'exploring';
+    let remaining = viewTime / 1000;
+
+    Renderer.setInstruction('Memorize', `${remaining.toFixed(0)}s to study the sequence...`);
+    Renderer.updateTimer(remaining);
+
+    this.timerInterval = setInterval(() => {
+      remaining -= 0.1;
+      Renderer.updateTimer(Math.max(0, remaining));
+      if (remaining <= 3 && remaining > 2.9) Audio.timerWarn();
+      if (remaining <= 0) {
+        clearInterval(this.timerInterval);
+        this.beginTransition();
+      }
+    }, 100);
+  },
+
+  beginTransition() {
+    State.phase = 'transitioning';
+    clearInterval(this.timerInterval);
+    Renderer.clearHighlights();
+    Renderer.hideNumbers();
+
+    const modeText = {
+      sequence: 'Click the objects in the order they were highlighted',
+      combined: 'Click the correct objects — in sequence — from memory',
+      position: 'Tap where each highlighted object appeared',
+    };
+
+    const pt = document.getElementById('phase-transition');
+    document.getElementById('phase-msg-text').textContent = 'Now — Recall the Sequence';
+    document.getElementById('phase-msg-sub').textContent = modeText[State.room.recallMode] || '';
+    pt.classList.add('active');
+
+    setTimeout(() => {
+      pt.classList.remove('active');
+      this.startRecall();
+    }, 1800);
+  },
+
+  startRecall() {
+    State.phase = 'recalling';
+    State.room.playerClicks = [];
+
+    const seq = State.room.sequence;
+    const mode = State.room.recallMode;
+
+    Renderer.setRecallMode(true);
+    Renderer.setInstruction(
+      'Recall',
+      `Click ${seq.length} objects in sequence • Step 1 of ${seq.length}`
+    );
+    Renderer.updateTimer(0);
+
+    document.getElementById('hud-timer').textContent = `1/${seq.length}`;
+  },
+
+  handleObjectClick(objIdx) {
+    if (State.phase !== 'recalling') return;
+
+    const seq = State.room.sequence;
+    const clicks = State.room.playerClicks;
+    const expected = seq[clicks.length];
+
+    if (clicks.includes(objIdx)) return; // already clicked
+
+    clicks.push(objIdx);
+
+    if (objIdx === expected) {
+      // Correct
+      Renderer.markCorrect(objIdx);
+      document.getElementById('hud-timer').textContent = `${clicks.length + 1}/${seq.length}`;
+      Renderer.setInstruction('Recall', `✓ Correct! ${clicks.length < seq.length ? `Step ${clicks.length + 1} of ${seq.length}` : 'All done!'}`);
+
+      if (clicks.length === seq.length) {
+        // Round complete!
+        setTimeout(() => this.endRound(true), 400);
+      }
+    } else {
+      // Wrong — allow continuing but mark the miss
+      Renderer.markWrong(objIdx);
+      // Remove incorrect click to retry? No — count as strike and end round
+      clicks.push('X'); // sentinel meaning a mistake was made
+      setTimeout(() => this.endRound(false, objIdx), 600);
+    }
+  },
+
+  endRound(allCorrect, wrongIdx) {
+    State.phase = 'feedback';
+    clearInterval(this.timerInterval);
+    Renderer.setRecallMode(false);
+
+    const seq = State.room.sequence;
+    const clicks = State.room.playerClicks.filter(c => c !== 'X');
+    const correctCount = allCorrect ? seq.length : clicks.length - 1;
+    const accuracy = correctCount / seq.length;
+
+    // Update accuracy history
+    State.accuracyHistory.push(accuracy);
+    if (State.accuracyHistory.length > 8) State.accuracyHistory.shift();
+
+    // Scoring
+    let points = 0;
+    if (allCorrect) {
+      points = seq.length * 100;
+      points += State.streak * 10; // streak bonus
+      State.streak++;
+    } else {
+      points = Math.floor(correctCount * 40);
+      State.streak = 0;
+    }
+    State.score += points;
+    State.roundsThisSession++;
+    if (allCorrect) State.correctRounds++;
+
+    // Update saved data
+    const saved = State.saved;
+    saved.allTimeScore += points;
+    saved.totalRounds++;
+    saved.bestStreak = Math.max(saved.bestStreak, State.streak);
+    if (allCorrect && seq.length >= 5) saved.perfectHighSeq = Math.max(saved.perfectHighSeq, seq.length);
+    saved.peakLevel = Math.max(saved.peakLevel, State.level);
+    saved.currentLevel = State.level;
+
+    Renderer.updateHUD();
+
+    // Show correct sequence after wrong
+    if (!allCorrect) {
+      Renderer.showNumbers(seq);
+    }
+
+    // Adaptive difficulty
+    if (State.accuracyHistory.length >= 3) {
+      const recentAvg = State.accuracyHistory.slice(-3).reduce((a,b)=>a+b,0) / 3;
+      if (recentAvg > 0.85 && State.level < 10) {
+        State.level = Math.min(State.level + 1, 10);
+      } else if (recentAvg < 0.50 && State.level > 1) {
+        State.level = Math.max(State.level - 1, 1);
+      }
+    }
+
+    // Check achievements
+    this.checkAchievements();
+
+    // Save
+    Storage.save(saved);
+
+    // Show feedback overlay
+    UI.showFeedback(seq, clicks, allCorrect, points, accuracy, correctCount);
+
+    if (allCorrect) Audio.success();
+    else Audio.partial();
+  },
+
+  checkAchievements() {
+    const saved = State.saved;
+    ACHIEVEMENTS.forEach(ach => {
+      if (!saved.unlockedAchievements.includes(ach.id) && ach.cond(saved)) {
+        saved.unlockedAchievements.push(ach.id);
+        UI.toastAchievement(ach);
+      }
+    });
+  },
+
+  nextRound() {
+    State.room.seqTimers.forEach(t => clearTimeout(t));
+    State.room.seqTimers = [];
+    clearInterval(this.timerInterval);
+
+    // Check if leveled up
+    const prevLevel = State.saved.peakLevel;
+    const newLevel = State.level;
+
+    this.startExplore();
+  },
+
+  clearAll() {
+    this.seqTimers && this.seqTimers.forEach(t => clearTimeout(t));
+    clearInterval(this.timerInterval);
+    State.room.seqTimers.forEach(t => clearTimeout(t));
+    State.room.seqTimers = [];
+  },
+};
+
+/* ===== UI ================================================================= */
+const UI = {
+  showFeedback(seq, clicks, allCorrect, points, accuracy, correctCount) {
+    const overlay = document.getElementById('overlay-feedback');
+    const diff = DIFFICULTY[State.level - 1];
+
+    document.getElementById('feedback-headline').textContent =
+      allCorrect ? (seq.length >= 5 ? 'Flawless Memory' : 'Well Recalled') : 'Almost';
+    document.getElementById('feedback-sub').textContent =
+      allCorrect
+        ? `${correctCount}/${seq.length} objects recalled in sequence`
+        : `${correctCount} of ${seq.length} recalled correctly`;
+    document.getElementById('feedback-score-delta').textContent = `+${points}`;
+
+    // Build item list
+    const container = document.getElementById('feedback-items');
+    container.innerHTML = '';
+    seq.forEach((objIdx, step) => {
+      const obj = State.room.objects[objIdx].obj;
+      const wasHit = step < correctCount;
+      const div = document.createElement('div');
+      div.className = `feedback-item ${wasHit ? 'hit' : 'miss'}`;
+      div.innerHTML = `
+        <span class="feedback-icon">${obj.emoji}</span>
+        <span>${obj.label}</span>
+        <span class="feedback-step">${wasHit ? '✓' : '✗'} Step ${step+1}</span>
+      `;
+      container.appendChild(div);
+    });
+
+    // Progress bar
+    const roundsNeeded = 5;
+    const roundsDone = State.correctRounds % roundsNeeded;
+    document.getElementById('progress-text').textContent = `${roundsDone}/${roundsNeeded} to next milestone`;
+    document.getElementById('level-progress-fill').style.width = `${(roundsDone / roundsNeeded) * 100}%`;
+
+    overlay.classList.add('active');
+  },
+
+  showStats() {
+    const saved = Storage.load();
+    const grid = document.getElementById('stats-grid');
+    const alltime = document.getElementById('stats-alltime');
+
+    grid.innerHTML = `
+      <div class="stat-box"><span class="stat-box-val">${State.roundsThisSession}</span><span class="stat-box-label">Rounds This Session</span></div>
+      <div class="stat-box"><span class="stat-box-val">${State.correctRounds}</span><span class="stat-box-label">Correct</span></div>
+      <div class="stat-box"><span class="stat-box-val">${State.score.toLocaleString()}</span><span class="stat-box-label">Session Score</span></div>
+      <div class="stat-box"><span class="stat-box-val">${State.level}</span><span class="stat-box-label">Current Level</span></div>
+    `;
+    alltime.innerHTML = `
+      <div class="stat-box"><span class="stat-box-val">${saved.allTimeScore.toLocaleString()}</span><span class="stat-box-label">Total Score</span></div>
+      <div class="stat-box"><span class="stat-box-val">${saved.peakLevel}</span><span class="stat-box-label">Peak Level</span></div>
+      <div class="stat-box"><span class="stat-box-val">${saved.bestStreak}</span><span class="stat-box-label">Best Streak</span></div>
+      <div class="stat-box"><span class="stat-box-val">${saved.sessions}</span><span class="stat-box-label">Sessions</span></div>
+    `;
+
+    document.getElementById('overlay-stats').classList.add('active');
+  },
+
+  showAchievements() {
+    const saved = Storage.load();
+    const list = document.getElementById('achievement-list');
+    list.innerHTML = '';
+    const unlocked = saved.unlockedAchievements || [];
+    const count = unlocked.length;
+    document.getElementById('ach-progress-text').textContent =
+      `${count} of ${ACHIEVEMENTS.length} unlocked`;
+
+    ACHIEVEMENTS.forEach(ach => {
+      const isUnlocked = unlocked.includes(ach.id);
+      const div = document.createElement('div');
+      div.className = `achievement-item ${isUnlocked ? 'unlocked' : 'locked'}`;
+      div.innerHTML = `
+        <span class="achievement-icon">${ach.icon}</span>
+        <div>
+          <div class="achievement-name">${ach.name}</div>
+          <div class="achievement-desc">${ach.desc}</div>
+        </div>
+        ${isUnlocked ? '<span style="margin-left:auto;color:#c9a96e;font-size:0.7rem;">✓</span>' : ''}
+      `;
+      list.appendChild(div);
+    });
+
+    document.getElementById('overlay-achievements').classList.add('active');
+  },
+
+  showSettings() {
+    const s = State.settings;
+    ['sfx','music','particles','reduced','labels'].forEach(k => {
+      const el = document.getElementById(`toggle-${k}`);
+      if (el) el.classList.toggle('on', !!s[k]);
+    });
+    document.getElementById('overlay-settings').classList.add('active');
+  },
+
+  toastAchievement(ach) {
+    const toast = document.createElement('div');
+    toast.style.cssText = `
+      position:fixed; bottom:24px; right:20px; z-index:1000;
+      background:#12091e; border:1px solid rgba(201,169,110,0.5);
+      border-radius:4px; padding:12px 16px;
+      display:flex; align-items:center; gap:10px;
+      box-shadow:0 8px 30px rgba(0,0,0,0.5);
+      animation:slideInToast 0.4s ease;
+      font-family:'Georgia',serif;
+    `;
+    toast.innerHTML = `
+      <span style="font-size:1.5rem">${ach.icon}</span>
+      <div>
+        <div style="font-size:0.7rem;color:#c9a96e;text-transform:uppercase;letter-spacing:0.15em;font-family:'Helvetica Neue',sans-serif">Achievement</div>
+        <div style="font-size:0.85rem;color:#e8d5b7">${ach.name}</div>
+      </div>
+    `;
+    const style = document.createElement('style');
+    style.textContent = `@keyframes slideInToast { from { transform:translateX(120%); } to { transform:translateX(0); } }`;
+    document.head.appendChild(style);
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3500);
+  },
+};
+
+/* ===== HELPERS ============================================================ */
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function hideOverlay(id) {
+  document.getElementById(id).classList.remove('active');
+}
+
+/* ===== GLOBAL ACTIONS ===================================================== */
+function startGame(mode) {
+  State.mode = mode;
+  if (mode === 'daily') {
+    const today = new Date().toISOString().split('T')[0];
+    if (State.saved.dailyDate === today) {
+      alert(`You've already completed today's challenge! Score: ${State.saved.dailyScore}`);
+      return;
+    }
+    State.saved.dailyDate = today;
+    State.level = 3; // Daily starts at level 3
+  } else if (mode === 'endless') {
+    State.level = 1;
+  } else {
+    // Resume from saved level
+    State.level = Math.min(State.saved.currentLevel || 1, 10);
+  }
+
+  State.score = 0;
+  State.streak = 0;
+  State.roundsThisSession = 0;
+  State.correctRounds = 0;
+  State.accuracyHistory = [];
+  State.saved.sessions = (State.saved.sessions || 0) + 1;
+  Storage.save(State.saved);
+
+  // Switch to game screen
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-game').classList.add('active');
+
+  Renderer.init();
+  Engine.startExplore();
+}
+
+function nextRound() {
+  hideOverlay('overlay-feedback');
+  Engine.nextRound();
+}
+
+function togglePause() {
+  const overlay = document.getElementById('overlay-pause');
+  const isPaused = overlay.classList.contains('active');
+  if (isPaused) {
+    overlay.classList.remove('active');
+    // If in exploring phase, the timer was paused; we restart
+    // (simple implementation: just re-show the room)
+  } else {
+    overlay.classList.add('active');
+    clearInterval(Engine.timerInterval);
+    Engine.clearAll();
+  }
+}
+
+function showStats() { UI.showStats(); }
+function showSettings() { UI.showSettings(); }
+function showAchievements() { UI.showAchievements(); }
+function dismissLevelUp() { hideOverlay('overlay-levelup'); Engine.startExplore(); }
+
+function toggleSetting(key) {
+  State.settings[key] = !State.settings[key];
+  const el = document.getElementById(`toggle-${key}`);
+  if (el) el.classList.toggle('on', State.settings[key]);
+  Audio.set(key, State.settings[key]);
+  State.saved.settings = State.settings;
+  Storage.save(State.saved);
+  if (key === 'labels') {
+    document.querySelectorAll('.obj-label').forEach(l => {
+      l.style.display = State.settings.labels ? '' : 'none';
+    });
+  }
+}
+
+function returnToTitle() {
+  Engine.clearAll();
+  clearInterval(Engine.timerInterval);
+  State.room.seqTimers.forEach(t => clearTimeout(t));
+  State.room.seqTimers = [];
+  document.getElementById('phase-transition').classList.remove('active');
+  document.querySelectorAll('.overlay').forEach(o => o.classList.remove('active'));
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-title').classList.add('active');
+  updateTitleStats();
+}
+
+function updateTitleStats() {
+  const saved = Storage.load();
+  document.getElementById('ts-best').textContent = saved.allTimeScore ? saved.allTimeScore.toLocaleString() : '—';
+  document.getElementById('ts-sessions').textContent = saved.sessions || 0;
+  document.getElementById('ts-maxlevel').textContent = saved.peakLevel || 1;
+  const today = new Date().toISOString().split('T')[0];
+  const dailyDone = saved.dailyDate === today;
+  document.getElementById('daily-indicator').textContent = dailyDone ? '◈ Daily Challenge ✓' : '◈ Daily Challenge';
+}
+
+/* ===== INIT =============================================================== */
+(function init() {
+  State.init();
+  Renderer.init();
+  updateTitleStats();
+
+  // Keyboard shortcuts
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      const anyOverlay = [...document.querySelectorAll('.overlay.active')];
+      if (anyOverlay.length) {
+        anyOverlay.forEach(o => o.classList.remove('active'));
+      } else if (State.phase !== 'title') {
+        togglePause();
+      }
+    }
+  });
+
+  // Resume AudioContext on first interaction
+  document.addEventListener('click', () => {
+    try {
+      if (window._audioCtx && window._audioCtx.state === 'suspended') {
+        window._audioCtx.resume();
+      }
+    } catch {}
+  }, { once: true });
+})();
+</script>
+</body>
+</html>

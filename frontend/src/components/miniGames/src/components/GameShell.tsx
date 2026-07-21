@@ -2,17 +2,16 @@ import { type ReactNode } from 'react';
 import { motion } from 'framer-motion';
 import { useAppStore } from '../store/useAppStore';
 import AmbientBackground from './AmbientBackground';
+import SpeakerIcon from './SpeakerIcon';
 
 interface Props {
-  title: string;
-  emoji: string;
   score?: number;
   onBack: () => void;
   children: ReactNode;
   topRight?: ReactNode;
 }
 
-export default function GameShell({ title, emoji, score, onBack, children, topRight }: Props) {
+export default function GameShell({ score, onBack, children, topRight }: Props) {
   const soundEnabled = useAppStore((s) => s.soundEnabled);
   const toggleSound = useAppStore((s) => s.toggleSound);
 
@@ -21,18 +20,15 @@ export default function GameShell({ title, emoji, score, onBack, children, topRi
       <AmbientBackground />
 
       {/* Header */}
-      <header className="relative z-10 flex items-center justify-between px-4 py-3 glass border-b border-black/8 shadow-sm">
+      <header className="relative z-10 flex items-center justify-between px-4 py-4 glass border-b border-white/10 shadow-sm">
         <button
           onClick={onBack}
-          className="flex items-center gap-2 text-sm font-medium opacity-50 hover:opacity-90 transition-opacity no-select"
+          className="flex items-center gap-2 text-sm font-medium opacity-60 hover:opacity-100 transition-opacity no-select"
+          style={{ color: '#FFFFFF' }}
         >
           <span className="text-lg">←</span>
           <span className="hidden sm:block">Games</span>
         </button>
-
-        <h1 className="font-display text-lg font-semibold text-center" style={{ color: '#3A2060' }}>
-          {emoji} {title}
-        </h1>
 
         <div className="flex items-center gap-3">
           {score !== undefined && (
@@ -42,18 +38,20 @@ export default function GameShell({ title, emoji, score, onBack, children, topRi
               animate={{ scale: [1, 1.2, 1] }}
               transition={{ duration: 0.25 }}
               className="text-sm font-semibold"
-              style={{ color: '#7B4FC8' }}
+              style={{ color: '#9FD8FF' }}
             >
-              ✦ {score}
+              {score} pts
             </motion.div>
           )}
           {topRight}
           <button
             onClick={toggleSound}
-            className="text-base opacity-50 hover:opacity-90 transition-opacity no-select"
+            className="opacity-60 hover:opacity-100 transition-opacity no-select"
+            style={{ color: '#FFFFFF' }}
+            aria-label={soundEnabled ? 'Mute sound' : 'Unmute sound'}
             title={soundEnabled ? 'Mute' : 'Unmute'}
           >
-            {soundEnabled ? '🔊' : '🔇'}
+            <SpeakerIcon muted={!soundEnabled} />
           </button>
         </div>
       </header>

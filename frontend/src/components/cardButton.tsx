@@ -15,7 +15,7 @@ export default function CardButton({
 }: CardButtonProps) {
   return (
     <button
-      className="imageCard"
+      className="imageCadonrd"
       onClick={onClick}
     >
       <img src={card.image} alt={card.label} />

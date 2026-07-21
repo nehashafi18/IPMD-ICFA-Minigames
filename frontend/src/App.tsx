@@ -5,6 +5,7 @@ import { EnterPage } from "./routes/EnterPage";
 import { HomePage } from "./routes/HomePage";
 import ImageCardsPage from "./routes/ImageCardsPage";
 import { ProtectedRoute } from "./routes/ProtectedRoute";
+import MiniGame from "./components/miniGames/src/MiniGames";
 
 function currentPath() {
   return window.location.pathname;
@@ -29,6 +30,10 @@ export default function App() {
 
     return () => window.removeEventListener("popstate", onPopState);
   }, []);
+
+  if (path === "/minigames") {
+    return <MiniGame />;
+  }
 
   if (path === "/enter") {
     return <EnterPage navigate={navigate} />;

@@ -13,6 +13,7 @@ import ParticleEngine from '../../systems/ParticleEngine';
 import { useParticleBurst } from '../../hooks/useParticleBurst';
 import { useSound } from '../../hooks/useSound';
 import { useAppStore } from '../../store/useAppStore';
+import { POWER_UP_IMAGES } from '../../systems/gameArt';
 
 interface Props { onBack: () => void; }
 
@@ -162,7 +163,7 @@ export default function Match3Game({ onBack }: Props) {
     if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
     idleTimerRef.current = setTimeout(
       () => setHint(findPossibleMove(stableGridRef.current)),
-      9000,
+      25000,
     );
   }, []);
 
@@ -304,8 +305,9 @@ export default function Match3Game({ onBack }: Props) {
     <>
       <ParticleEngine bursts={bursts} onBurstsConsumed={clearBursts} />
 
-      <GameShell title="Art Match" emoji="🎨" score={score} onBack={onBack}>
-        <div className="w-full max-w-sm flex flex-col items-center gap-3 mt-2">
+      <GameShell score={score} onBack={onBack}>
+        <div className="flex-1 flex flex-col items-center justify-center w-full">
+        <div className="flex flex-col items-center gap-3" style={{ width: 'min(86vw, calc(100dvh - 320px))' }}>
 
           {/* Combo / reshuffle badge */}
           <div className="h-7 flex items-center">
@@ -316,7 +318,7 @@ export default function Match3Game({ onBack }: Props) {
                   initial={{ scale: 0.5, opacity: 0, y: -8 }}
                   animate={{ scale: 1, opacity: 1, y: 0 }}
                   exit={{ scale: 0.5, opacity: 0, y: 8 }}
-                  className="font-display text-base font-bold px-4 py-1 glass rounded-full border border-black/8"
+                  className="font-display text-base font-bold px-4 py-1 glass rounded-full border border-white/15"
                   style={{ color: '#5B8DD6' }}
                 >
                   Reshuffling ↺
@@ -327,7 +329,7 @@ export default function Match3Game({ onBack }: Props) {
                   initial={{ scale: 0.5, opacity: 0, y: -8 }}
                   animate={{ scale: 1, opacity: 1, y: 0 }}
                   exit={{ scale: 0.5, opacity: 0, y: 8 }}
-                  className="font-display text-base font-bold px-4 py-1 glass rounded-full border border-black/8"
+                  className="font-display text-base font-bold px-4 py-1 glass rounded-full border border-white/15"
                   style={{ color: '#C07A10' }}
                 >
                   {comboDisplay}
@@ -377,18 +379,26 @@ export default function Match3Game({ onBack }: Props) {
           </div>
 
           {/* Legend */}
-          <div className="flex items-center gap-4 text-[10px] opacity-35 mt-1">
+          <div className="flex items-center gap-4 text-sm mt-1" style={{ color: '#9FD8FF' }}>
             <span>↔ Line blast</span>
-            <span>💜 Color bomb</span>
-            <span>💥 Super blast</span>
+            <span className="flex items-center gap-1.5">
+              <img src={POWER_UP_IMAGES.bomb} alt="" className="w-5 h-5 rounded-full object-cover" />
+              Color bomb
+            </span>
+            <span className="flex items-center gap-1.5">
+              <img src={POWER_UP_IMAGES.super} alt="" className="w-5 h-5 rounded-full object-cover" />
+              Super blast
+            </span>
           </div>
 
           <button
             onClick={reset}
-            className="text-sm opacity-35 hover:opacity-60 transition-opacity"
+            className="flex items-center gap-2 text-base transition-opacity hover:opacity-100"
+            style={{ color: '#9FD8FF', opacity: 0.85 }}
           >
-            ↺ New board
+            <span className="text-2xl">↺</span> New board
           </button>
+        </div>
         </div>
       </GameShell>
 

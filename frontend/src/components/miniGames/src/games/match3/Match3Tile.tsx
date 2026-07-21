@@ -1,12 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { getTileType, tilePower } from './match3Data';
-
-const POWER_EMOJI: Record<string, string> = {
-  line: '↔',
-  bomb: '💜',
-  super: '💥',
-};
+import { POWER_UP_IMAGES, type PowerUpId } from '../../systems/gameArt';
 
 interface Props {
   tileId: string;
@@ -72,9 +67,12 @@ function Match3Tile({ tileId, selected, highlighted, isCursor, isHinted, onClick
           : { type: 'spring' as const, stiffness: 380, damping: 22 }
       }
     >
-      <span className="text-xl leading-none pointer-events-none">
-        {power ? POWER_EMOJI[power] : tile.emoji}
-      </span>
+      <img
+        src={power ? POWER_UP_IMAGES[power as PowerUpId] : tile.image}
+        alt={power ? `${power} power-up` : tile.name}
+        draggable={false}
+        className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+      />
     </motion.button>
   );
 }

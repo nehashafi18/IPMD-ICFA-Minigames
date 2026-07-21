@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 56 56" width="56" height="56" fill="none">
+  <!-- Body: wide-arm starfish star path (cx=28,cy=28,ro=21,ri=10) -->
+  <path d="M28,7 L33.88,19.91 L47.97,21.51 L37.51,31.09 L40.34,44.99 L28,38 L15.66,44.99 L18.49,31.09 L8.03,21.51 L22.12,19.91 Z" fill="#D06020" stroke="#9B4410" stroke-width="1.2"/>
+  <!-- Arm texture dots at radius 15 (outer) and 8 (inner) from center -->
+  <!-- arm 0 top -->
+  <circle cx="28" cy="13" r="1.5" fill="rgba(255,150,60,0.55)"/>
+  <circle cx="28" cy="20" r="1.0" fill="rgba(255,150,60,0.40)"/>
+  <!-- arm 1 upper-right -->
+  <circle cx="42.27" cy="23.36" r="1.5" fill="rgba(255,150,60,0.55)"/>
+  <circle cx="35.61" cy="25.53" r="1.0" fill="rgba(255,150,60,0.40)"/>
+  <!-- arm 2 lower-right -->
+  <circle cx="36.82" cy="40.14" r="1.5" fill="rgba(255,150,60,0.55)"/>
+  <circle cx="32.70" cy="34.47" r="1.0" fill="rgba(255,150,60,0.40)"/>
+  <!-- arm 3 lower-left -->
+  <circle cx="19.18" cy="40.14" r="1.5" fill="rgba(255,150,60,0.55)"/>
+  <circle cx="23.30" cy="34.47" r="1.0" fill="rgba(255,150,60,0.40)"/>
+  <!-- arm 4 upper-left -->
+  <circle cx="13.73" cy="23.36" r="1.5" fill="rgba(255,150,60,0.55)"/>
+  <circle cx="20.39" cy="25.53" r="1.0" fill="rgba(255,150,60,0.40)"/>
+  <!-- Center disc -->
+  <circle cx="28" cy="28" r="5.5" fill="#B85018" stroke="#9B4410" stroke-width="0.8"/>
+  <circle cx="28" cy="28" r="2.5" fill="rgba(220,100,40,0.5)"/>
+</svg>

@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 56 56" width="56" height="56" fill="none">
+  <!-- Upper wings -->
+  <path d="M28,27 C20,21 9,16 7,22 C5,28 12,34 24,30Z" fill="#C05020"/>
+  <path d="M28,27 C36,21 47,16 49,22 C51,28 44,34 32,30Z" fill="#C05020"/>
+  <!-- Lower wings -->
+  <path d="M28,30 C20,36 10,38 11,44 C12,48 22,47 28,39Z" fill="#A04018"/>
+  <path d="M28,30 C36,36 46,38 45,44 C44,48 34,47 28,39Z" fill="#A04018"/>
+  <!-- Wing spots -->
+  <circle cx="15" cy="25" r="2.5" fill="rgba(255,210,100,0.45)"/>
+  <circle cx="41" cy="25" r="2.5" fill="rgba(255,210,100,0.45)"/>
+  <!-- Wing outlines -->
+  <path d="M28,27 C20,21 9,16 7,22 C5,28 12,34 24,30Z" stroke="#5A1808" stroke-width="0.8" fill="none"/>
+  <path d="M28,27 C36,21 47,16 49,22 C51,28 44,34 32,30Z" stroke="#5A1808" stroke-width="0.8" fill="none"/>
+  <!-- Body -->
+  <ellipse cx="28" cy="30" rx="2.2" ry="8" fill="#241008"/>
+  <!-- Head -->
+  <circle cx="28" cy="21" r="2.2" fill="#2A1208"/>
+  <!-- Antennae -->
+  <path d="M27,19 Q23,12 20,9" stroke="#2A1208" stroke-width="1.1" stroke-linecap="round"/>
+  <path d="M29,19 Q33,12 36,9" stroke="#2A1208" stroke-width="1.1" stroke-linecap="round"/>
+  <circle cx="20" cy="9" r="1.5" fill="#2A1208"/>
+  <circle cx="36" cy="9" r="1.5" fill="#2A1208"/>
+</svg>

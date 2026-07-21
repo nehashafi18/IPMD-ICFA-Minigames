@@ -9,24 +9,23 @@ import ParticleEngine from '../../systems/ParticleEngine';
 import { useParticleBurst } from '../../hooks/useParticleBurst';
 import { useSound } from '../../hooks/useSound';
 import { useAppStore } from '../../store/useAppStore';
-import { emojiUrl } from './twemoji';
+import { ART_STYLE_IMAGES } from '../../systems/gameArt';
 
 interface Props { onBack: () => void; }
 
-type Phase = 'preview' | 'finding' | 'correct' | 'wrong' | 'levelDone' | 'complete';
+type Phase = 'reveal' | 'preview' | 'finding' | 'correct' | 'wrong' | 'levelDone' | 'complete';
 
 const TOTAL_LEVELS = LEVEL_CONFIGS.length;
+const REVEAL_MS = 1400;
 
-function EmojiImg({ emoji, size }: { emoji: string; size: number }) {
-  const [failed, setFailed] = useState(false);
-  if (failed) return <span style={{ fontSize: size }}>{emoji}</span>;
+function SceneImg({ image, size }: { image: string; size: number }) {
   return (
     <img
-      src={emojiUrl(emoji)}
+      src={image}
       alt=""
       draggable={false}
-      onError={() => setFailed(true)}
-      style={{ width: size, height: size, objectFit: 'contain' }}
+      className="rounded-lg object-cover"
+      style={{ width: size, height: size }}
     />
   );
 }
@@ -59,15 +58,20 @@ export default function MemoryGame({ onBack }: Props) {
     setCards(shown);
     setTargetIdx(newTarget);
     setPickedIdx(null);
-    setPhase('preview');
+    setPhase('reveal');
     setLevel(lvl);
     setRound(rnd);
 
-    const blankMs = LEVEL_CONFIGS[lvl].blankMs;
+    // Big solo reveal of the target picture first, then the card grid appears
+    // (still flipped face-up) before flipping face-down to start the find phase.
     timerRef.current = setTimeout(() => {
-      setCards((prev) => prev.map((c) => ({ ...c, flipped: false })));
-      setPhase('finding');
-    }, blankMs);
+      setPhase('preview');
+      const blankMs = LEVEL_CONFIGS[lvl].blankMs;
+      timerRef.current = setTimeout(() => {
+        setCards((prev) => prev.map((c) => ({ ...c, flipped: false })));
+        setPhase('finding');
+      }, blankMs);
+    }, REVEAL_MS);
   }, [clearTimer]);
 
   const handleStartGame = useCallback(() => {
@@ -136,19 +140,21 @@ export default function MemoryGame({ onBack }: Props) {
 
   const gap = cfg.cols <= 4 ? 12 : cfg.cols <= 6 ? 8 : cfg.cols <= 10 ? 5 : 3;
   const targetCard = cards[targetIdx];
+  const rows = cfg.cardCount / cfg.cols;
+  const gridWidth = `min(94vw, calc((100dvh - 260px) * ${cfg.cols} / ${rows}))`;
 
   return (
     <>
       <ParticleEngine bursts={bursts} onBurstsConsumed={clearBursts} />
 
-      <GameShell title="Memory Find" emoji="🎴" onBack={onBack}>
+      <GameShell score={totalScore} onBack={onBack}>
         {/* Level progress bar */}
         <div
-          className="flex items-center gap-2 mb-3"
-          style={{ width: '70vw', maxWidth: '100%' }}
+          className="flex items-center gap-3 mb-3"
+          style={{ width: '94vw', maxWidth: '100%' }}
         >
-          <span className="text-xs font-semibold" style={{ color: '#9B6FD8', whiteSpace: 'nowrap' }}>
-            Lv {level + 1}/{TOTAL_LEVELS}
+          <span className="font-semibold" style={{ color: '#9FD8FF', whiteSpace: 'nowrap', fontSize: 15 }}>
+            Level {level + 1}/{TOTAL_LEVELS}
           </span>
           <div className="flex gap-1 flex-1">
             {Array.from({ length: cfg.roundCount }, (_, i) => (
@@ -161,33 +167,48 @@ export default function MemoryGame({ onBack }: Props) {
                       ? '#9B6FD8'
                       : phase === 'correct' && i === round
                       ? '#B06ED8'
-                      : 'rgba(0,0,0,0.1)',
+                      : 'rgba(255,255,255,0.12)',
                   transition: 'background 0.4s',
                 }}
               />
             ))}
           </div>
-          <span className="text-xs opacity-40">{totalScore}pts</span>
         </div>
+
+        {/* Big solo reveal of the target picture, before the card grid appears at all */}
+        {phase === 'reveal' && targetCard && (
+          <motion.div
+            className="flex-1 flex flex-col items-center justify-center gap-4 w-full"
+            style={{ minHeight: 0 }}
+            initial={{ opacity: 0, scale: 0.92 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.4 }}
+          >
+            <div className="rounded-3xl overflow-hidden" style={{ width: 'min(65vw, 340px)', height: 'min(65vw, 340px)', boxShadow: '0 12px 50px rgba(80,40,130,0.25)' }}>
+              <img src={targetCard.image} alt="" className="w-full h-full object-cover" />
+            </div>
+            <span className="font-semibold" style={{ color: '#FFFFFF', fontSize: 22 }}>Remember this</span>
+          </motion.div>
+        )}
 
         {/* Target banner */}
         <AnimatePresence mode="wait">
           {targetCard && (phase === 'preview' || phase === 'finding') && (
             <motion.div
               key={`target-${level}-${round}`}
-              className="flex items-center gap-3 rounded-2xl px-5 py-3 mb-4"
+              className="flex items-center gap-4 rounded-2xl px-4 py-3 mb-3"
               style={{
-                background: 'rgba(155,111,216,0.10)',
-                border: '1.5px solid rgba(155,111,216,0.22)',
-                width: '70vw',
+                background: 'rgba(155,111,216,0.14)',
+                border: '1.5px solid rgba(155,111,216,0.3)',
+                width: '94vw',
                 maxWidth: '100%',
               }}
               initial={{ opacity: 0, y: -8 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
             >
-              <EmojiImg emoji={targetCard.emoji} size={44} />
-              <span className="text-sm font-semibold" style={{ color: '#5A3080' }}>
+              <SceneImg image={targetCard.image} size={120} />
+              <span className="font-semibold" style={{ color: '#FFFFFF', fontSize: 22 }}>
                 {phase === 'preview' ? 'Remember this' : 'Find it!'}
               </span>
             </motion.div>
@@ -196,64 +217,63 @@ export default function MemoryGame({ onBack }: Props) {
           {phase === 'correct' && targetCard && (
             <motion.div
               key="feedback-correct"
-              className="flex items-center gap-3 rounded-2xl px-5 py-3 mb-4"
+              className="flex items-center gap-4 rounded-2xl px-4 py-3 mb-3"
               style={{
-                background: 'rgba(80,180,80,0.10)',
-                border: '1.5px solid rgba(80,180,80,0.28)',
-                width: '70vw',
+                background: 'rgba(80,200,120,0.14)',
+                border: '1.5px solid rgba(80,200,120,0.35)',
+                width: '94vw',
                 maxWidth: '100%',
               }}
               initial={{ opacity: 0, scale: 0.88 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0 }}
             >
-              <EmojiImg emoji={targetCard.emoji} size={40} />
-              <span className="text-2xl">✓</span>
+              <SceneImg image={targetCard.image} size={120} />
+              <span className="text-3xl" style={{ color: '#FFFFFF' }}>✓</span>
             </motion.div>
           )}
 
           {phase === 'wrong' && targetCard && pickedIdx !== null && cards[pickedIdx] && (
             <motion.div
               key="feedback-wrong"
-              className="flex items-center gap-3 rounded-2xl px-5 py-3 mb-4"
+              className="flex items-center gap-4 rounded-2xl px-4 py-3 mb-3"
               style={{
-                background: 'rgba(220,60,60,0.08)',
-                border: '1.5px solid rgba(220,60,60,0.22)',
-                width: '70vw',
+                background: 'rgba(230,80,80,0.12)',
+                border: '1.5px solid rgba(230,80,80,0.3)',
+                width: '94vw',
                 maxWidth: '100%',
               }}
               initial={{ opacity: 0, scale: 0.88 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0 }}
             >
-              <EmojiImg emoji={cards[pickedIdx].emoji} size={32} />
-              <span className="text-lg opacity-40">→</span>
-              <EmojiImg emoji={targetCard.emoji} size={36} />
+              <SceneImg image={cards[pickedIdx].image} size={110} />
+              <span className="text-2xl" style={{ color: '#9FD8FF' }}>→</span>
+              <SceneImg image={targetCard.image} size={120} />
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* Card grid */}
-        <div
-          className="overflow-y-auto"
-          style={{ maxHeight: 'calc(100dvh - 240px)', width: '70vw', maxWidth: '100%' }}
-        >
-          <div
-            className="grid"
-            style={{ gridTemplateColumns: `repeat(${cfg.cols},1fr)`, gap }}
-          >
-            {cards.map((card, idx) => (
-              <div key={card.id} id={`mem-card-${idx}`} style={{ aspectRatio: '1' }}>
-                <MemoryCardTile
-                  card={card}
-                  onClick={() => handleCardClick(idx)}
-                  disabled={phase !== 'finding'}
-                  cols={cfg.cols}
-                />
-              </div>
-            ))}
+        {/* Card grid — sized to always fit without scrolling */}
+        {phase !== 'reveal' && (
+          <div className="flex-1 flex items-center justify-center w-full" style={{ minHeight: 0 }}>
+            <div
+              className="grid"
+              style={{ gridTemplateColumns: `repeat(${cfg.cols},1fr)`, gap, width: gridWidth }}
+            >
+              {cards.map((card, idx) => (
+                <div key={card.id} id={`mem-card-${idx}`} style={{ aspectRatio: '1' }}>
+                  <MemoryCardTile
+                    card={card}
+                    onClick={() => handleCardClick(idx)}
+                    disabled={phase !== 'finding'}
+                    cols={cfg.cols}
+                  />
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </GameShell>
 
       {showInstructions && <MemoryInstructions onPlay={handleStartGame} />}
@@ -263,24 +283,23 @@ export default function MemoryGame({ onBack }: Props) {
           className="fixed inset-0 z-40 flex items-center justify-center"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          style={{ background: 'rgba(240,234,226,0.88)', backdropFilter: 'blur(6px)' }}
+          style={{ background: 'rgba(5,8,15,0.82)', backdropFilter: 'blur(6px)' }}
         >
           <motion.div
-            className="flex flex-col items-center gap-6 rounded-3xl p-10 text-center"
+            className="glass flex flex-col items-center gap-6 rounded-3xl p-10 text-center"
             style={{
-              background: 'rgba(255,255,255,0.85)',
-              boxShadow: '0 12px 60px rgba(80,40,130,0.12)',
+              boxShadow: '0 12px 60px rgba(0,0,0,0.4)',
               maxWidth: 380,
             }}
             initial={{ scale: 0.85, y: 24 }}
             animate={{ scale: 1, y: 0 }}
             transition={{ type: 'spring', damping: 20 }}
           >
-            <div className="text-5xl">🎉</div>
-            <h2 className="font-semibold text-2xl" style={{ color: '#3A2060' }}>
+            <SceneImg image={ART_STYLE_IMAGES['sparkles']} size={80} />
+            <h2 className="font-semibold text-2xl" style={{ color: '#FFFFFF' }}>
               Level {level + 1} done!
             </h2>
-            <p className="text-sm" style={{ color: '#7A6888' }}>
+            <p className="text-sm" style={{ color: '#9FD8FF' }}>
               Level {level + 2} — {LEVEL_CONFIGS[level + 1]?.cardCount} cards
             </p>
             <motion.button

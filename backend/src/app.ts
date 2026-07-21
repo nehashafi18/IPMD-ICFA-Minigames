@@ -8,9 +8,10 @@ import cors from "cors";
 import fs from "node:fs";
 import path from "node:path";
 
-import cardRoutes from "./routes/cardRoutes.js";
-import promptRoutes from "./routes/promptRoutes.js";
-import artRoutes from "./routes/artRoutes.js";
+import cardRoutes      from "./routes/cardRoutes.js";
+import promptRoutes    from "./routes/promptRoutes.js";
+import artRoutes       from "./routes/artRoutes.js";
+import detectiveRoutes from "./routes/detectiveRoutes.js";
 import { config } from "./config.js";
 import { requireGallerySession } from "./middleware/requireGallerySession.js";
 import { vmsRouter } from "./vms/routes.js";
@@ -48,7 +49,8 @@ app.use("/api/cards", cardRoutes);
 
 app.use("/api/prompt", promptRoutes);
 
-app.use("/api/art", artRoutes);
+app.use("/api/art",            artRoutes);
+app.use("/api/art-detective",  detectiveRoutes);
 
 app.use(errorHandler);
 

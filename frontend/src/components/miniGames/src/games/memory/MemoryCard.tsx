@@ -1,22 +1,6 @@
-import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { type MemoryCard as CardData } from './memoryData';
 import { getArtStyleById } from '../../systems/artStyles';
-import { emojiUrl } from './twemoji';
-
-function EmojiImg({ emoji, alt, size }: { emoji: string; alt: string; size: string }) {
-  const [failed, setFailed] = useState(false);
-  if (failed) return <span style={{ fontSize: size, lineHeight: 1 }}>{emoji}</span>;
-  return (
-    <img
-      src={emojiUrl(emoji)}
-      alt={alt}
-      draggable={false}
-      onError={() => setFailed(true)}
-      style={{ width: size, height: size, objectFit: 'contain' }}
-    />
-  );
-}
 
 interface Props {
   card: CardData;
@@ -31,7 +15,7 @@ const flipTransition = { duration: 0.15, ease: 'easeInOut' as const };
 export default function MemoryCardTile({ card, onClick, disabled, cols = 5, highlight = false }: Props) {
   const style = getArtStyleById(card.artStyleId);
   const visible = card.flipped || card.matched;
-  const imgSize = `calc(70vw / ${cols} * 0.62)`;
+  void cols;
 
   return (
     <div
@@ -46,10 +30,10 @@ export default function MemoryCardTile({ card, onClick, disabled, cols = 5, high
             className="absolute inset-0 rounded-lg flex items-center justify-center"
             style={{
               background: highlight
-                ? 'rgba(155,111,216,0.18)'
-                : 'rgba(255,255,255,0.55)',
-              border: highlight ? '2px solid #9B6FD8' : '1px solid rgba(0,0,0,0.08)',
-              boxShadow: '0 1px 6px rgba(0,0,0,0.07)',
+                ? 'rgba(155,111,216,0.22)'
+                : 'rgba(255,255,255,0.08)',
+              border: highlight ? '2px solid #9B6FD8' : '1px solid rgba(255,255,255,0.12)',
+              boxShadow: '0 1px 6px rgba(0,0,0,0.3)',
             }}
             initial={{ rotateY: -90, opacity: 0 }}
             animate={{ rotateY: 0, opacity: 1 }}
@@ -61,17 +45,16 @@ export default function MemoryCardTile({ card, onClick, disabled, cols = 5, high
               style={{
                 width: `calc(70vw / ${cols} * 0.18)`,
                 height: `calc(70vw / ${cols} * 0.18)`,
-                background: '#9B6FD8',
-                opacity: 0.15,
+                background: '#C9A8F0',
+                opacity: 0.3,
               }}
             />
           </motion.div>
         ) : (
           <motion.div
             key="front"
-            className="absolute inset-0 rounded-lg flex items-center justify-center"
+            className="absolute inset-0 rounded-lg overflow-hidden flex items-center justify-center"
             style={{
-              background: `${style.primary}22`,
               border: `2px solid ${style.primary}60`,
               boxShadow: card.matched
                 ? `0 0 12px ${style.glow}, 0 1px 6px rgba(0,0,0,0.06)`
@@ -82,7 +65,12 @@ export default function MemoryCardTile({ card, onClick, disabled, cols = 5, high
             exit={{ rotateY: 90, opacity: 0 }}
             transition={flipTransition}
           >
-            <EmojiImg emoji={card.emoji} alt={card.name} size={imgSize} />
+            <img
+              src={card.image}
+              alt={card.name}
+              draggable={false}
+              className="w-full h-full object-cover"
+            />
           </motion.div>
         )}
       </AnimatePresence>

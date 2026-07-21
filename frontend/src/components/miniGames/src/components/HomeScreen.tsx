@@ -1,86 +1,92 @@
 import { motion } from 'framer-motion';
 import { useAppStore, type GameId } from '../store/useAppStore';
 import AmbientBackground from './AmbientBackground';
+import SpeakerIcon from './SpeakerIcon';
+import { ART_STYLE_IMAGES } from '../systems/gameArt';
 
 const GAMES = [
   {
-    id: 'memory' as GameId,
+    id:    'memory'           as GameId,
+    intro: 'memory-intro'    as GameId,
     title: 'Memory Match',
-    emoji: '🎴',
-    tagline: 'Flip cards, find pairs, feel calm',
-    accent: '#9B6FD8',
+    desc:  'Uncover hidden pairs from memory — one flip at a time',
+    image: ART_STYLE_IMAGES['soft-pastel'],
   },
   {
-    id: 'match3' as GameId,
-    title: 'Art Match',
-    emoji: '🎨',
-    tagline: 'Swap tiles, chain combos, create art',
-    accent: '#5BADD6',
+    id:    'bubble'           as GameId,
+    intro: 'bubble-intro'    as GameId,
+    title: 'Cascade',
+    desc:  'Keep the board clear before the cascade overtakes you',
+    image: ART_STYLE_IMAGES['cloud-softness'],
   },
   {
-    id: 'bubble' as GameId,
-    title: 'Bubble Art',
-    emoji: '🫧',
-    tagline: 'Aim, shoot, watch bubbles bloom',
-    accent: '#D6A83A',
+    id:    'artDetective'     as GameId,
+    intro: 'artDetective'    as GameId,
+    title: 'Canvas Quest',
+    desc:  'Search painted scenes for hidden objects before time runs out',
+    image: ART_STYLE_IMAGES['soft-pastel'],
+    accent: 'linear-gradient(90deg, rgba(200,168,76,0.7) 0%, rgba(139,105,20,0.4) 55%, rgba(200,168,76,0.05) 100%)',
+  },
+  {
+    id:    'memoryGallery'    as GameId,
+    intro: 'memoryGallery'   as GameId,
+    title: 'Memory Manor',
+    desc:  'Watch objects glow in sequence, then recall them in perfect order',
+    image: ART_STYLE_IMAGES['oil-paint'],
+    accent: 'linear-gradient(90deg, rgba(155,114,232,0.7) 0%, rgba(80,50,150,0.4) 55%, rgba(155,114,232,0.05) 100%)',
   },
 ];
 
 const containerVariants = {
   hidden: {},
-  show: { transition: { staggerChildren: 0.1 } },
+  show: { transition: { staggerChildren: 0.08 } },
 };
 const cardVariants = {
-  hidden: { opacity: 0, y: 24 },
-  show: { opacity: 1, y: 0, transition: { type: 'spring' as const, damping: 20 } },
+  hidden: { opacity: 0, y: 20 },
+  show:   { opacity: 1, y: 0, transition: { type: 'spring' as const, damping: 22 } },
 };
 
 export default function HomeScreen() {
-  const navigateTo = useAppStore((s) => s.navigateTo);
-  const scores = useAppStore((s) => s.scores);
+  const navigateTo   = useAppStore((s) => s.navigateTo);
   const soundEnabled = useAppStore((s) => s.soundEnabled);
-  const toggleSound = useAppStore((s) => s.toggleSound);
+  const toggleSound  = useAppStore((s) => s.toggleSound);
 
   return (
-    <div className="min-h-dvh flex flex-col">
+    <div className="min-h-dvh h-dvh flex flex-col">
       <AmbientBackground />
 
       {/* Header */}
-      <header className="relative z-10 flex items-center justify-end px-5 pt-6 pb-2">
+      <header className="relative z-10 flex items-center justify-end px-6 pt-5 pb-2 flex-shrink-0">
         <button
           onClick={toggleSound}
-          className="text-base opacity-40 hover:opacity-70 transition-opacity"
+          className="opacity-60 hover:opacity-100 transition-opacity"
+          aria-label={soundEnabled ? 'Mute sound' : 'Unmute sound'}
+          style={{ color: '#FFFFFF' }}
         >
-          {soundEnabled ? '🔊' : '🔇'}
+          <SpeakerIcon muted={!soundEnabled} className="w-6 h-6" />
         </button>
       </header>
 
-      <main className="flex-1 relative z-10 flex flex-col items-center px-5 pb-10">
-        {/* Hero */}
+      <main className="flex-1 relative z-10 flex flex-col items-center px-3 pb-6" style={{ minHeight: 0 }}>
+        {/* Heading */}
         <motion.div
-          className="text-center mt-4 mb-8"
-          initial={{ opacity: 0, y: -16 }}
+          className="text-center mt-1 mb-5 flex-shrink-0 w-full"
+          initial={{ opacity: 0, y: -14 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: 'easeOut' }}
+          transition={{ duration: 0.45, ease: 'easeOut' }}
         >
-          <motion.div
-            className="text-5xl mb-3"
-            animate={{ rotate: [0, 4, -4, 2, 0] }}
-            transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-          >
-            🎨
-          </motion.div>
-          <h1 className="font-display text-3xl sm:text-4xl font-semibold mb-2" style={{ color: '#3A2060' }}>
-            Emotional Arts
+          <h1 className="font-display text-3xl sm:text-4xl font-semibold mb-2 text-glow" style={{ color: '#FFFFFF' }}>
+            Choose an Experience
           </h1>
-          <p className="text-sm max-w-xs mx-auto" style={{ color: '#6B5880' }}>
-            Three meditative mini games inspired by fine art and feeling
+          <p className="text-base sm:text-lg w-full px-2" style={{ color: '#FFFFFF' }}>
+            Three games to enjoy while your artwork comes together
           </p>
         </motion.div>
 
-        {/* Game Cards */}
+        {/* Game Cards — single column */}
         <motion.div
-          className="flex flex-col gap-3 w-full max-w-sm"
+          className="flex flex-col gap-3 flex-1 w-full"
+          style={{ minHeight: 0 }}
           variants={containerVariants}
           initial="hidden"
           animate="show"
@@ -89,38 +95,37 @@ export default function HomeScreen() {
             <motion.button
               key={game.id}
               variants={cardVariants}
-              onClick={() => navigateTo(game.id)}
-              className="glass rounded-2xl p-5 text-left transition-all active:scale-[0.97] group border border-black/7 hover:border-black/15"
+              onClick={() => navigateTo(game.intro)}
+              className="relative w-full rounded-2xl overflow-hidden text-left transition-all active:scale-[0.97] group border border-white/10 hover:border-white/25 flex-1"
               whileHover={{ y: -2 }}
-              style={{ boxShadow: '0 2px 16px rgba(0,0,0,0.06)' }}
+              style={{ boxShadow: '0 2px 16px rgba(0,0,0,0.08)', minHeight: 0 }}
             >
-              <div className="flex items-center gap-4">
-                <div
-                  className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0"
-                  style={{ background: `${game.accent}18` }}
-                >
-                  {game.emoji}
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center justify-between mb-0.5">
-                    <span className="font-semibold text-base" style={{ color: '#2A1F2E' }}>
-                      {game.title}
-                    </span>
-                    {scores[game.id] > 0 && (
-                      <span className="text-xs opacity-40">✦ {scores[game.id]}</span>
-                    )}
-                  </div>
-                  <p className="text-sm" style={{ color: '#7A6888' }}>{game.tagline}</p>
-                </div>
-                <span className="opacity-25 group-hover:opacity-50 transition-opacity">→</span>
+              {/* Background image */}
+              <img
+                src={game.image}
+                alt=""
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+              {/* Gradient overlay */}
+              <div
+                className="absolute inset-0"
+                style={{
+                  background: game.accent
+                    ?? 'linear-gradient(180deg, rgba(3,5,10,0.35) 0%, rgba(3,5,10,0.82) 100%)',
+                }}
+              />
+              {/* Content */}
+              <div className="relative h-full flex flex-col justify-end px-4 py-5 gap-2">
+                <span className="font-display font-semibold text-2xl sm:text-3xl block leading-tight" style={{ color: '#FFFFFF' }}>
+                  {game.title}
+                </span>
+                <span className="text-base sm:text-lg block leading-snug" style={{ color: '#FFFFFF' }}>
+                  {game.desc}
+                </span>
               </div>
             </motion.button>
           ))}
         </motion.div>
-
-        <p className="mt-10 text-xs opacity-25 text-center">
-          An emotional art therapy experience ✦
-        </p>
       </main>
     </div>
   );

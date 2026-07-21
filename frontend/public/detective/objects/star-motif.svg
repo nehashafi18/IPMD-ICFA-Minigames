@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 56 56" width="56" height="56" fill="none">
+  <!-- Decorative ring -->
+  <circle cx="28" cy="28" r="22" stroke="rgba(180,150,80,0.28)" stroke-width="1" stroke-dasharray="3,3"/>
+  <!-- Ring dots at 8 cardinal/diagonal positions -->
+  <circle cx="50"   cy="28"    r="1.2" fill="rgba(180,150,80,0.35)"/>
+  <circle cx="43.56" cy="43.56" r="1.2" fill="rgba(180,150,80,0.35)"/>
+  <circle cx="28"   cy="50"    r="1.2" fill="rgba(180,150,80,0.35)"/>
+  <circle cx="12.44" cy="43.56" r="1.2" fill="rgba(180,150,80,0.35)"/>
+  <circle cx="6"    cy="28"    r="1.2" fill="rgba(180,150,80,0.35)"/>
+  <circle cx="12.44" cy="12.44" r="1.2" fill="rgba(180,150,80,0.35)"/>
+  <circle cx="28"   cy="6"     r="1.2" fill="rgba(180,150,80,0.35)"/>
+  <circle cx="43.56" cy="12.44" r="1.2" fill="rgba(180,150,80,0.35)"/>
+  <!-- Star: cx=28,cy=28,ro=17,ri=7 -->
+  <path d="M28,11 L32.11,22.34 L44.17,22.75 L34.66,30.16 L37.99,41.75 L28,35 L18.01,41.75 L21.34,30.16 L11.83,22.75 L23.89,22.34 Z" fill="#C4A018" stroke="#8A6E10" stroke-width="1"/>
+  <!-- Highlight: cx=28,cy=27,ro=5,ri=2 -->
+  <path d="M28,22 L29.18,25.38 L32.76,25.45 L29.90,27.62 L30.94,31.05 L28,29 L25.06,31.05 L26.10,27.62 L23.24,25.45 L26.82,25.38 Z" fill="rgba(255,240,160,0.50)"/>
+</svg>

@@ -1,7 +1,9 @@
+import { ART_STYLE_IMAGES, type ArtStyleId } from './gameArt';
+
 export interface ArtStyle {
   id: string;
   name: string;
-  emoji: string;
+  image: string;
   primary: string;
   secondary: string;
   gradient: [string, string];
@@ -16,7 +18,7 @@ export const ART_STYLES: ArtStyle[] = [
   {
     id: 'watercolor',
     name: 'Watercolor',
-    emoji: '💧',
+    image: ART_STYLE_IMAGES['watercolor' as ArtStyleId],
     primary: '#a8d8ea',
     secondary: '#f7cac9',
     gradient: ['#a8d8ea', '#f7cac9'],
@@ -29,7 +31,7 @@ export const ART_STYLES: ArtStyle[] = [
   {
     id: 'sparkles',
     name: 'Sparkles',
-    emoji: '✨',
+    image: ART_STYLE_IMAGES['sparkles' as ArtStyleId],
     primary: '#ffd700',
     secondary: '#fff0a0',
     gradient: ['#ffd700', '#fff9c4'],
@@ -42,7 +44,7 @@ export const ART_STYLES: ArtStyle[] = [
   {
     id: 'colored-pencil',
     name: 'Colored Pencil',
-    emoji: '✏️',
+    image: ART_STYLE_IMAGES['colored-pencil' as ArtStyleId],
     primary: '#ff9a9e',
     secondary: '#fad0c4',
     gradient: ['#ff9a9e', '#fad0c4'],
@@ -55,7 +57,7 @@ export const ART_STYLES: ArtStyle[] = [
   {
     id: 'soft-pastel',
     name: 'Soft Pastel',
-    emoji: '🎨',
+    image: ART_STYLE_IMAGES['soft-pastel' as ArtStyleId],
     primary: '#c9b1d0',
     secondary: '#b5d5e8',
     gradient: ['#c9b1d0', '#b5d5e8'],
@@ -68,7 +70,7 @@ export const ART_STYLES: ArtStyle[] = [
   {
     id: 'ink-wash',
     name: 'Ink Wash',
-    emoji: '🖌️',
+    image: ART_STYLE_IMAGES['ink-wash' as ArtStyleId],
     primary: '#3d3d4f',
     secondary: '#6b6b8a',
     gradient: ['#2a2a3e', '#6b6b8a'],
@@ -81,7 +83,7 @@ export const ART_STYLES: ArtStyle[] = [
   {
     id: 'oil-paint',
     name: 'Oil Paint',
-    emoji: '🖼️',
+    image: ART_STYLE_IMAGES['oil-paint' as ArtStyleId],
     primary: '#e07b39',
     secondary: '#c45c26',
     gradient: ['#e07b39', '#8b3a0f'],
@@ -94,7 +96,7 @@ export const ART_STYLES: ArtStyle[] = [
   {
     id: 'cloud-softness',
     name: 'Cloud Softness',
-    emoji: '☁️',
+    image: ART_STYLE_IMAGES['cloud-softness' as ArtStyleId],
     primary: '#e8eaf6',
     secondary: '#c5cef7',
     gradient: ['#e8eaf6', '#b3c5f5'],
@@ -107,7 +109,7 @@ export const ART_STYLES: ArtStyle[] = [
   {
     id: 'glitter',
     name: 'Glitter',
-    emoji: '💫',
+    image: ART_STYLE_IMAGES['glitter' as ArtStyleId],
     primary: '#e040fb',
     secondary: '#ab47bc',
     gradient: ['#e040fb', '#7b1fa2'],

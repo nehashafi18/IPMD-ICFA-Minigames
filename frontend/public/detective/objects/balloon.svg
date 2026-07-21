@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 60" width="44" height="60" fill="none">
+  <!-- Balloon body -->
+  <ellipse cx="22" cy="22" rx="15" ry="17" fill="#C21818"/>
+  <ellipse cx="22" cy="22" rx="15" ry="17" stroke="#8A0E0E" stroke-width="1.2"/>
+  <!-- Specular highlight -->
+  <ellipse cx="16" cy="14" rx="5" ry="4" fill="rgba(255,150,140,0.38)"/>
+  <!-- Knot -->
+  <path d="M22,39 Q20,42 22,44 Q24,42 22,39Z" fill="#8A0E0E"/>
+  <!-- String -->
+  <path d="M22,44 Q18,50 20,56 Q22,58 22,60" stroke="#9B7B3C" stroke-width="1.2" stroke-linecap="round"/>
+</svg>

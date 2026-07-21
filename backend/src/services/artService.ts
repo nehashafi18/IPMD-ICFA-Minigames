@@ -68,61 +68,60 @@ export async function generateImageFromPrompt(
   prompt: string,
   negativePrompt: string,
   imagePath: string | null,
-  width = 512,
-  height = 512
+  width    = 1024,
+  height   = 1024,
+  steps    = 40,
+  cfgScale = 7.0,
+  sampler  = 'DPM++ 2M Karras',
 ): Promise<string> {
   try {
     if (imagePath) {
       const formData = new FormData();
-
-      formData.append("prompt", prompt);
-      formData.append("negative_prompt", negativePrompt || "");
-      formData.append("width", String(width));
-      formData.append("height", String(height));
-      formData.append("image", fs.createReadStream(imagePath));
+      formData.append('prompt',          prompt);
+      formData.append('negative_prompt', negativePrompt || '');
+      formData.append('width',           String(width));
+      formData.append('height',          String(height));
+      formData.append('steps',           String(steps));
+      formData.append('cfg_scale',       String(cfgScale));
+      formData.append('sampler',         sampler);
+      formData.append('image',           fs.createReadStream(imagePath));
 
       const response = await axios.post(
-        process.env.SD_IMG2IMG_URL ||
-          "http://localhost:8000/generate-image-to-image",
+        process.env.SD_IMG2IMG_URL ?? 'http://localhost:8000/generate-image-to-image',
         formData,
         {
           headers: formData.getHeaders(),
-          timeout: 300000,
+          timeout: 600000,
           maxBodyLength: Infinity,
-          maxContentLength: Infinity
-        }
+          maxContentLength: Infinity,
+        },
       );
-
-      console.log("SD raw response:", JSON.stringify(response.data, null, 2));
-
+      console.log('SD raw response:', JSON.stringify(response.data, null, 2));
       return await handleSDResponse(response.data);
     }
 
     const response = await axios.post(
-      process.env.SD_TXT2IMG_URL ||
-        "http://localhost:8000/generate-text-to-image",
+      process.env.SD_TXT2IMG_URL ?? 'http://localhost:8000/generate-text-to-image',
       {
         prompt,
-        negative_prompt: negativePrompt || "",
+        negative_prompt: negativePrompt || '',
         width,
-        height
+        height,
+        steps,
+        cfg_scale: cfgScale,
+        sampler,
       },
       {
-        timeout: 300000,
+        timeout: 600000,
         maxBodyLength: Infinity,
-        maxContentLength: Infinity
-      }
+        maxContentLength: Infinity,
+      },
     );
-
-    console.log("SD raw response:", JSON.stringify(response.data, null, 2));
-
+    console.log('SD raw response:', JSON.stringify(response.data, null, 2));
     return await handleSDResponse(response.data);
   } catch (error: any) {
-    console.error("SD generation error:", error.message);
-    console.error("SD response:", error.response?.data);
-
-    throw new InternalServerErrorException(
-      "Stable Diffusion generation failed"
-    );
+    console.error('SD generation error:', error.message);
+    console.error('SD response:', error.response?.data);
+    throw new InternalServerErrorException('Stable Diffusion generation failed');
   }
 }

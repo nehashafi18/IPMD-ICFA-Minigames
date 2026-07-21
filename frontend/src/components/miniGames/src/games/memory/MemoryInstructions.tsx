@@ -1,180 +1,390 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { emojiUrl } from './twemoji';
+import { MEMORY_SCENES } from '../../systems/gameArt';
+import MemoryCardTile from './MemoryCard';
+import type { MemoryCard } from './memoryData';
 
-interface Step {
-  emoji: string;
-  label: string;
-  color: string;
+const N      = 6;
+const COLS   = 3;
+const TARGET = 2;   // bird — the card to find
+const WRONG  = 4;   // butterfly — simulated wrong pick
+
+const SCENES = MEMORY_SCENES.slice(0, N);
+
+// Size of target image when docked in the banner
+const BANNER_IMG = 140;
+
+function makeCards(faceUp: boolean[], matchedIdx: number | null): MemoryCard[] {
+  return SCENES.map((s, i) => ({
+    id: i,
+    symbolId: s.id,
+    artStyleId: 'watercolor',
+    image: s.image,
+    name: s.name,
+    flipped: faceUp[i],
+    matched: matchedIdx === i,
+  }));
 }
 
-const STEPS: Step[] = [
-  { emoji: '👁️', label: 'Watch the cards', color: '#7B4FC8' },
-  { emoji: '🧠', label: 'Remember where', color: '#9B6FD8' },
-  { emoji: '🃏', label: 'Cards flip over', color: '#B06ED8' },
-  { emoji: '👆', label: 'Find it!', color: '#C87FD8' },
-];
+type DemoPhase =
+  | 'idle'
+  | 'flip-preview'
+  | 'flip-hiding'
+  | 'flip-done'
+  | 'find-wait'
+  | 'find-wrong-lit'
+  | 'find-wrong-show'
+  | 'find-correct-lit'
+  | 'find-matched';
 
-function EmojiImg({ emoji, size }: { emoji: string; size: number }) {
-  const [failed, setFailed] = useState(false);
-  if (failed) return <span style={{ fontSize: size }}>{emoji}</span>;
-  return (
-    <img
-      src={emojiUrl(emoji)}
-      alt=""
-      draggable={false}
-      onError={() => setFailed(true)}
-      style={{ width: size, height: size, objectFit: 'contain' }}
-    />
-  );
-}
-
-interface Props {
-  onPlay: () => void;
-}
+interface Props { onPlay: () => void }
 
 export default function MemoryInstructions({ onPlay }: Props) {
-  const [step, setStep] = useState(0);
+  const [step,      setStep]      = useState(0);
+  const [faceUp,    setFaceUp]    = useState<boolean[]>(Array(N).fill(true));
+  const [matched,   setMatched]   = useState<number | null>(null);
+  const [hovered,   setHovered]   = useState<number | null>(null);
+  const [demoPhase, setDemoPhase] = useState<DemoPhase>('idle');
+  const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
-  useEffect(() => {
-    const id = setInterval(() => {
-      setStep((s) => (s + 1) % STEPS.length);
-    }, 2600);
-    return () => clearInterval(id);
+  const clearTimers = useCallback(() => {
+    timers.current.forEach(clearTimeout);
+    timers.current = [];
   }, []);
 
-  const current = STEPS[step];
+  const after = useCallback((fn: () => void, ms: number) => {
+    const id = setTimeout(fn, ms);
+    timers.current.push(id);
+  }, []);
+
+  const runStep1 = useCallback(() => {
+    clearTimers();
+    setFaceUp(Array(N).fill(true));
+    setMatched(null);
+    setHovered(null);
+    setDemoPhase('flip-preview');
+
+    after(() => {
+      setDemoPhase('flip-hiding');
+      for (let i = 0; i < N; i++) {
+        after(
+          () => setFaceUp(prev => prev.map((v, k) => (k === i ? false : v))),
+          i * 230,
+        );
+      }
+      after(() => {
+        setDemoPhase('flip-done');
+        after(() => {
+          setFaceUp(Array(N).fill(true));
+          setDemoPhase('flip-preview');
+          after(runStep1, 1000);
+        }, 1100);
+      }, N * 230 + 500);
+    }, 1600);
+  }, [clearTimers, after]);
+
+  const runStep2 = useCallback(() => {
+    clearTimers();
+    setFaceUp(Array(N).fill(false));
+    setMatched(null);
+    setHovered(null);
+    setDemoPhase('find-wait');
+
+    after(() => {
+      setHovered(WRONG);
+      setDemoPhase('find-wrong-lit');
+      after(() => {
+        setHovered(null);
+        setFaceUp(prev => prev.map((v, k) => (k === WRONG || k === TARGET ? true : v)));
+        setDemoPhase('find-wrong-show');
+        after(() => {
+          setFaceUp(Array(N).fill(false));
+          setDemoPhase('find-wait');
+          after(() => {
+            setHovered(TARGET);
+            setDemoPhase('find-correct-lit');
+            after(() => {
+              setHovered(null);
+              setFaceUp(prev => prev.map((v, k) => (k === TARGET ? true : v)));
+              setMatched(TARGET);
+              setDemoPhase('find-matched');
+              after(runStep2, 1900);
+            }, 680);
+          }, 950);
+        }, 1500);
+      }, 720);
+    }, 900);
+  }, [clearTimers, after]);
+
+  useEffect(() => {
+    clearTimers();
+    if (step === 1) runStep1();
+    else if (step === 2) runStep2();
+    else {
+      setFaceUp(Array(N).fill(true));
+      setMatched(null);
+      setHovered(null);
+      setDemoPhase('idle');
+    }
+    return clearTimers;
+  }, [step, runStep1, runStep2, clearTimers]);
+
+  const advance = () => {
+    if (step < 2) setStep(s => s + 1);
+    else onPlay();
+  };
+
+  const cards      = makeCards(faceUp, matched);
+  const wrongShown = demoPhase === 'find-wrong-show';
 
   return (
     <motion.div
-      className="fixed inset-0 z-40 flex items-center justify-center"
+      className="fixed inset-0 z-40 flex flex-col"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      style={{ background: 'rgba(240,234,226,0.92)', backdropFilter: 'blur(8px)' }}
+      style={{ background: '#05080F' }}
     >
-      <motion.div
-        className="flex flex-col items-center gap-8 rounded-3xl p-10"
-        style={{
-          width: '70vw',
-          maxWidth: 600,
-          background: 'rgba(255,255,255,0.80)',
-          boxShadow: '0 12px 60px rgba(80,40,130,0.12)',
-        }}
-        initial={{ scale: 0.88, y: 28 }}
-        animate={{ scale: 1, y: 0 }}
-        transition={{ type: 'spring', damping: 22 }}
-      >
-        {/* Animated icon + label */}
-        <div className="flex flex-col items-center gap-4">
-          <AnimatePresence mode="wait">
+
+      {/* ── BANNER (steps 1 & 2) ── */}
+      <div style={{ minHeight: step > 0 ? 176 : 0, flexShrink: 0 }}>
+        <AnimatePresence mode="wait">
+
+          {/* Wrong-pick feedback */}
+          {step > 0 && wrongShown && (
             <motion.div
-              key={step}
-              initial={{ opacity: 0, scale: 0.7, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.7, y: -20 }}
-              transition={{ duration: 0.35, ease: 'easeOut' }}
-              className="flex flex-col items-center gap-3"
+              key="wrong"
+              className="flex items-center gap-5 mx-5 mt-5 rounded-3xl px-6 py-4"
+              style={{
+                background: 'rgba(230,80,80,0.12)',
+                border: '1.5px solid rgba(230,80,80,0.3)',
+              }}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0 }}
             >
-              <EmojiImg emoji={current.emoji} size={96} />
-              <span
-                className="font-semibold text-2xl"
-                style={{ color: current.color }}
+              <img
+                src={SCENES[WRONG].image} alt="" draggable={false}
+                className="rounded-2xl object-cover flex-shrink-0"
+                style={{ width: BANNER_IMG, height: BANNER_IMG }}
+              />
+              <span style={{ color: '#9FD8FF', fontSize: 30, lineHeight: 1 }}>→</span>
+              <img
+                src={SCENES[TARGET].image} alt="" draggable={false}
+                className="rounded-2xl object-cover flex-shrink-0"
+                style={{ width: BANNER_IMG, height: BANNER_IMG }}
+              />
+            </motion.div>
+          )}
+
+          {/* Correct-pick feedback — layoutId keeps image in place from normal banner */}
+          {step > 0 && demoPhase === 'find-matched' && (
+            <motion.div
+              key="correct"
+              className="flex items-center gap-5 mx-5 mt-5 rounded-3xl px-6 py-4"
+              style={{
+                background: 'rgba(80,200,120,0.14)',
+                border: '1.5px solid rgba(80,200,120,0.35)',
+              }}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <motion.div
+                layoutId="target-card"
+                className="overflow-hidden flex-shrink-0"
+                style={{ width: BANNER_IMG, height: BANNER_IMG, borderRadius: 16 }}
               >
-                {current.label}
+                <img src={SCENES[TARGET].image} alt="" draggable={false}
+                  className="w-full h-full object-cover" />
+              </motion.div>
+              <motion.span
+                style={{ color: '#fff', fontSize: 44, lineHeight: 1 }}
+                initial={{ opacity: 0, scale: 0.3 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ type: 'spring', damping: 11 }}
+              >
+                ✓
+              </motion.span>
+            </motion.div>
+          )}
+
+          {/* Normal banner — shared image element that flies from step 0's big card */}
+          {step > 0 && !wrongShown && demoPhase !== 'find-matched' && (
+            <motion.div
+              key="normal"
+              className="flex items-center gap-5 mx-5 mt-5 rounded-3xl px-6 py-4"
+              style={{
+                background: 'rgba(155,111,216,0.14)',
+                border: '1.5px solid rgba(155,111,216,0.3)',
+              }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <motion.div
+                layoutId="target-card"
+                className="overflow-hidden flex-shrink-0"
+                style={{ width: BANNER_IMG, height: BANNER_IMG, borderRadius: 16 }}
+              >
+                <img src={SCENES[TARGET].image} alt="" draggable={false}
+                  className="w-full h-full object-cover" />
+              </motion.div>
+              <span style={{ color: '#fff', fontWeight: 600, fontSize: 22 }}>
+                {step === 1 ? 'Remember this' : 'Find it!'}
               </span>
             </motion.div>
-          </AnimatePresence>
-        </div>
+          )}
+        </AnimatePresence>
+      </div>
 
-        {/* Step dots */}
-        <div className="flex gap-2.5">
-          {STEPS.map((_, i) => (
-            <motion.div
-              key={i}
-              className="rounded-full"
-              animate={{
-                width: i === step ? 24 : 8,
-                background: i === step ? '#9B6FD8' : 'rgba(0,0,0,0.12)',
-              }}
-              style={{ height: 8 }}
-              transition={{ duration: 0.3 }}
-            />
-          ))}
-        </div>
+      {/* ── MAIN VISUAL AREA + BUTTON (grouped so button sits right under graphic) ── */}
+      <div
+        className="flex-1 flex flex-col items-center justify-center gap-7"
+        style={{ minHeight: 0, padding: '0 16px' }}
+      >
+        <AnimatePresence mode="wait">
 
-        {/* Mini demo grid */}
-        <div
-          className="grid gap-2 rounded-2xl p-3"
-          style={{
-            gridTemplateColumns: 'repeat(3,1fr)',
-            background: 'rgba(155,111,216,0.06)',
-            width: 180,
-          }}
-        >
-          {['🦁','🌸','🎮','🍓','🦊','🎸','🐬','🌻','🚀'].map((e, i) => (
+          {/* Step 0 — big card; instant exit so layoutId can take over the image */}
+          {step === 0 && (
             <motion.div
-              key={e}
-              className="flex items-center justify-center rounded-xl"
-              style={{
-                aspectRatio: '1',
-                background: step < 2 ? 'rgba(155,111,216,0.12)' : 'rgba(255,255,255,0.6)',
-                border: '1px solid rgba(155,111,216,0.2)',
-              }}
-              animate={{ opacity: step < 2 ? 1 : i === 4 ? 1 : 0.3 }}
-              transition={{ duration: 0.4 }}
+              key="step0"
+              className="flex flex-col items-center gap-7"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0, transition: { duration: 0.05 } }}
             >
-              <AnimatePresence mode="wait">
-                {step < 2 ? (
-                  <motion.span
-                    key="visible"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    style={{ fontSize: 22 }}
-                  >
-                    {e}
-                  </motion.span>
-                ) : step === 2 ? (
-                  <motion.div
-                    key="hidden"
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    exit={{ scale: 0 }}
-                    className="rounded-full"
-                    style={{ width: 10, height: 10, background: '#9B6FD8', opacity: 0.2 }}
-                  />
-                ) : (
-                  <motion.div
-                    key="find"
-                    initial={{ scale: 0 }}
-                    animate={{ scale: i === 4 ? 1.1 : 1 }}
-                    exit={{ scale: 0 }}
-                    className="rounded-full"
-                    style={{
-                      width: 10, height: 10,
-                      background: i === 4 ? '#9B6FD8' : 'rgba(0,0,0,0.12)',
-                      opacity: i === 4 ? 0.9 : 0.2,
-                    }}
-                  />
-                )}
-              </AnimatePresence>
-            </motion.div>
-          ))}
-        </div>
+              <motion.div
+                layoutId="target-card"
+                className="overflow-hidden flex-shrink-0"
+                style={{
+                  width: 'min(74vw, 360px)',
+                  height: 'min(74vw, 360px)',
+                  borderRadius: 28,
+                  boxShadow: '0 0 70px rgba(155,111,216,0.65), 0 12px 48px rgba(0,0,0,0.65)',
+                }}
+                animate={{
+                  boxShadow: [
+                    '0 0 55px rgba(155,111,216,0.5),  0 12px 48px rgba(0,0,0,0.65)',
+                    '0 0 90px rgba(155,111,216,0.85), 0 12px 48px rgba(0,0,0,0.65)',
+                    '0 0 55px rgba(155,111,216,0.5),  0 12px 48px rgba(0,0,0,0.65)',
+                  ],
+                }}
+                transition={{ duration: 2.6, repeat: Infinity, ease: 'easeInOut' }}
+              >
+                <img
+                  src={SCENES[TARGET].image} alt="" draggable={false}
+                  className="w-full h-full object-cover"
+                />
+              </motion.div>
 
+              <motion.span
+                style={{ color: '#fff', fontSize: 24, fontWeight: 600, letterSpacing: '-0.01em' }}
+              >
+                Remember this
+              </motion.span>
+            </motion.div>
+          )}
+
+          {/* Steps 1 & 2 — card grid */}
+          {step > 0 && (
+            <motion.div
+              key={`grid-${step}`}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.4 }}
+              style={{ width: 'min(94vw, 440px)' }}
+            >
+              <div
+                className="grid"
+                style={{
+                  gridTemplateColumns: `repeat(${COLS}, 1fr)`,
+                  gap: 'clamp(10px, 3vw, 20px)',
+                }}
+              >
+                {cards.map((card, idx) => {
+                  const isTarget = idx === TARGET;
+                  const isWrong  = idx === WRONG;
+
+                  const previewGlow  = step === 1 && demoPhase === 'flip-preview' && isTarget;
+                  const hoverWrong   = hovered === WRONG  && isWrong;
+                  const hoverCorrect = hovered === TARGET && isTarget;
+                  const matchedGlow  = demoPhase === 'find-matched' && isTarget;
+                  const showGlow     = previewGlow || hoverWrong || hoverCorrect || matchedGlow;
+
+                  const ringColor =
+                    hoverWrong                    ? 'rgba(248,113,113,0.9)' :
+                    (hoverCorrect || matchedGlow) ? 'rgba(74,222,128,0.9)'  :
+                    '#9B6FD8';
+                  const shadow =
+                    hoverWrong                    ? '0 0 32px rgba(248,113,113,0.7)' :
+                    (hoverCorrect || matchedGlow) ? '0 0 32px rgba(74,222,128,0.7)' :
+                    '0 0 32px rgba(155,111,216,0.7)';
+
+                  return (
+                    <div key={card.id} className="relative" style={{ aspectRatio: '1' }}>
+                      <AnimatePresence>
+                        {showGlow && (
+                          <motion.div
+                            className="absolute inset-0 rounded-lg pointer-events-none"
+                            style={{ border: `2.5px solid ${ringColor}`, boxShadow: shadow, zIndex: 10 }}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.2 }}
+                          />
+                        )}
+                      </AnimatePresence>
+                      <MemoryCardTile
+                        card={card}
+                        onClick={() => {}}
+                        disabled
+                        cols={COLS}
+                        highlight={hovered === idx && !faceUp[idx]}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Button directly under graphic */}
         <motion.button
-          onClick={onPlay}
-          className="w-full py-4 rounded-xl font-semibold text-white text-lg"
+          onClick={advance}
+          className="py-4 rounded-2xl font-semibold text-white"
           style={{
-            maxWidth: 300,
-            background: 'linear-gradient(135deg,#9B6FD8,#7B4FC8)',
+            width: 'min(94vw, 440px)',
+            fontSize: 'clamp(1.05rem, 3.5vw, 1.25rem)',
+            background: step === 2
+              ? 'linear-gradient(135deg, #9B6FD8, #7B4FC8)'
+              : 'rgba(255,255,255,0.08)',
+            border: step === 2 ? 'none' : '1px solid rgba(255,255,255,0.14)',
           }}
-          whileHover={{ scale: 1.03 }}
+          whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.97 }}
+          layout
         >
-          Play ✦
+          {step === 2 ? 'Play →' : 'Next →'}
         </motion.button>
-      </motion.div>
+      </div>
+
+      {/* ── DOTS ── */}
+      <div className="flex justify-center gap-3 pb-8">
+        {[0, 1, 2].map(i => (
+          <motion.div
+            key={i}
+            className="rounded-full"
+            style={{
+              width: 8, height: 8,
+              background: i === step ? '#9FD8FF' : 'rgba(159,216,255,0.2)',
+            }}
+            animate={{ scale: i === step ? 1.4 : 1 }}
+            transition={{ duration: 0.3 }}
+          />
+        ))}
+      </div>
     </motion.div>
   );
 }

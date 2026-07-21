@@ -2,7 +2,7 @@ import { ART_STYLES } from '../../systems/artStyles';
 
 export const TILE_TYPES = ART_STYLES.map((s) => ({
   id: s.id,
-  emoji: s.emoji,
+  image: s.image,
   name: s.name,
   primary: s.primary,
   glow: s.glow,

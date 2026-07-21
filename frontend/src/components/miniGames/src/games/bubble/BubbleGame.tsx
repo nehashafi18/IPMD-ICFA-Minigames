@@ -1,323 +1,486 @@
 import { useRef, useEffect, useState, useCallback } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import GameShell from '../../components/GameShell';
 import CompletionOverlay from '../../components/CompletionOverlay';
 import InstructionsOverlay from '../../components/InstructionsOverlay';
-import ParticleEngine from '../../systems/ParticleEngine';
-import { useParticleBurst } from '../../hooks/useParticleBurst';
 import { useSound } from '../../hooks/useSound';
 import { useAppStore } from '../../store/useAppStore';
-import {
-  type BubbleCell, buildInitialGrid, randomBubbleType, getBubbleType,
-  BUBBLE_RADIUS, COLS, cellToXY, distance,
-  findConnected, findFloating,
-} from './bubbleData';
+import { type FallingBall, BALL_RADIUS, LEVEL_VY_BASE, LEVEL_VY_RANGE, makeBall, splitCount } from './bubbleData';
 
 interface Props { onBack: () => void; }
 
-const SPEED = 10;
-const MIN_MATCH = 3;
-const GRID_PAD_TOP = 24;
-const CANVAS_BG = '#FAFAF7';
+const CANVAS_BG = '#05091A';
+const MAX_MISSES = 20;
+const PTS_PER_HIT = 10;
+// Hits needed to finish each level — grows so later levels feel longer
+const HITS_PER_LEVEL = [5, 8, 12, 18];
+const BULLET_SPEED = 14;
+const BULLET_R = 7;
+const SHOOTER_Y_OFFSET = 36;
 
-let globalId = 0;
+const LEVEL_NAMES = ['Warm-Up', 'Focus', 'Challenge', 'Expert'];
+const LEVEL_DESCS = [
+  'Balls fall slowly — take your time to aim.',
+  'Speed is picking up. Stay focused!',
+  'Balls now drift sideways. Track carefully!',
+  'Maximum speed & movement. React fast!',
+];
+const LEVEL_STARS = [1, 2, 3, 4];
 
-// Ensures a bubble center is never closer than `r` to any edge of the play area.
-// Called AFTER grid→pixel conversion so clamping operates in canvas space.
-function getSafeBubblePosition(
-  x: number, y: number, r: number, w: number, h: number,
-): { x: number; y: number } {
+let gid = 0;
+function uid() { return `b${++gid}`; }
+
+interface Bullet { x: number; y: number; vx: number; vy: number; }
+
+function buildSplitFromHit(
+  hitX:     number,
+  hitY:     number,
+  parentR:  number,
+  parentVy: number,   // exact speed of the ball that was hit
+  level:    number,   // level BEFORE any level-up this tick
+): FallingBall[] {
+  const count  = splitCount(level);
+  const redIdx = Math.floor(Math.random() * count);
+  const childR = Math.max(16, parentR * 0.88);
+  const lvl    = Math.min(level, 3);
+
+  return Array.from({ length: count }, (_, j): FallingBall => {
+    // The red ball keeps the parent's exact speed so the player feels no change.
+    // Blue distractor balls use the level speed (they just scatter and fall off).
+    const vy = j === redIdx
+      ? parentVy
+      : LEVEL_VY_BASE[lvl] + Math.random() * LEVEL_VY_RANGE[lvl];
+    const vx = (Math.random() - 0.5) * 1.3;
+    return {
+      id: uid(),
+      isRed:     j === redIdx,
+      x:         hitX,
+      y:         hitY,
+      baseX:     hitX,
+      vx,
+      vy,
+      r:         childR,
+      amplitude: level >= 3 ? 10 + Math.random() * 18 : 0,
+      frequency: 0.022 + Math.random() * 0.018,
+      phase:     Math.random() * Math.PI * 2,
+      t:         0,
+    };
+  });
+}
+
+interface Flash { x: number; y: number; alpha: number; red: boolean; r: number; }
+
+interface GameState {
+  balls: FallingBall[];
+  bullets: Bullet[];
+  shooterX: number;
+  angle: number;
+  score: number;
+  level: number;
+  misses: number;
+  hits: number;
+  done: boolean;
+  started: boolean;
+  paused: boolean;           // true while waiting for level-confirm
+  flash: Flash | null;
+  warningAlpha: number;
+}
+
+function initialState(w = 300): GameState {
   return {
-    x: Math.max(r, Math.min(x, w - r)),
-    y: Math.max(r, Math.min(y, h - r)),
+    balls: [], bullets: [],
+    shooterX: w / 2, angle: -Math.PI / 2,
+    score: 0, level: 0, misses: 0, hits: 0,
+    done: false, started: false, paused: false,
+    flash: null, warningAlpha: 0,
   };
 }
 
+// ── Between-level overlay ─────────────────────────────────────────────────────
+
+interface LevelGateProps {
+  completedLevel: number;   // 0-indexed level just finished
+  nextLevel: number;        // 0-indexed next level
+  onContinue: () => void;
+}
+
+function LevelGate({ completedLevel, nextLevel, onContinue }: LevelGateProps) {
+  const nextName = LEVEL_NAMES[Math.min(nextLevel, LEVEL_NAMES.length - 1)];
+  const nextDesc = LEVEL_DESCS[Math.min(nextLevel, LEVEL_DESCS.length - 1)];
+  const stars    = LEVEL_STARS[Math.min(nextLevel, LEVEL_STARS.length - 1)];
+
+  return (
+    <motion.div
+      className="fixed inset-0 z-50 flex items-center justify-center"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      style={{ background: 'rgba(3,5,16,0.88)', backdropFilter: 'blur(10px)' }}
+    >
+      <motion.div
+        className="flex flex-col items-center gap-6 rounded-3xl p-10 max-w-sm w-full mx-4"
+        style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', boxShadow: '0 8px 48px rgba(0,0,0,0.4)' }}
+        initial={{ scale: 0.8, y: 24 }}
+        animate={{ scale: 1, y: 0 }}
+        transition={{ type: 'spring', damping: 18 }}
+      >
+        {/* Checkmark */}
+        <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ background: 'linear-gradient(135deg,#4CAF50,#2E7D32)' }}>
+          <span className="text-3xl">✓</span>
+        </div>
+
+        <div className="text-center">
+          <p className="text-sm uppercase tracking-widest mb-1" style={{ color: '#9FD8FF', opacity: 0.7 }}>
+            Level {completedLevel + 1} Complete
+          </p>
+          <h2 className="font-display text-3xl font-bold" style={{ color: '#FFFFFF' }}>
+            {LEVEL_NAMES[Math.min(completedLevel, LEVEL_NAMES.length - 1)]}
+          </h2>
+        </div>
+
+        {/* Next level preview */}
+        <div className="w-full rounded-2xl p-4 text-center" style={{ background: 'rgba(159,216,255,0.08)', border: '1px solid rgba(159,216,255,0.15)' }}>
+          <p className="text-xs uppercase tracking-widest mb-1" style={{ color: '#9FD8FF', opacity: 0.6 }}>
+            Next — Level {nextLevel + 1}
+          </p>
+          <p className="text-lg font-semibold mb-1" style={{ color: '#FFFFFF' }}>
+            {nextName}
+          </p>
+          <div className="flex justify-center gap-1 mb-2">
+            {Array.from({ length: 4 }, (_, i) => (
+              <span key={i} style={{ opacity: i < stars ? 1 : 0.2, fontSize: 14 }}>★</span>
+            ))}
+          </div>
+          <p className="text-sm" style={{ color: '#9FD8FF' }}>{nextDesc}</p>
+        </div>
+
+        <motion.button
+          onClick={onContinue}
+          className="w-full py-4 rounded-2xl font-bold text-lg text-white transition-all active:scale-95"
+          style={{ background: 'linear-gradient(135deg,#9B6FD8,#7B4FC8)', boxShadow: '0 4px 24px rgba(123,79,200,0.4)' }}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.97 }}
+        >
+          Continue →
+        </motion.button>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 export default function BubbleGame({ onBack }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const stateRef = useRef({
-    grid: buildInitialGrid(),
-    shooterX: 0,
-    angle: -Math.PI / 2,
-    currentType: randomBubbleType(),
-    nextType: randomBubbleType(),
-    bullet: null as { x: number; y: number; vx: number; vy: number; typeId: string } | null,
-    score: 0,
-    done: false,
-  });
-  const rafRef = useRef<number>(0);
-  const [score, setScore] = useState(0);
-  const [done, setDone] = useState(false);
+  const stateRef  = useRef<GameState>(initialState());
+  const rafRef    = useRef(0);
+
+  const [score, setScore]               = useState(0);
+  const [misses, setMisses]             = useState(0);
+  const [level, setLevel]               = useState(1);
+  const [done, setDone]                 = useState(false);
   const [showInstructions, setShowInstructions] = useState(true);
-  const [canvasReady, setCanvasReady] = useState(false);
-const { bursts, burst, clearBursts } = useParticleBurst();
-  const { play } = useSound();
-  const updateScore = useAppStore((s) => s.updateScore);
-  const sizeRef = useRef({ w: 0, h: 0, offsetX: 0, scale: 1 });
+  // pendingLevelUp = { completed: 0-indexed level done, next: 0-indexed next level }
+  const [pendingLevelUp, setPendingLevelUp] = useState<{ completed: number; next: number } | null>(null);
 
-  // ── Drawing ──────────────────────────────────────────────────────────────
+  const { play }      = useSound();
+  const updateScore   = useAppStore((s) => s.updateScore);
 
-  const drawBubble = useCallback(
-    (ctx: CanvasRenderingContext2D, x: number, y: number, typeId: string, alpha = 1, r = BUBBLE_RADIUS) => {
-      const bt = getBubbleType(typeId);
-      ctx.save();
-      ctx.globalAlpha = alpha;
-      ctx.shadowColor = bt.glow;
-      ctx.shadowBlur = 10;
+  // ── Red hit handler ───────────────────────────────────────────────────────
 
-      const grad = ctx.createRadialGradient(x - r * 0.3, y - r * 0.3, r * 0.08, x, y, r);
-      grad.addColorStop(0, bt.gradient[0] + 'ee');
-      grad.addColorStop(1, bt.gradient[1] + 'cc');
-      ctx.beginPath();
-      ctx.arc(x, y, r, 0, Math.PI * 2);
-      ctx.fillStyle = grad;
-      ctx.fill();
+  const handleRedHit = useCallback(
+    (ball: FallingBall, idx: number) => {
+      const s = stateRef.current;
+      play('chime');
 
-      ctx.shadowBlur = 0;
-      const hl = ctx.createRadialGradient(x - r * 0.35, y - r * 0.35, 0, x - r * 0.35, y - r * 0.35, r * 0.5);
-      hl.addColorStop(0, 'rgba(255,255,255,0.6)');
-      hl.addColorStop(1, 'rgba(255,255,255,0)');
-      ctx.beginPath();
-      ctx.arc(x, y, r, 0, Math.PI * 2);
-      ctx.fillStyle = hl;
-      ctx.fill();
+      s.flash  = { x: ball.x, y: ball.y, alpha: 1, red: true, r: ball.r };
+      s.balls.splice(idx, 1);
+      s.score += PTS_PER_HIT;
+      s.hits  += 1;
+      setScore(s.score);
+      updateScore('bubble', s.score);
 
-      ctx.globalAlpha = alpha * 0.88;
-      ctx.font = `${Math.floor(r * 0.8)}px serif`;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(bt.emoji, x, y + 1);
-      ctx.restore();
+      const oldLevel = s.level;
+      const threshold = HITS_PER_LEVEL[Math.min(oldLevel, HITS_PER_LEVEL.length - 1)];
+      const levelingUp = s.hits >= threshold && oldLevel < HITS_PER_LEVEL.length;
+
+      if (levelingUp) {
+        const newLevel = oldLevel + 1;
+        // Clear ALL balls immediately so none fall off and count as misses
+        s.balls = [];
+        s.bullets = [];
+        s.misses = 0;
+        s.hits = 0;
+        s.paused = true;
+        play('sparkle');
+        setPendingLevelUp({ completed: oldLevel, next: newLevel });
+        s.level = newLevel;
+        setLevel(newLevel + 1);
+        setMisses(0);
+      } else {
+        // Not leveling up — spawn split balls as normal
+        s.balls.push(...buildSplitFromHit(ball.x, ball.y, ball.r, ball.vy, oldLevel));
+      }
     },
-    [],
+    [play, updateScore],
   );
 
+  // ── Aim line ──────────────────────────────────────────────────────────────
+
   const drawAimLine = useCallback(
-    (ctx: CanvasRenderingContext2D, sx: number, sy: number, angle: number, w: number, wallR: number) => {
-      let x = sx, y = sy;
-      let dx = Math.cos(angle);
+    (ctx: CanvasRenderingContext2D, sx: number, sy: number, angle: number, w: number) => {
+      let x = sx, y = sy, dx = Math.cos(angle);
       const dy = Math.sin(angle);
       ctx.save();
-      ctx.setLineDash([7, 6]);
-      ctx.strokeStyle = 'rgba(90,50,140,0.20)';
+      ctx.setLineDash([6, 5]);
+      ctx.strokeStyle = 'rgba(255,200,200,0.28)';
       ctx.lineWidth = 1.5;
       ctx.beginPath();
       ctx.moveTo(x, y);
       for (let i = 0; i < 5; i++) {
         while (true) {
-          const tLeft = dx < 0 ? (wallR - x) / dx : Infinity;
-          const tRight = dx > 0 ? (w - wallR - x) / dx : Infinity;
-          const tStep = 80;
-          const t = Math.min(tLeft, tRight, tStep);
-          x += dx * t;
-          y += dy * t;
+          const tLeft  = dx < 0 ? (BULLET_R - x) / dx : Infinity;
+          const tRight = dx > 0 ? (w - BULLET_R - x) / dx : Infinity;
+          const t = Math.min(tLeft, tRight, 90);
+          x += dx * t; y += dy * t;
           ctx.lineTo(x, y);
-          if (t < tStep) { dx = -dx; } else break;
+          if (t < 90) dx = -dx; else break;
         }
+        if (y < 0) break;
       }
       ctx.stroke();
+      ctx.setLineDash([]);
       ctx.restore();
     },
     [],
   );
+
+  // ── Draw ──────────────────────────────────────────────────────────────────
 
   const draw = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d')!;
-    const { w, h, offsetX, scale } = sizeRef.current;
-    const r = BUBBLE_RADIUS * scale;
+    const { width: w, height: h } = canvas;
     const s = stateRef.current;
 
-    ctx.fillStyle = CANVAS_BG;
+    const wa = Math.min(1, s.warningAlpha);
+    ctx.fillStyle = wa > 0
+      ? `rgb(${Math.round(10 + 40 * wa)},${Math.round(10 + 18 * wa)},20)`
+      : CANVAS_BG;
     ctx.fillRect(0, 0, w, h);
 
-    ctx.strokeStyle = 'rgba(0,0,0,0.06)';
+    const dangerY = h - SHOOTER_Y_OFFSET - 30;
+    ctx.save();
+    ctx.strokeStyle = 'rgba(255,70,70,0.22)';
     ctx.lineWidth = 1;
-    ctx.setLineDash([]);
+    ctx.setLineDash([5, 4]);
     ctx.beginPath();
-    ctx.moveTo(0, h - 80);
-    ctx.lineTo(w, h - 80);
+    ctx.moveTo(0, dangerY);
+    ctx.lineTo(w, dangerY);
     ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.restore();
 
-    for (const cell of s.grid) {
-      const raw = { x: cell.x * scale + offsetX, y: cell.y * scale + GRID_PAD_TOP };
-      const pos = getSafeBubblePosition(raw.x, raw.y, r, w, h);
-      drawBubble(ctx, pos.x, pos.y, cell.typeId, 1, r);
-    }
-
-    if (!s.bullet && !s.done) {
-      drawAimLine(ctx, s.shooterX, h - 50, s.angle, w, r);
-    }
-
-    if (s.bullet) {
-      const pos = getSafeBubblePosition(s.bullet.x, s.bullet.y, r, w, h);
-      drawBubble(ctx, pos.x, pos.y, s.bullet.typeId, 1, r);
-    }
-
-    if (!s.done) {
-      // Current bubble (cannon) — uses full BUBBLE_RADIUS (UI area, not scaled)
-      const cannon = getSafeBubblePosition(s.shooterX, h - 50, BUBBLE_RADIUS, w, h);
-      drawBubble(ctx, cannon.x, cannon.y, s.currentType);
-      // Next bubble preview
-      const nextX = s.shooterX + BUBBLE_RADIUS * 2.8;
-      const nextR = BUBBLE_RADIUS * 0.7;
-      const nextPos = getSafeBubblePosition(nextX, h - 50, nextR, w, h);
-      drawBubble(ctx, nextPos.x, nextPos.y, s.nextType, 0.55, nextR);
-      // Swap arrow label between them
+    for (const ball of s.balls) {
       ctx.save();
-      ctx.globalAlpha = 0.35;
-      ctx.fillStyle = '#3A2060';
-      ctx.font = '11px sans-serif';
+      ctx.shadowColor = ball.isRed ? '#FF3030' : '#3060FF';
+      ctx.shadowBlur = 18;
+      const grad = ctx.createRadialGradient(
+        ball.x - ball.r * 0.3, ball.y - ball.r * 0.35, ball.r * 0.04,
+        ball.x, ball.y, ball.r,
+      );
+      if (ball.isRed) {
+        grad.addColorStop(0, '#FF9090');
+        grad.addColorStop(0.45, '#FF1818');
+        grad.addColorStop(1, '#8B0000');
+      } else {
+        grad.addColorStop(0, '#C0D8FF');
+        grad.addColorStop(0.45, '#4488FF');
+        grad.addColorStop(1, '#1A44CC');
+      }
+      ctx.beginPath();
+      ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
+      ctx.fillStyle = grad;
+      ctx.fill();
+      if (!ball.isRed) {
+        ctx.strokeStyle = '#66AAFF';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      }
+      ctx.shadowBlur = 0;
+      const hl = ctx.createRadialGradient(
+        ball.x - ball.r * 0.35, ball.y - ball.r * 0.4, 0,
+        ball.x - ball.r * 0.35, ball.y - ball.r * 0.4, ball.r * 0.52,
+      );
+      hl.addColorStop(0, 'rgba(255,255,255,0.55)');
+      hl.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx.beginPath();
+      ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
+      ctx.fillStyle = hl;
+      ctx.fill();
+      ctx.restore();
+
+      // Large symbol so the ball type is unmistakable
+      ctx.save();
+      ctx.font = `bold ${Math.round(ball.r * 0.88)}px Quicksand, sans-serif`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText('⇄', s.shooterX + BUBBLE_RADIUS * 1.4, h - 50);
+      ctx.fillStyle = ball.isRed ? 'rgba(255,255,255,0.92)' : 'rgba(255,255,255,0.70)';
+      ctx.fillText(ball.isRed ? '♥' : '✕', ball.x, ball.y + ball.r * 0.06);
       ctx.restore();
     }
-  }, [drawBubble, drawAimLine]);
 
-  // ── Snap logic ────────────────────────────────────────────────────────────
+    if (s.warningAlpha > 0.05) {
+      ctx.save();
+      ctx.globalAlpha = Math.min(1, s.warningAlpha);
+      ctx.fillStyle = '#FFB830';
+      ctx.font = 'bold 13px Quicksand, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('Oops! That was a blue ball — aim for red', w / 2, h / 2);
+      ctx.restore();
+    }
 
-  const snapToGrid = useCallback(
-    (bx: number, by: number, typeId: string): BubbleCell | null => {
-      const { offsetX, scale } = sizeRef.current;
-      const r = BUBBLE_RADIUS * scale;
-      let bestDist = Infinity;
-      let bestRow = 0, bestCol = 0;
-      for (let row = 0; row <= 10; row++) {
-        const cols = row % 2 === 0 ? COLS : COLS - 1;
-        for (let col = 0; col < cols; col++) {
-          const { x: gx, y: gy } = cellToXY(row, col);
-          const ax = gx * scale + offsetX, ay = gy * scale + GRID_PAD_TOP;
-          if (stateRef.current.grid.some((c) => c.row === row && c.col === col)) continue;
-          const d = distance(bx, by, ax, ay);
-          if (d < bestDist) { bestDist = d; bestRow = row; bestCol = col; }
-        }
-      }
-      if (bestDist < r * 2.5) {
-        const { x, y } = cellToXY(bestRow, bestCol);
-        return { id: `bullet-${++globalId}`, typeId, row: bestRow, col: bestCol, x, y };
-      }
-      return null;
-    },
-    [],
-  );
+    const sy = h - SHOOTER_Y_OFFSET;
+    const sx = s.shooterX;
+    if (!s.done && s.started) {
+      drawAimLine(ctx, sx, sy, s.angle, w);
+    }
+    ctx.save();
+    ctx.shadowColor = '#FF6060';
+    ctx.shadowBlur = 14;
+    ctx.strokeStyle = '#FF9090';
+    ctx.lineWidth = 4;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(sx, sy);
+    ctx.lineTo(sx + Math.cos(s.angle) * 20, sy + Math.sin(s.angle) * 20);
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+    const sg = ctx.createRadialGradient(sx - 4, sy - 4, 1, sx, sy, 14);
+    sg.addColorStop(0, '#FF9090');
+    sg.addColorStop(1, '#CC2222');
+    ctx.beginPath();
+    ctx.arc(sx, sy, 14, 0, Math.PI * 2);
+    ctx.fillStyle = sg;
+    ctx.fill();
+    ctx.restore();
 
-  // ── Match + cascade ────────────────────────────────────────────────────────
-  // Called AFTER bullet has already been nullified. Steps:
-  //   1. Add new cell to grid
-  //   2. Find connected same-type cluster from new cell
-  //   3. If ≥ MIN_MATCH → pop, remove floating, cascade-loop until stable
-  //   4. Advance queue, clear swap lock
+    for (const b of s.bullets) {
+      ctx.save();
+      ctx.shadowColor = '#FFCCCC';
+      ctx.shadowBlur = 12;
+      const bg = ctx.createRadialGradient(b.x - 2, b.y - 2, 1, b.x, b.y, BULLET_R);
+      bg.addColorStop(0, '#FFFFFF');
+      bg.addColorStop(0.4, '#FFD0D0');
+      bg.addColorStop(1, '#FF4040');
+      ctx.beginPath();
+      ctx.arc(b.x, b.y, BULLET_R, 0, Math.PI * 2);
+      ctx.fillStyle = bg;
+      ctx.fill();
+      ctx.restore();
+    }
 
-  const handleMatch = useCallback(
-    (newCell: BubbleCell) => {
-      const s = stateRef.current;
-      // Step 1: attach bubble to board
-      s.grid = [...s.grid, newCell];
-      const { offsetX, scale } = sizeRef.current;
+    if (s.flash) {
+      const f = s.flash;
+      const expandR = f.r * (1 + (1 - f.alpha) * 1.5);
+      ctx.save();
+      ctx.globalAlpha = f.alpha * 0.85;
+      ctx.strokeStyle = f.red ? '#FF5555' : '#5577FF';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(f.x, f.y, expandR, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+      f.alpha -= 0.065;
+      if (f.alpha <= 0) s.flash = null;
+    }
 
-      const popGroup = (ids: Set<string>, pts: number) => {
-        for (const id of ids) {
-          const cell = s.grid.find((c) => c.id === id);
-          if (cell) burst(cell.x * scale + offsetX, cell.y * scale + GRID_PAD_TOP, cell.typeId);
-        }
-        s.grid = s.grid.filter((c) => !ids.has(c.id));
-        s.score += ids.size * pts;
-        setScore(s.score);
-        updateScore('bubble', s.score);
-      };
+  }, [drawAimLine]);
 
-      // Step 2: evaluate cluster from new cell
-      const connected = findConnected(s.grid, newCell.id);
-      if (connected.size >= MIN_MATCH) {
-        play('pop');
-        popGroup(connected, 10);
-
-        // Remove bubbles no longer connected to the ceiling (gravity)
-        const floating = findFloating(s.grid);
-        if (floating.size > 0) { play('sparkle'); popGroup(floating, 20); }
-
-        if (s.grid.length === 0) {
-          play('complete');
-          s.done = true;
-          setDone(true);
-        }
-      } else {
-        play('shoot');
-      }
-
-      // Step 4: advance queue
-      s.currentType = s.nextType;
-      s.nextType = randomBubbleType();
-    },
-    [burst, play, updateScore],
-  );
-
-  // ── Game loop ──────────────────────────────────────────────────────────────
+  // ── Game loop ─────────────────────────────────────────────────────────────
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
     const resize = () => {
-      const w = canvas.clientWidth;
-      const h = canvas.clientHeight;
-      if (w === 0 || h === 0) return;
-      canvas.width = w;
-      canvas.height = h;
-      const gridWidth = COLS * BUBBLE_RADIUS * 2;
-      const scale = Math.max(0.1, Math.min(1, (w - 4) / gridWidth));
-      const scaledGridW = gridWidth * scale;
-      sizeRef.current = { w, h, offsetX: (w - scaledGridW) / 2, scale };
-      stateRef.current.shooterX = w / 2;
+      canvas.width  = canvas.clientWidth  || 220;
+      canvas.height = canvas.clientHeight || 440;
+      stateRef.current.shooterX = canvas.width / 2;
     };
-
     resize();
-    setCanvasReady(true);
 
     const tick = () => {
       const s = stateRef.current;
-      const { w, offsetX, scale } = sizeRef.current;
-      const r = BUBBLE_RADIUS * scale;
+      const { width: w, height: h } = canvas;
+      const dangerY = h - SHOOTER_Y_OFFSET - 30;
 
-      if (s.bullet) {
-        s.bullet.x += s.bullet.vx;
-        s.bullet.y += s.bullet.vy;
+      if (s.started && !s.done && !s.paused) {
+        if (s.warningAlpha > 0) s.warningAlpha = Math.max(0, s.warningAlpha - 0.022);
 
-        if (s.bullet.x < r) {
-          s.bullet.x = r;
-          s.bullet.vx = Math.abs(s.bullet.vx);
-        } else if (s.bullet.x > w - r) {
-          s.bullet.x = w - r;
-          s.bullet.vx = -Math.abs(s.bullet.vx);
+        for (const ball of s.balls) {
+          ball.t += 1;
+          if (ball.amplitude > 0) {
+            ball.baseX += ball.vx;
+            const margin = ball.r + ball.amplitude;
+            ball.baseX = Math.max(margin, Math.min(w - margin, ball.baseX));
+            ball.x = ball.baseX + Math.sin(ball.t * ball.frequency + ball.phase) * ball.amplitude;
+          } else {
+            ball.baseX += ball.vx;
+            if (ball.baseX < ball.r)     { ball.baseX = ball.r;     ball.vx =  Math.abs(ball.vx); }
+            if (ball.baseX > w - ball.r) { ball.baseX = w - ball.r; ball.vx = -Math.abs(ball.vx); }
+            ball.x = ball.baseX;
+          }
+          ball.y += ball.vy;
         }
 
-        // Ceiling: nullify bullet FIRST, then evaluate match
-        if (s.bullet.y <= r + GRID_PAD_TOP) {
-          const captured = s.bullet;
-          s.bullet = null;
-          const snapped = snapToGrid(captured.x, captured.y, captured.typeId);
-          if (snapped) handleMatch(snapped);
-        }
+        s.bullets = s.bullets.filter((b) => {
+          b.x += b.vx;
+          b.y += b.vy;
+          if (b.x < BULLET_R)     { b.x = BULLET_R;     b.vx =  Math.abs(b.vx); }
+          if (b.x > w - BULLET_R) { b.x = w - BULLET_R; b.vx = -Math.abs(b.vx); }
+          if (b.y < -BULLET_R) return false;
 
-        // Grid collision: nullify bullet FIRST, then evaluate match
-        if (s.bullet) {
-          for (const cell of s.grid) {
-            const cx = cell.x * scale + offsetX;
-            const cy = cell.y * scale + GRID_PAD_TOP;
-            if (distance(s.bullet.x, s.bullet.y, cx, cy) < r * 1.85) {
-              const captured = s.bullet;
-              s.bullet = null;
-              const snapped = snapToGrid(captured.x, captured.y, captured.typeId);
-              if (snapped) handleMatch(snapped);
-              break;
+          for (let i = 0; i < s.balls.length; i++) {
+            const ball = s.balls[i];
+            const dx = b.x - ball.x;
+            const dy = b.y - ball.y;
+            if (dx * dx + dy * dy < (BULLET_R + ball.r) ** 2) {
+              if (ball.isRed) {
+                handleRedHit(ball, i);
+              } else {
+                play('flip');
+                s.misses += 1;
+                s.warningAlpha = 1.0;
+                s.flash = { x: ball.x, y: ball.y, alpha: 0.65, red: false, r: ball.r };
+                setMisses(s.misses);
+                if (s.misses >= MAX_MISSES) { s.done = true; play('complete'); setDone(true); }
+              }
+              return false; // remove bullet on any hit
             }
           }
+          return true;
+        });
+
+        let redFell = false;
+        s.balls = s.balls.filter((b) => {
+          if (b.y > dangerY + b.r) { if (b.isRed) redFell = true; return false; }
+          return true;
+        });
+
+        if (redFell) {
+          play('pop');
+          s.misses += 1;
+          setMisses(s.misses);
+          if (s.misses >= MAX_MISSES) { s.done = true; play('complete'); setDone(true); }
         }
 
-        // Off screen
-        if (s.bullet && s.bullet.y > sizeRef.current.h) s.bullet = null;
+        if (!s.done && !s.balls.some((b) => b.isRed)) {
+          const margin = BALL_RADIUS * 2;
+          s.balls.push(makeBall(uid(), true, margin + Math.random() * (w - margin * 2), s.level));
+        }
       }
 
       draw();
@@ -327,132 +490,143 @@ const { bursts, burst, clearBursts } = useParticleBurst();
     rafRef.current = requestAnimationFrame(tick);
     const ro = new ResizeObserver(resize);
     ro.observe(canvas);
-    return () => {
-      cancelAnimationFrame(rafRef.current);
-      ro.disconnect();
-    };
-  }, [draw, snapToGrid, handleMatch]);
+    return () => { cancelAnimationFrame(rafRef.current); ro.disconnect(); };
+  }, [draw, handleRedHit, play]);
 
-  // ── Actions ────────────────────────────────────────────────────────────────
+  // ── Start / reset ─────────────────────────────────────────────────────────
 
-  const shoot = useCallback(() => {
-    const s = stateRef.current;
-    if (s.bullet || s.done) return;
-    const angle = Math.max(-Math.PI + 0.18, Math.min(-0.18, s.angle));
-    play('shoot');
-    s.bullet = {
-      x: s.shooterX,
-      y: sizeRef.current.h - 50,
-      vx: Math.cos(angle) * SPEED,
-      vy: Math.sin(angle) * SPEED,
-      typeId: s.currentType,
-    };
-  }, [play]);
-
-  const handleSwap = useCallback(() => {
-    const s = stateRef.current;
-    if (s.bullet || s.done) return;
-    [s.currentType, s.nextType] = [s.nextType, s.currentType];
-    play('flip');
-  }, [play]);
-
-  const onPointerMove = useCallback((e: React.PointerEvent) => {
+  const startGame = useCallback(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
-    const rect = canvas.getBoundingClientRect();
-    const sy = sizeRef.current.h - 50;
-    stateRef.current.angle = Math.atan2(
-      e.clientY - rect.top - sy,
-      e.clientX - rect.left - stateRef.current.shooterX,
-    );
-  }, []);
-
-  const onPointerDown = useCallback(
-    (e: React.PointerEvent) => {
-      onPointerMove(e);
-      shoot();
-    },
-    [onPointerMove, shoot],
-  );
-
-  // Keyboard: Shift or S to swap
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Shift' || e.key === 's' || e.key === 'S') {
-        e.preventDefault();
-        handleSwap();
-      }
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [handleSwap]);
-
-  const reset = useCallback(() => {
+    const w = canvas?.width ?? 300;
+    const margin = BALL_RADIUS * 2;
     stateRef.current = {
-      grid: buildInitialGrid(),
-      shooterX: sizeRef.current.w / 2,
-      angle: -Math.PI / 2,
-      currentType: randomBubbleType(),
-      nextType: randomBubbleType(),
-      bullet: null,
-      score: 0,
-      done: false,
+      ...initialState(w),
+      started: true,
+      balls: [makeBall(uid(), true, margin + Math.random() * (w - margin * 2), 0)],
     };
     setScore(0);
+    setMisses(0);
+    setLevel(1);
+    setDone(false);
+    setPendingLevelUp(null);
+  }, []);
+
+  // ── Level continue ────────────────────────────────────────────────────────
+
+  const handleLevelContinue = useCallback(() => {
+    setPendingLevelUp(null);
+    const canvas = canvasRef.current;
+    const w = canvas?.width ?? 300;
+    // Capture the next level before resetting, then restart fresh at that level
+    const nextLevel = stateRef.current.level;
+    const margin = BALL_RADIUS * 2;
+    stateRef.current = {
+      ...initialState(w),
+      started: true,
+      level: nextLevel,
+      balls: [makeBall(uid(), true, margin + Math.random() * (w - margin * 2), nextLevel)],
+    };
+    setScore(0);
+    setMisses(0);
+    setLevel(nextLevel + 1);
     setDone(false);
   }, []);
 
+  // ── Shoot ─────────────────────────────────────────────────────────────────
+
+  const shoot = useCallback(() => {
+    const s = stateRef.current;
+    if (!s.started || s.done || s.paused) return;
+    const angle = Math.max(-Math.PI + 0.15, Math.min(-0.15, s.angle));
+    play('shoot');
+    s.bullets.push({
+      x: s.shooterX,
+      y: (canvasRef.current?.height ?? 440) - SHOOTER_Y_OFFSET,
+      vx: Math.cos(angle) * BULLET_SPEED,
+      vy: Math.sin(angle) * BULLET_SPEED,
+    });
+  }, [play]);
+
+  const handlePointerMove = useCallback((e: React.PointerEvent) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const mx = (e.clientX - rect.left) * (canvas.width / rect.width);
+    const my = (e.clientY - rect.top)  * (canvas.height / rect.height);
+    stateRef.current.angle = Math.atan2(my - (canvas.height - SHOOTER_Y_OFFSET), mx - stateRef.current.shooterX);
+  }, []);
+
+  const handlePointerDown = useCallback(
+    (e: React.PointerEvent) => { handlePointerMove(e); shoot(); },
+    [handlePointerMove, shoot],
+  );
+
+  const hitCount = Math.round(score / PTS_PER_HIT);
+
   return (
     <>
-      <ParticleEngine bursts={bursts} onBurstsConsumed={clearBursts} />
+      <GameShell score={score} onBack={onBack}>
+        <div className="flex flex-col items-center justify-start gap-3 mt-2 flex-1 w-full">
 
-      <GameShell title="Bubble Art" emoji="🫧" score={score} onBack={onBack}>
-        <div className="w-full max-w-sm flex flex-col items-center gap-2 mt-2 flex-1">
+          <div className="flex items-center gap-2 w-full max-w-xs px-1">
+            <div className="flex-1 rounded-xl py-2 text-center"
+              style={{ background: 'rgba(255,100,100,0.1)', border: '1px solid rgba(255,100,100,0.22)' }}>
+              <div className="text-sm uppercase tracking-widest mb-0.5" style={{ color: '#FF8888', opacity: 0.65 }}>Misses</div>
+              <div className="text-3xl font-bold leading-none" style={{ color: '#FF7777' }}>
+                {misses}<span className="text-lg font-normal opacity-45">/{MAX_MISSES}</span>
+              </div>
+            </div>
+            <div className="flex-1 rounded-xl py-2 text-center"
+              style={{ background: 'rgba(159,216,255,0.08)', border: '1px solid rgba(159,216,255,0.18)' }}>
+              <div className="text-sm uppercase tracking-widest mb-0.5" style={{ color: '#9FD8FF', opacity: 0.65 }}>Level</div>
+              <div className="text-3xl font-bold leading-none" style={{ color: '#FFFFFF' }}>{level}</div>
+            </div>
+            <div className="flex-1 rounded-xl py-2 text-center"
+              style={{ background: 'rgba(159,216,255,0.08)', border: '1px solid rgba(159,216,255,0.18)' }}>
+              <div className="text-sm uppercase tracking-widest mb-0.5" style={{ color: '#9FD8FF', opacity: 0.65 }}>Score</div>
+              <div className="text-3xl font-bold leading-none" style={{ color: '#9FD8FF' }}>{score}</div>
+            </div>
+          </div>
+
           <canvas
             ref={canvasRef}
-            className="w-full rounded-2xl border border-black/8 touch-none"
-            style={{
-              height: 480,
-              minHeight: 480,
-              cursor: canvasReady ? 'crosshair' : 'default',
-              background: CANVAS_BG,
-              boxShadow: '0 2px 16px rgba(0,0,0,0.06)',
-            }}
-            onPointerMove={onPointerMove}
-            onPointerDown={onPointerDown}
+            className="rounded-2xl border border-white/10 touch-none"
+            style={{ width: 'min(94vw, 380px)', height: '60vh', minHeight: 260, cursor: 'crosshair', background: CANVAS_BG, boxShadow: '0 2px 16px rgba(0,0,0,0.2)' }}
+            onPointerDown={handlePointerDown}
+            onPointerMove={handlePointerMove}
           />
 
-          {/* Swap button */}
-          <motion.button
-            onClick={handleSwap}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl glass border border-black/8 text-sm font-medium transition-all active:scale-95"
-            style={{ opacity: 0.85 }}
-            whileHover={{ scale: 1.03 }}
-            title="Swap current and next bubble (Shift or S)"
-          >
-            <span>⇄</span>
-            <span>Swap bubble</span>
-            <span className="text-xs opacity-50">Shift</span>
-          </motion.button>
+          <p className="text-base text-center font-semibold" style={{ color: '#9FD8FF' }}>
+            Shoot the <span style={{ color: '#FF5555', fontWeight: 800 }}>♥ red</span> ball — avoid the <span style={{ color: '#5599FF' }}>✕ blue</span> balls
+          </p>
 
-          <p className="text-xs opacity-25">Move to aim  •  Click or tap to shoot</p>
-
-          <button onClick={reset} className="text-sm opacity-35 hover:opacity-60 transition-opacity">
-            ↺ New game
+          <button onClick={startGame} className="flex items-center gap-2 text-base transition-opacity hover:opacity-100" style={{ color: '#9FD8FF', opacity: 0.75 }}>
+            <span className="text-xl">↺</span> New game
           </button>
         </div>
       </GameShell>
 
       {showInstructions && (
-        <InstructionsOverlay game="bubble" onPlay={() => setShowInstructions(false)} />
+        <InstructionsOverlay game="bubble" onPlay={() => { setShowInstructions(false); startGame(); }} />
       )}
 
-      {done && (
+      <AnimatePresence>
+        {pendingLevelUp && (
+          <LevelGate
+            key="level-gate"
+            completedLevel={pendingLevelUp.completed}
+            nextLevel={pendingLevelUp.next}
+            onContinue={handleLevelContinue}
+          />
+        )}
+      </AnimatePresence>
+
+      {done && !pendingLevelUp && (
         <CompletionOverlay
-          title="All Clear!"
-          subtitle="You cleared the entire board!"
+          title="Session Complete"
+          subtitle={`${hitCount} hits · ${misses} misses`}
           score={score}
-          onReplay={reset}
+          onReplay={startGame}
           onHome={onBack}
         />
       )}

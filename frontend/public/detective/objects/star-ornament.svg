@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 56 56" width="56" height="56" fill="none">
+  <!-- String -->
+  <line x1="28" y1="1" x2="28" y2="10" stroke="#9B7B3C" stroke-width="1.8" stroke-linecap="round"/>
+  <ellipse cx="28" cy="11" rx="2.5" ry="2" fill="#6A4010"/>
+  <!-- Drop shadow (same path, shifted 1,4) -->
+  <path transform="translate(1,4)" d="M28,12 L31.82,22.74 L43.22,23.06 L34.18,30.01 L37.40,40.94 L28,34.50 L18.60,40.94 L21.82,30.01 L12.78,23.06 L24.18,22.74 Z" fill="rgba(0,0,0,0.18)"/>
+  <!-- Star body -->
+  <path d="M28,12 L31.82,22.74 L43.22,23.06 L34.18,30.01 L37.40,40.94 L28,34.50 L18.60,40.94 L21.82,30.01 L12.78,23.06 L24.18,22.74 Z" fill="#C49020" stroke="#8A6010" stroke-width="1.1"/>
+  <!-- Highlight -->
+  <path d="M28,22 L29.18,25.38 L32.76,25.45 L29.90,27.62 L30.94,31.05 L28,29 L25.06,31.05 L26.10,27.62 L23.24,25.45 L26.82,25.38 Z" fill="rgba(255,240,160,0.55)"/>
+</svg>

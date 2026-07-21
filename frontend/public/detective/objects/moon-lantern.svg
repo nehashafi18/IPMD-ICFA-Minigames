@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 56 56" width="56" height="56" fill="none">
+  <!-- Rope -->
+  <line x1="28" y1="1" x2="28" y2="9" stroke="#9B7B3C" stroke-width="1.8" stroke-linecap="round"/>
+  <!-- Top cap -->
+  <rect x="15" y="9" width="26" height="5" rx="2.5" fill="#5A3510"/>
+  <!-- Body -->
+  <rect x="11" y="14" width="34" height="30" rx="7" fill="#B87830"/>
+  <rect x="11" y="14" width="34" height="30" rx="7" stroke="#7A4E18" stroke-width="1.2"/>
+  <!-- Glass glow -->
+  <rect x="15" y="18" width="26" height="22" rx="5" fill="rgba(255,200,100,0.45)"/>
+  <!-- Crescent moon — evenodd punches inner circle through outer -->
+  <path fill-rule="evenodd" d="M28,21 A9,9 0 1,0 28,39 A9,9 0 1,0 28,21Z M32,20.5 A7,7 0 1,0 32,34.5 A7,7 0 1,0 32,20.5Z" fill="#FFDA50"/>
+  <!-- Vertical frame lines -->
+  <line x1="21" y1="14" x2="21" y2="44" stroke="#7A4E18" stroke-width="0.7" opacity="0.5"/>
+  <line x1="35" y1="14" x2="35" y2="44" stroke="#7A4E18" stroke-width="0.7" opacity="0.5"/>
+  <!-- Bottom cap -->
+  <rect x="15" y="42" width="26" height="5" rx="2.5" fill="#5A3510"/>
+</svg>
