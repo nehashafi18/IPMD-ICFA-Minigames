@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { useAppStore } from '../store/useAppStore';
 import { TRANSITION_BACKDROPS } from '../systems/gameArt';
-import { bgMusic } from '../systems/audioSystem';
 
 interface Props {
   onDone: () => void;
@@ -35,21 +34,6 @@ export default function TransitionScreen({ onDone }: Props) {
 
   const [scene, setScene] = useState(0);
   const doneRef = useRef(false);
-  const [audioHint, setAudioHint] = useState(false);
-  const [audioUnlocked, setAudioUnlocked] = useState(false);
-
-  // Show the "tap for audio" hint after 1.5 s if the user hasn't tapped yet
-  useEffect(() => {
-    const t = setTimeout(() => { if (!audioUnlocked) setAudioHint(true); }, 1500);
-    return () => clearTimeout(t);
-  }, [audioUnlocked]);
-
-  function handleScreenTap() {
-    if (audioUnlocked) return;
-    bgMusic.unlock();
-    setAudioHint(false);
-    setAudioUnlocked(true);
-  }
 
   useEffect(() => {
     if (reducedMotion) {
@@ -93,8 +77,7 @@ export default function TransitionScreen({ onDone }: Props) {
   return (
     <div
       className="fixed inset-0 z-40 overflow-hidden"
-      style={{ background: '#05080F', cursor: audioUnlocked ? 'default' : 'pointer' }}
-      onClick={handleScreenTap}
+      style={{ background: '#05080F' }}
     >
       <AnimatePresence mode="wait">
         <motion.div
@@ -166,29 +149,6 @@ export default function TransitionScreen({ onDone }: Props) {
         </AnimatePresence>
       </div>
 
-      {/* Tap-for-audio hint — fades in after 1.5 s, disappears on first tap */}
-      <AnimatePresence>
-        {audioHint && (
-          <motion.div
-            className="absolute bottom-8 left-0 right-0 flex items-center justify-center gap-2 pointer-events-none"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.6 }}
-          >
-            <motion.span
-              animate={{ scale: [1, 1.2, 1] }}
-              transition={{ repeat: Infinity, duration: 1.8, ease: 'easeInOut' }}
-              style={{ color: 'rgba(255,255,255,0.45)', fontSize: 14 }}
-            >
-              ♪
-            </motion.span>
-            <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: 13, letterSpacing: '0.04em' }}>
-              Tap anywhere for audio
-            </span>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }

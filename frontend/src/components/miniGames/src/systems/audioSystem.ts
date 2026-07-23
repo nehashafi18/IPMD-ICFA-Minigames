@@ -119,43 +119,60 @@ function stopOthers(keep: MusicMode): void {
   });
 }
 
-// Attempt to start a track. Falls back to muted autoplay when the browser
-// blocks unmuted play, then registers a one-time gesture listener to unmute.
+// Attempt to start a track unmuted. If the browser's autoplay policy blocks it,
+// fall back to muted autoplay and immediately unmute once the element is playing
+// (changing .muted on an already-playing element is always allowed). This means
+// music starts automatically with no tap required in the vast majority of cases.
 function startTrack(mode: MusicMode): void {
   const audio = BGM[mode];
-  audio.muted  = false;
   audio.volume = prefs.musicVol;
 
+  // ── Try unmuted first ────────────────────────────────────────────────────
+  audio.muted = false;
   const promise = audio.play();
-  if (!promise) return;
+  if (!promise) return; // legacy sync-play browsers
 
   promise
     .then(() => { interacted = true; })
     .catch(() => {
-      // Browser blocked unmuted play — run muted so position advances from frame 1.
+      // ── Muted autoplay fallback ──────────────────────────────────────────
+      // Start muted (always allowed), then immediately set muted = false.
+      // Once an element is in the playing state, unmuting is a plain property
+      // write — no gesture required — so music plays automatically.
       audio.muted = true;
-      audio.play().catch(() => {});
+      const fallback = audio.play();
+      if (!fallback) return;
 
-      // Register unlock listeners only once, not on every failed play() call.
-      if (interacted || unlockPending) return;
-      unlockPending = true;
+      fallback
+        .then(() => {
+          // Element is now playing; unmute instantly for auto audio.
+          audio.muted  = false;
+          audio.volume = prefs.musicVol;
+          interacted   = true;
+        })
+        .catch(() => {
+          // Even muted play blocked (very restrictive browser / iframe).
+          // Register a one-time gesture listener as a last resort.
+          if (interacted || unlockPending) return;
+          unlockPending = true;
 
-      const handler = () => {
-        unlockPending = false;
-        interacted    = true;
-        if (current) {
-          BGM[current].muted  = false;
-          BGM[current].volume = prefs.musicVol;
-          if (BGM[current].paused) BGM[current].play().catch(() => {});
-        }
-        (['click', 'keydown', 'touchstart', 'pointerdown'] as const).forEach(ev =>
-          document.removeEventListener(ev, handler, { capture: true } as AddEventListenerOptions),
-        );
-      };
+          const handler = () => {
+            unlockPending = false;
+            interacted    = true;
+            if (current) {
+              BGM[current].muted  = false;
+              BGM[current].volume = prefs.musicVol;
+              if (BGM[current].paused) BGM[current].play().catch(() => {});
+            }
+            (['click', 'keydown', 'touchstart', 'pointerdown'] as const).forEach(ev =>
+              document.removeEventListener(ev, handler, { capture: true } as AddEventListenerOptions),
+            );
+          };
 
-      (['click', 'keydown', 'touchstart', 'pointerdown'] as const).forEach(ev =>
-        document.addEventListener(ev, handler, { capture: true }),
-      );
+          (['click', 'keydown', 'touchstart', 'pointerdown'] as const).forEach(ev =>
+            document.addEventListener(ev, handler, { capture: true }),
+          );
+        });
     });
 }
 
