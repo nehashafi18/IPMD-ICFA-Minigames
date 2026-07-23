@@ -9,6 +9,7 @@ import ParticleEngine from '../../systems/ParticleEngine';
 import { useParticleBurst } from '../../hooks/useParticleBurst';
 import { useSound } from '../../hooks/useSound';
 import { useAppStore } from '../../store/useAppStore';
+import { bgMusic, sounds } from '../../systems/audioSystem';
 import { ART_STYLE_IMAGES } from '../../systems/gameArt';
 
 interface Props { onBack: () => void; }
@@ -80,6 +81,19 @@ export default function MemoryGame({ onBack }: Props) {
   }, [startRound]);
 
   useEffect(() => () => clearTimer(), [clearTimer]);
+
+  // Music mode + answer sounds — only switch on the phases that actually matter
+  useEffect(() => {
+    if (phase === 'finding') {
+      bgMusic.setMode('waiting');
+    } else if (phase === 'correct') {
+      sounds.correct();
+      bgMusic.setMode('game');
+    } else if (phase === 'wrong') {
+      sounds.wrong();
+      bgMusic.setMode('game');
+    }
+  }, [phase]);
 
   const handleCardClick = useCallback((idx: number) => {
     if (phase !== 'finding') return;

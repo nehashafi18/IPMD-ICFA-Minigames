@@ -4,6 +4,7 @@ import GameShell from '../../components/GameShell';
 import CompletionOverlay from '../../components/CompletionOverlay';
 import MemoryGalleryInstructions from './MemoryGalleryInstructions';
 import { useAppStore } from '../../store/useAppStore';
+import { bgMusic, sounds } from '../../systems/audioSystem';
 
 interface Props { onBack: () => void; }
 
@@ -76,6 +77,20 @@ export default function MemoryGalleryGame({ onBack }: Props) {
   const [roundResult, setRoundResult] = useState<{ correct: number; total: number } | null>(null);
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
   const updateScore = useAppStore(s => s.updateScore);
+
+  // Music mode + answer sounds — only switch on the phases that actually matter
+  useEffect(() => {
+    if (phase === 'recalling') {
+      bgMusic.setMode('waiting');
+    } else if (phase === 'feedback') {
+      if (roundResult && roundResult.correct === roundResult.total) {
+        sounds.correct();
+      } else {
+        sounds.wrong();
+      }
+      bgMusic.setMode('game');
+    }
+  }, [phase, roundResult]);
 
   const after = useCallback((fn: () => void, ms: number) => {
     const id = setTimeout(fn, ms);

@@ -34,14 +34,14 @@ function fmt(s: number) {
 function BackArrow() {
   return (
     <svg viewBox="0 0 20 20" width="22" height="22" fill="none"
-      stroke="rgba(210,185,110,0.5)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      stroke="rgba(255,255,255,0.4)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <polyline points="13 4 7 10 13 16" />
     </svg>
   );
 }
 
 function HintLamp({ dim }: { dim: boolean }) {
-  const c = dim ? 'rgba(255,255,255,0.15)' : '#F0B848';
+  const c = dim ? 'rgba(255,255,255,0.15)' : '#9B6FD8';
   return (
     <svg viewBox="0 0 22 22" width="18" height="18" fill="none"
       stroke={c} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -69,8 +69,8 @@ function ItemPanel({ items, found }: { items: HiddenItem[]; found: Set<string> }
   return (
     <div style={{
       width: PANEL_W, minWidth: PANEL_W, height: '100%', flexShrink: 0,
-      background: '#0D1409',
-      borderRight: '1px solid rgba(200,170,90,0.10)',
+      background: '#05080F',
+      borderRight: '1px solid rgba(155,111,216,0.12)',
       display: 'flex', flexDirection: 'column',
       overflow: 'hidden',
       fontFamily: 'Quicksand, sans-serif',
@@ -79,12 +79,12 @@ function ItemPanel({ items, found }: { items: HiddenItem[]; found: Set<string> }
       {/* ── Header ── */}
       <div style={{
         padding: '14px 12px 10px',
-        borderBottom: '1px solid rgba(200,170,90,0.08)',
+        borderBottom: '1px solid rgba(155,111,216,0.10)',
         flexShrink: 0,
       }}>
         <div style={{
           fontSize: 24, letterSpacing: 3, textTransform: 'uppercase',
-          color: 'rgba(200,170,90,0.32)', fontWeight: 700, textAlign: 'center',
+          color: 'rgba(155,111,216,0.55)', fontWeight: 700, textAlign: 'center',
           marginBottom: 10,
         }}>
           Find
@@ -97,8 +97,8 @@ function ItemPanel({ items, found }: { items: HiddenItem[]; found: Set<string> }
             return (
               <div key={it.id} style={{
                 width: 12, height: 12, borderRadius: '50%',
-                background: done ? '#5AC870' : 'rgba(200,170,90,0.14)',
-                border: `1.5px solid ${done ? '#5AC870' : 'rgba(200,170,90,0.22)'}`,
+                background: done ? '#5AC870' : 'rgba(155,111,216,0.12)',
+                border: `1.5px solid ${done ? '#5AC870' : 'rgba(155,111,216,0.22)'}`,
                 transition: 'background 0.35s, border-color 0.35s',
                 boxShadow: done ? '0 0 6px rgba(90,200,112,0.5)' : 'none',
               }}/>
@@ -108,7 +108,7 @@ function ItemPanel({ items, found }: { items: HiddenItem[]; found: Set<string> }
 
         <div style={{
           textAlign: 'center', fontSize: 28,
-          color: nFound === nTotal ? 'rgba(90,200,112,0.55)' : 'rgba(200,170,90,0.32)',
+          color: nFound === nTotal ? 'rgba(90,200,112,0.75)' : 'rgba(155,111,216,0.45)',
           transition: 'color 0.35s',
         }}>
           {nFound} / {nTotal} found
@@ -126,7 +126,7 @@ function ItemPanel({ items, found }: { items: HiddenItem[]; found: Set<string> }
             <div key={item.id} style={{
               borderRadius: 12,
               background: done ? 'rgba(90,200,112,0.07)' : 'rgba(255,255,255,0.025)',
-              border: `1px solid ${done ? 'rgba(90,200,112,0.25)' : 'rgba(200,170,90,0.09)'}`,
+              border: `1px solid ${done ? 'rgba(90,200,112,0.25)' : 'rgba(155,111,216,0.10)'}`,
               padding: '10px 8px 8px',
               display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
               position: 'relative',
@@ -137,14 +137,14 @@ function ItemPanel({ items, found }: { items: HiddenItem[]; found: Set<string> }
               <div style={{
                 position: 'absolute', top: 7, left: 8,
                 width: 18, height: 18, borderRadius: '50%',
-                background: done ? '#5AC870' : 'rgba(200,170,90,0.10)',
-                border: `1px solid ${done ? '#5AC870' : 'rgba(200,170,90,0.20)'}`,
+                background: done ? '#5AC870' : 'rgba(155,111,216,0.10)',
+                border: `1px solid ${done ? '#5AC870' : 'rgba(155,111,216,0.22)'}`,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 transition: 'background 0.35s',
               }}>
                 {done
                   ? <Tick sz={9} />
-                  : <span style={{ fontSize: 10, fontWeight: 800, color: 'rgba(200,170,90,0.5)', lineHeight: 1 }}>{i + 1}</span>
+                  : <span style={{ fontSize: 10, fontWeight: 800, color: 'rgba(155,111,216,0.5)', lineHeight: 1 }}>{i + 1}</span>
                 }
               </div>
 
@@ -211,8 +211,8 @@ function TopBar({
   return (
     <div style={{
       flexShrink: 0,
-      background: '#0A0E07',
-      borderBottom: '1px solid rgba(200,170,90,0.09)',
+      background: '#050810',
+      borderBottom: '1px solid rgba(155,111,216,0.09)',
       fontFamily: 'Quicksand, sans-serif',
     }}>
       {/* Main row */}
@@ -231,7 +231,7 @@ function TopBar({
         <span style={{
           flex: 1, minWidth: 0,
           fontSize: 28, fontWeight: 600, letterSpacing: 0.3,
-          color: 'rgba(210,185,110,0.4)',
+          color: 'rgba(155,111,216,0.45)',
           whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
         }}>
           {sceneTitle}
@@ -252,9 +252,9 @@ function TopBar({
           display: 'flex', alignItems: 'center', gap: 10,
           padding: '6px 12px', borderRadius: 8,
           fontSize: 28, fontWeight: 600,
-          background: hintUsed ? 'transparent' : 'rgba(240,184,72,0.09)',
-          border: `1px solid ${hintUsed ? 'rgba(255,255,255,0.05)' : 'rgba(240,184,72,0.28)'}`,
-          color: hintUsed ? 'rgba(255,255,255,0.14)' : '#F0B848',
+          background: hintUsed ? 'transparent' : 'rgba(155,111,216,0.09)',
+          border: `1px solid ${hintUsed ? 'rgba(255,255,255,0.05)' : 'rgba(155,111,216,0.28)'}`,
+          color: hintUsed ? 'rgba(255,255,255,0.14)' : '#9B6FD8',
           cursor: hintUsed ? 'default' : 'pointer',
           transition: 'opacity 0.3s',
         }}>
@@ -426,7 +426,7 @@ export default function ArtDetectiveGame({ onBack }: Props) {
 
     // Background
     ctx.clearRect(0, 0, CW, CH);
-    ctx.fillStyle = '#0B0F08';
+    ctx.fillStyle = '#05080F';
     ctx.fillRect(0, 0, CW, CH);
 
     // ── Scene background image (letterboxed, with per-scene style filter) ──
@@ -441,7 +441,7 @@ export default function ArtDetectiveGame({ onBack }: Props) {
       const vcx = dX + dW / 2, vcy = dY + dH / 2;
       const vg = ctx.createRadialGradient(vcx, vcy, Math.min(dW, dH) * 0.22, vcx, vcy, Math.max(dW, dH) * 0.76);
       vg.addColorStop(0, 'rgba(0,0,0,0)');
-      vg.addColorStop(1, 'rgba(4,6,3,0.48)');
+      vg.addColorStop(1, 'rgba(4,6,15,0.48)');
       ctx.save(); ctx.fillStyle = vg; ctx.fillRect(dX, dY, dW, dH); ctx.restore();
 
       // Painterly grain overlay — subtle warm noise tiled across the scene area
@@ -567,19 +567,19 @@ export default function ArtDetectiveGame({ onBack }: Props) {
         const sr = cr * 2.6;
 
         const sg = ctx.createRadialGradient(cx, cy, 0, cx, cy, sr);
-        sg.addColorStop(0, 'rgba(240,184,72,0.24)');
-        sg.addColorStop(0.5, 'rgba(240,184,72,0.08)');
-        sg.addColorStop(1, 'rgba(240,184,72,0)');
+        sg.addColorStop(0, 'rgba(155,111,216,0.24)');
+        sg.addColorStop(0.5, 'rgba(155,111,216,0.08)');
+        sg.addColorStop(1, 'rgba(155,111,216,0)');
         ctx.save();
         ctx.fillStyle = sg;
         ctx.fillRect(cx - sr, cy - sr, sr * 2, sr * 2);
         ctx.restore();
 
         ctx.save();
-        ctx.strokeStyle = 'rgba(240,184,72,0.88)';
+        ctx.strokeStyle = 'rgba(155,111,216,0.88)';
         ctx.lineWidth   = Math.max(1.5, CW * 0.0025);
         ctx.setLineDash([6, 4]);
-        ctx.shadowColor = 'rgba(240,184,72,0.4)';
+        ctx.shadowColor = 'rgba(155,111,216,0.4)';
         ctx.shadowBlur  = 8;
         ctx.beginPath(); ctx.arc(cx, cy, cr, 0, Math.PI * 2); ctx.stroke();
         ctx.restore();
@@ -745,7 +745,7 @@ export default function ArtDetectiveGame({ onBack }: Props) {
     return (
       <motion.div
         className="fixed inset-0 z-40 flex flex-col items-center justify-center"
-        style={{ background: '#0B0F08', padding: '0 20px', gap: 0 }}
+        style={{ background: '#05080F', padding: '0 20px', gap: 0 }}
         initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
 
         {/* Level + difficulty row */}
@@ -754,9 +754,9 @@ export default function ArtDetectiveGame({ onBack }: Props) {
           style={{ display: 'flex', gap: 8, marginBottom: 18 }}>
           <div style={{
             padding: '5px 14px', borderRadius: 20,
-            border: '1px solid rgba(200,170,90,0.16)', background: 'rgba(200,170,90,0.05)',
+            border: '1px solid rgba(155,111,216,0.16)', background: 'rgba(155,111,216,0.05)',
             fontSize: 17, letterSpacing: 2.5, textTransform: 'uppercase' as const,
-            color: 'rgba(200,170,90,0.48)', fontWeight: 700,
+            color: 'rgba(155,111,216,0.48)', fontWeight: 700,
           }}>
             Level {scene.levelNum} · {STATIC_SCENES.length}
           </div>
@@ -775,7 +775,7 @@ export default function ArtDetectiveGame({ onBack }: Props) {
           initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.06 }}
           style={{
-            color: '#E8DFC8', fontSize: 28, fontWeight: 700, margin: '0 0 10px',
+            color: '#FFFFFF', fontSize: 28, fontWeight: 700, margin: '0 0 10px',
             textAlign: 'center', lineHeight: 1.2,
           }}>
           {scene.title}
@@ -786,7 +786,7 @@ export default function ArtDetectiveGame({ onBack }: Props) {
           initial={{ opacity: 0 }} animate={{ opacity: 1 }}
           transition={{ delay: 0.12 }}
           style={{
-            fontSize: 17, color: 'rgba(180,210,180,0.48)',
+            fontSize: 17, color: 'rgba(200,200,255,0.45)',
             margin: '0 0 28px', textAlign: 'center',
             maxWidth: 300, lineHeight: 1.55,
           }}>
@@ -799,7 +799,7 @@ export default function ArtDetectiveGame({ onBack }: Props) {
           transition={{ delay: 0.18 }}
           style={{
             fontSize: 18, letterSpacing: 3, textTransform: 'uppercase' as const,
-            color: 'rgba(200,170,90,0.3)', fontWeight: 700,
+            color: 'rgba(155,111,216,0.3)', fontWeight: 700,
             marginBottom: 16,
           }}>
           Find these
@@ -819,17 +819,17 @@ export default function ArtDetectiveGame({ onBack }: Props) {
               style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
               <div style={{
                 padding: '12px', borderRadius: 16,
-                border: '1.5px solid rgba(200,170,90,0.17)',
-                background: 'rgba(200,170,90,0.05)',
+                border: '1.5px solid rgba(155,111,216,0.17)',
+                background: 'rgba(155,111,216,0.05)',
                 position: 'relative',
               }}>
                 {/* Item number */}
                 <div style={{
                   position: 'absolute', top: -8, right: -8,
                   width: 20, height: 20, borderRadius: '50%',
-                  background: '#0B0F08', border: '1px solid rgba(200,170,90,0.22)',
+                  background: '#05080F', border: '1px solid rgba(155,111,216,0.22)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 10, fontWeight: 800, color: 'rgba(200,170,90,0.5)',
+                  fontSize: 10, fontWeight: 800, color: 'rgba(155,111,216,0.5)',
                 }}>
                   {i + 1}
                 </div>
@@ -842,7 +842,7 @@ export default function ArtDetectiveGame({ onBack }: Props) {
               </div>
               <span style={{
                 fontSize: 17, fontWeight: 600,
-                color: 'rgba(220,200,160,0.58)', textAlign: 'center',
+                color: 'rgba(255,255,255,0.60)', textAlign: 'center',
               }}>
                 {item.label}
               </span>
@@ -857,18 +857,18 @@ export default function ArtDetectiveGame({ onBack }: Props) {
           style={{
             display: 'flex', alignItems: 'center', gap: 8, marginBottom: 24,
             padding: '7px 16px', borderRadius: 20,
-            border: '1px solid rgba(200,170,90,0.09)',
-            background: 'rgba(200,170,90,0.03)',
+            border: '1px solid rgba(155,111,216,0.09)',
+            background: 'rgba(155,111,216,0.03)',
           }}>
           <motion.div
             animate={{ scale: [1, 0.86, 1] }}
             transition={{ duration: 0.45, delay: 1.1, repeat: 0 }}>
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none"
-              stroke="rgba(200,170,90,0.45)" strokeWidth="1.8" strokeLinecap="round">
+              stroke="rgba(155,111,216,0.45)" strokeWidth="1.8" strokeLinecap="round">
               <path d="M9 12V7a3 3 0 0 1 6 0v5"/><path d="M6 14v2a6 6 0 0 0 12 0v-2"/>
             </svg>
           </motion.div>
-          <span style={{ fontSize: 22, color: 'rgba(200,170,90,0.38)', letterSpacing: 0.4 }}>
+          <span style={{ fontSize: 22, color: 'rgba(155,111,216,0.38)', letterSpacing: 0.4 }}>
             Tap anywhere in the scene to find them
           </span>
         </motion.div>
@@ -879,18 +879,18 @@ export default function ArtDetectiveGame({ onBack }: Props) {
           transition={{ delay: 0.55 }}
           style={{
             padding: '14px 52px', borderRadius: 14, border: 'none', cursor: 'pointer',
-            background: 'linear-gradient(140deg, #527A38, #384F24)',
-            color: '#E8DFC8', fontSize: 18, fontWeight: 700, letterSpacing: 0.4,
-            boxShadow: '0 6px 24px rgba(82,122,56,0.28)',
+            background: 'linear-gradient(135deg, #9B6FD8, #7B4FC8)',
+            color: '#FFFFFF', fontSize: 18, fontWeight: 700, letterSpacing: 0.4,
+            boxShadow: '0 6px 24px rgba(155,111,216,0.28)',
             marginBottom: 14,
           }}
-          whileHover={{ scale: 1.05, boxShadow: '0 8px 28px rgba(82,122,56,0.38)' }}
+          whileHover={{ scale: 1.05, boxShadow: '0 8px 28px rgba(155,111,216,0.38)' }}
           whileTap={{ scale: 0.96 }}>
           Begin
         </motion.button>
 
         <button onClick={onBack} style={{
-          color: 'rgba(200,170,90,0.22)', fontSize: 22,
+          color: 'rgba(155,111,216,0.22)', fontSize: 22,
           background: 'none', border: 'none', cursor: 'pointer',
           display: 'flex', alignItems: 'center', gap: 5,
         }}>
@@ -909,7 +909,7 @@ export default function ArtDetectiveGame({ onBack }: Props) {
     return (
       <motion.div
         className="fixed inset-0 z-40 flex items-center justify-center"
-        style={{ background: 'rgba(5,8,3,0.95)', backdropFilter: 'blur(14px)' }}
+        style={{ background: 'rgba(5,8,15,0.95)', backdropFilter: 'blur(14px)' }}
         initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
         <motion.div
           initial={{ scale: 0.82, y: 24 }} animate={{ scale: 1, y: 0 }}
@@ -917,32 +917,32 @@ export default function ArtDetectiveGame({ onBack }: Props) {
           style={{
             display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20,
             padding: '40px 32px', borderRadius: 26, maxWidth: 300, width: '90%', textAlign: 'center',
-            background: 'rgba(200,170,90,0.04)', border: '1px solid rgba(200,170,90,0.14)',
+            background: 'rgba(155,111,216,0.04)', border: '1px solid rgba(155,111,216,0.14)',
           }}>
 
           <div style={{
             width: 56, height: 56, borderRadius: '50%',
-            background: 'rgba(200,170,90,0.09)', border: '1.5px solid rgba(200,170,90,0.24)',
+            background: 'rgba(155,111,216,0.09)', border: '1.5px solid rgba(155,111,216,0.24)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
             <svg viewBox="0 0 28 28" width="24" height="24" fill="none"
-              stroke="rgba(200,170,90,0.85)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              stroke="rgba(155,111,216,0.85)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
               <path d="M14 3l2.8 7.2H23l-5.6 4 2 7.6L14 18l-5.4 3.8 2-7.6L5 10.2h6.2Z"/>
             </svg>
           </div>
 
           <div>
-            <h2 style={{ color: '#E8DFC8', fontSize: 28, fontWeight: 700, margin: '0 0 4px' }}>All Found!</h2>
-            <p style={{ fontSize: 22, color: 'rgba(200,170,90,0.38)', margin: 0, letterSpacing: 0.5 }}>
+            <h2 style={{ color: '#FFFFFF', fontSize: 28, fontWeight: 700, margin: '0 0 4px' }}>All Found!</h2>
+            <p style={{ fontSize: 22, color: 'rgba(155,111,216,0.38)', margin: 0, letterSpacing: 0.5 }}>
               {STATIC_SCENES.length} scenes complete
             </p>
           </div>
 
           <div>
-            <p style={{ fontSize: 17, letterSpacing: 2.5, textTransform: 'uppercase', color: 'rgba(200,170,90,0.36)', margin: '0 0 6px', fontWeight: 700 }}>
+            <p style={{ fontSize: 17, letterSpacing: 2.5, textTransform: 'uppercase', color: 'rgba(155,111,216,0.36)', margin: '0 0 6px', fontWeight: 700 }}>
               Final Score
             </p>
-            <p style={{ fontSize: 58, fontWeight: 800, color: '#E8DFC8', margin: 0, lineHeight: 1 }}>
+            <p style={{ fontSize: 58, fontWeight: 800, color: '#FFFFFF', margin: 0, lineHeight: 1 }}>
               {totalScore}
             </p>
           </div>
@@ -950,15 +950,15 @@ export default function ArtDetectiveGame({ onBack }: Props) {
           <div style={{ display: 'flex', gap: 10, width: '100%' }}>
             <button onClick={restart} style={{
               flex: 1, padding: '13px', borderRadius: 12, fontWeight: 600, fontSize: 18,
-              background: 'rgba(200,170,90,0.07)', border: '1px solid rgba(200,170,90,0.16)',
-              color: '#E8DFC8', cursor: 'pointer',
+              background: 'rgba(155,111,216,0.07)', border: '1px solid rgba(155,111,216,0.16)',
+              color: '#FFFFFF', cursor: 'pointer',
             }}>
               Play Again
             </button>
             <button onClick={onBack} style={{
               flex: 1, padding: '13px', borderRadius: 12, fontWeight: 600, fontSize: 18,
-              background: 'linear-gradient(140deg, #527A38, #384F24)', border: 'none',
-              color: '#E8DFC8', cursor: 'pointer',
+              background: 'linear-gradient(135deg, #9B6FD8, #7B4FC8)', border: 'none',
+              color: '#FFFFFF', cursor: 'pointer',
             }}>
               Home
             </button>
@@ -970,7 +970,7 @@ export default function ArtDetectiveGame({ onBack }: Props) {
 
   // ── Playing screen ────────────────────────────────────────────────────────
   return (
-    <div className="fixed inset-0 z-30 flex flex-col" style={{ background: '#0B0F08' }}>
+    <div className="fixed inset-0 z-30 flex flex-col" style={{ background: '#05080F' }}>
 
       {/* Top bar — full width */}
       <TopBar
@@ -1006,17 +1006,17 @@ export default function ArtDetectiveGame({ onBack }: Props) {
                 style={{
                   position: 'absolute', inset: 0, zIndex: 20,
                   display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 20,
-                  background: 'rgba(5,8,3,0.9)', backdropFilter: 'blur(8px)',
+                  background: 'rgba(5,8,15,0.9)', backdropFilter: 'blur(8px)',
                 }}>
-                <p style={{ color: 'rgba(200,170,90,0.7)', fontSize: 16, textAlign: 'center', maxWidth: 260 }}>
+                <p style={{ color: 'rgba(155,111,216,0.7)', fontSize: 16, textAlign: 'center', maxWidth: 260 }}>
                   Scene failed to load
                 </p>
                 <button
                   onClick={onBack}
                   style={{
                     padding: '12px 36px', borderRadius: 12, border: 'none', cursor: 'pointer',
-                    background: 'linear-gradient(140deg, #527A38, #384F24)',
-                    color: '#E8DFC8', fontSize: 16, fontWeight: 700,
+                    background: 'linear-gradient(135deg, #9B6FD8, #7B4FC8)',
+                    color: '#FFFFFF', fontSize: 16, fontWeight: 700,
                   }}>
                   Back to Menu
                 </button>
@@ -1033,8 +1033,8 @@ export default function ArtDetectiveGame({ onBack }: Props) {
                 style={{
                   position: 'absolute', top: 12, left: '50%', transform: 'translateX(-50%)',
                   padding: '9px 20px', borderRadius: 12,
-                  background: 'rgba(240,184,72,0.09)', border: '1px solid rgba(240,184,72,0.26)',
-                  color: '#F0B848', backdropFilter: 'blur(8px)',
+                  background: 'rgba(155,111,216,0.09)', border: '1px solid rgba(155,111,216,0.26)',
+                  color: '#9B6FD8', backdropFilter: 'blur(8px)',
                   fontSize: 17, fontWeight: 500,
                   maxWidth: '80%', textAlign: 'center', pointerEvents: 'none',
                   lineHeight: 1.4,
@@ -1053,7 +1053,7 @@ export default function ArtDetectiveGame({ onBack }: Props) {
             style={{
               position: 'absolute', inset: 0, zIndex: 50,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              background: 'rgba(4,6,3,0.90)', backdropFilter: 'blur(12px)',
+              background: 'rgba(4,6,15,0.90)', backdropFilter: 'blur(12px)',
             }}
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
             <motion.div
@@ -1062,7 +1062,7 @@ export default function ArtDetectiveGame({ onBack }: Props) {
               style={{
                 display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14,
                 padding: '36px 28px', borderRadius: 24, maxWidth: 290, width: '90%', textAlign: 'center',
-                background: 'rgba(200,170,90,0.04)', border: '1px solid rgba(200,170,90,0.14)',
+                background: 'rgba(155,111,216,0.04)', border: '1px solid rgba(155,111,216,0.14)',
               }}>
 
               <div style={{
@@ -1074,10 +1074,10 @@ export default function ArtDetectiveGame({ onBack }: Props) {
               </div>
 
               <div>
-                <p style={{ fontSize: 17, letterSpacing: 2.5, textTransform: 'uppercase', color: 'rgba(200,170,90,0.4)', margin: '0 0 6px', fontWeight: 700 }}>
+                <p style={{ fontSize: 17, letterSpacing: 2.5, textTransform: 'uppercase', color: 'rgba(155,111,216,0.4)', margin: '0 0 6px', fontWeight: 700 }}>
                   Level {scene.levelNum} clear
                 </p>
-                <h2 style={{ color: '#E8DFC8', fontSize: 22, fontWeight: 700, margin: 0 }}>{scene.title}</h2>
+                <h2 style={{ color: '#FFFFFF', fontSize: 22, fontWeight: 700, margin: 0 }}>{scene.title}</h2>
               </div>
 
               {wrongCount > 0 && (
@@ -1086,23 +1086,23 @@ export default function ArtDetectiveGame({ onBack }: Props) {
                 </p>
               )}
 
-              <p style={{ fontSize: 50, fontWeight: 800, color: '#E8DFC8', margin: 0, lineHeight: 1 }}>
+              <p style={{ fontSize: 50, fontWeight: 800, color: '#FFFFFF', margin: 0, lineHeight: 1 }}>
                 {totalScore}
               </p>
 
               <motion.button onClick={goNextLevel}
                 style={{
                   width: '100%', padding: '14px', borderRadius: 13, border: 'none', cursor: 'pointer',
-                  background: 'linear-gradient(140deg, #527A38, #384F24)',
-                  color: '#E8DFC8', fontSize: 22, fontWeight: 700,
-                  boxShadow: '0 4px 16px rgba(82,122,56,0.25)',
+                  background: 'linear-gradient(135deg, #9B6FD8, #7B4FC8)',
+                  color: '#FFFFFF', fontSize: 22, fontWeight: 700,
+                  boxShadow: '0 4px 16px rgba(155,111,216,0.25)',
                 }}
                 whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
                 {levelIdx < STATIC_SCENES.length - 1 ? 'Next Level' : 'Finish'}
               </motion.button>
 
               <button onClick={onBack} style={{
-                color: 'rgba(200,170,90,0.22)', fontSize: 22,
+                color: 'rgba(155,111,216,0.22)', fontSize: 22,
                 background: 'none', border: 'none', cursor: 'pointer',
               }}>
                 Exit

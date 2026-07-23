@@ -1,8 +1,10 @@
-import { motion } from 'framer-motion';
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore, type GameId } from '../store/useAppStore';
 import AmbientBackground from './AmbientBackground';
 import SpeakerIcon from './SpeakerIcon';
 import { ART_STYLE_IMAGES } from '../systems/gameArt';
+import { audioSettings, bgMusic } from '../systems/audioSystem';
 
 const GAMES = [
   {
@@ -51,20 +53,95 @@ export default function HomeScreen() {
   const soundEnabled = useAppStore((s) => s.soundEnabled);
   const toggleSound  = useAppStore((s) => s.toggleSound);
 
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [musicVol, setMusicVolState]    = useState(audioSettings.musicVol);
+  const [sfxVol,   setSfxVolState]      = useState(audioSettings.sfxVol);
+
+  function handleMusicVol(v: number) {
+    setMusicVolState(v);
+    audioSettings.setMusicVol(v);
+  }
+  function handleSfxVol(v: number) {
+    setSfxVolState(v);
+    audioSettings.setSfxVol(v);
+  }
+
   return (
     <div className="min-h-dvh h-dvh flex flex-col">
       <AmbientBackground />
 
       {/* Header */}
-      <header className="relative z-10 flex items-center justify-end px-6 pt-5 pb-2 flex-shrink-0">
-        <button
-          onClick={toggleSound}
-          className="opacity-60 hover:opacity-100 transition-opacity"
-          aria-label={soundEnabled ? 'Mute sound' : 'Unmute sound'}
-          style={{ color: '#FFFFFF' }}
-        >
-          <SpeakerIcon muted={!soundEnabled} className="w-6 h-6" />
-        </button>
+      <header className="relative z-10 flex items-center justify-end px-6 pt-5 pb-2 flex-shrink-0 gap-3">
+        {/* Audio settings panel */}
+        <div className="relative">
+          <button
+            onClick={() => { setSettingsOpen(s => !s); bgMusic.unlock(); }}
+            className="opacity-60 hover:opacity-100 transition-opacity"
+            aria-label="Audio settings"
+            style={{ color: '#FFFFFF' }}
+          >
+            <SpeakerIcon muted={!soundEnabled} className="w-6 h-6" />
+          </button>
+
+          <AnimatePresence>
+            {settingsOpen && (
+              <motion.div
+                initial={{ opacity: 0, y: -8, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -8, scale: 0.95 }}
+                transition={{ duration: 0.15 }}
+                className="absolute right-0 top-9 rounded-2xl p-4 flex flex-col gap-3"
+                style={{
+                  background: 'rgba(10,12,24,0.92)',
+                  border: '1px solid rgba(255,255,255,0.12)',
+                  boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+                  backdropFilter: 'blur(12px)',
+                  minWidth: 210,
+                  zIndex: 50,
+                }}
+              >
+                {/* Mute toggle */}
+                <button
+                  onClick={toggleSound}
+                  className="text-left text-sm font-semibold px-3 py-2 rounded-xl transition-colors"
+                  style={{
+                    color: soundEnabled ? '#FFFFFF' : 'rgba(255,255,255,0.4)',
+                    background: soundEnabled ? 'rgba(155,111,216,0.18)' : 'rgba(255,255,255,0.06)',
+                  }}
+                >
+                  {soundEnabled ? '🔊  Sound On' : '🔇  Sound Off'}
+                </button>
+
+                {/* Music volume */}
+                <label className="flex flex-col gap-1.5">
+                  <span style={{ color: 'rgba(255,255,255,0.55)', fontSize: 11, letterSpacing: '0.05em' }}>
+                    MUSIC
+                  </span>
+                  <input
+                    type="range" min={0} max={1} step={0.05}
+                    value={musicVol}
+                    onPointerDown={() => { bgMusic.unlock(); audioSettings.setMusicVol(musicVol); }}
+                    onChange={e => handleMusicVol(parseFloat(e.target.value))}
+                    style={{ accentColor: '#9B6FD8', width: '100%' }}
+                  />
+                </label>
+
+                {/* SFX volume */}
+                <label className="flex flex-col gap-1.5">
+                  <span style={{ color: 'rgba(255,255,255,0.55)', fontSize: 11, letterSpacing: '0.05em' }}>
+                    SOUND EFFECTS
+                  </span>
+                  <input
+                    type="range" min={0} max={1} step={0.05}
+                    value={sfxVol}
+                    onChange={e => handleSfxVol(parseFloat(e.target.value))}
+                    style={{ accentColor: '#9B6FD8', width: '100%' }}
+                  />
+                </label>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </header>
 
       <main className="flex-1 relative z-10 flex flex-col items-center px-3 pb-6" style={{ minHeight: 0 }}>
@@ -127,6 +204,21 @@ export default function HomeScreen() {
           ))}
         </motion.div>
       </main>
+
+      <footer className="relative z-10 text-center pb-3 flex-shrink-0">
+        <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 11 }}>
+          Music by{' '}
+          <a
+            href="https://incompetech.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: 'rgba(255,255,255,0.45)', textDecoration: 'underline' }}
+          >
+            Kevin MacLeod
+          </a>
+          {' '}· CC BY 4.0
+        </p>
+      </footer>
     </div>
   );
 }
