@@ -201,140 +201,137 @@ export class PortalPreviewEngine {
   }
 
   // ── Cascade — vivid pieces flowing/falling and interacting, pure motion ──
-  // ── Cascade — the actual mechanic: ONE red ball falls continuously; the
-  // scene starts calm with nothing else on screen. A blue projectile is
-  // fired up at it — on impact the red ball shrinks (still falling) and
-  // solid blue balls burst outward FROM the impact point. Blue balls only
-  // ever exist after a hit, never fade, and accumulate as clutter each round.
+  // ── Cascade — the actual mechanic: ONE red ball falls straight down; the
+  // scene starts calm with nothing else on screen. A blue projectile fires
+  // from a fixed bottom turret up at it — on impact the red ball shrinks
+  // (still falling) and solid blue balls emerge FROM that exact impact
+  // point, diverging outward and settling nearby. Blue balls only ever
+  // exist after a hit — none are ever placed independently of one — and
+  // hits only start once the red ball is well clear of the top edge, so a
+  // burst never reads as "arriving from the ceiling."
   private buildCascade(): (ctx: CanvasRenderingContext2D, w: number, h: number, t: number) => void {
-    const FALL_DUR = 7.2;    // time for the red ball to cross the whole field
-    const FIRE_INTERVAL = 1.6;
-    const FLIGHT = 0.4;
-    const EMERGE_DUR = 0.45; // burst-outward time right after impact
-    const MAX_HITS = Math.floor(FALL_DUR / FIRE_INTERVAL);
+    const FALL_DUR = 7.2;                      // time for the red ball to cross the whole field
+    const FLIGHT = 0.4;                         // turret-to-target travel time
+    const EMERGE_DUR = 0.45;                    // burst-outward time right after impact
+    const HIT_FRACTIONS = [0.32, 0.5, 0.68, 0.86]; // all safely mid-to-lower field, never near the top
+    const BLUES_PER_HIT = [3, 4, 5, 6];         // more distractions with each successive hit
+    const hitTimes = HIT_FRACTIONS.map((f) => f * FALL_DUR);
 
-    type BlueSpec = { hit: number; angle: number; reach: number; driftX: number; driftY: number; bob: number; size: number };
+    type BlueSpec = { hit: number; angle: number; reach: number; bob: number; bobSpeed: number; size: number };
     const blues: BlueSpec[] = [];
-    for (let hit = 0; hit < MAX_HITS; hit++) {
-      const count = 2 + hit; // more distractions released with each successive hit
+    hitTimes.forEach((_, hit) => {
+      const count = BLUES_PER_HIT[hit];
       for (let i = 0; i < count; i++) {
         blues.push({
           hit,
-          angle: (i / count) * Math.PI * 2 + (Math.random() - 0.5) * 0.4,
-          reach: 1.6 + Math.random() * 0.8,
-          driftX: (Math.random() - 0.5) * 0.04,
-          driftY: 0.02 + Math.random() * 0.04,
-          bob: Math.random() * 10,
+          angle: (i / count) * Math.PI * 2 + (Math.random() - 0.5) * 0.35,
+          reach: 1.5 + Math.random() * 0.9,
+          bob: Math.random() * Math.PI * 2,
+          bobSpeed: 0.6 + Math.random() * 0.5,
           size: 0.8 + Math.random() * 0.35,
         });
       }
+    });
+
+    // One shared solid-ball renderer for both colors — a physical ball with
+    // a soft directional shade and a highlight, never a glow/bubble look.
+    function drawBall(
+      c: CanvasRenderingContext2D, x: number, y: number, r: number,
+      base: string, dark: string, light: string,
+    ) {
+      c.save();
+      c.beginPath();
+      c.arc(x, y, r, 0, Math.PI * 2);
+      const grad = c.createRadialGradient(x - r * 0.32, y - r * 0.35, r * 0.15, x, y, r);
+      grad.addColorStop(0, light);
+      grad.addColorStop(1, base);
+      c.fillStyle = grad;
+      c.fill();
+      c.lineWidth = Math.max(1.5, r * 0.1);
+      c.strokeStyle = dark;
+      c.stroke();
+      c.beginPath();
+      c.ellipse(x - r * 0.34, y - r * 0.36, r * 0.28, r * 0.17, -0.6, 0, Math.PI * 2);
+      c.fillStyle = 'rgba(255,255,255,0.55)';
+      c.fill();
+      c.restore();
     }
 
     return (ctx, w, h, t) => {
-      const R = Math.min(w, h) * 0.14;
+      const R = Math.min(w, h) * 0.15;
       const turretY = h - R * 0.9;
+      const redX = w / 2;
       const lt = t % FALL_DUR;
 
-      // Red ball falls the whole height continuously — it never stops.
-      const redX = w / 2 + Math.sin(lt * 0.5) * w * 0.12;
-      const redY = -R * 1.5 + (h + R * 3) * (lt / FALL_DUR);
-      const hitsSoFar = Math.min(MAX_HITS, Math.floor(lt / FIRE_INTERVAL) +
-        (lt % FIRE_INTERVAL >= FLIGHT ? 1 : 0));
-      const redR = R * Math.max(0.28, 1 - hitsSoFar * 0.13);
+      const fallY = (frac: number) => -R * 1.5 + (h + R * 3) * frac;
+      const redY = fallY(lt / FALL_DUR);
+      const hitsSoFar = hitTimes.filter((ht) => lt >= ht).length;
+      const redR = R * Math.max(0.3, 1 - hitsSoFar * 0.15);
 
-      // Blue balls: none exist until the first hit. Each burst emerges from
-      // the exact impact point and travels outward on a clear trajectory,
-      // then settles into a slow drift — solid, opaque, never fading.
+      // Blue distractions — each exists ONLY once its hit has landed, born
+      // exactly at the red ball's position at that instant, then diverges
+      // outward a short, fixed distance and stays there.
       for (const b of blues) {
-        if (b.hit >= hitsSoFar) continue;
-        const hitTime = b.hit * FIRE_INTERVAL + FLIGHT;
-        const spawnX = w / 2 + Math.sin(hitTime * 0.5) * w * 0.12;
-        const spawnY = -R * 1.5 + (h + R * 3) * (hitTime / FALL_DUR);
+        const hitTime = hitTimes[b.hit];
+        if (lt < hitTime) continue;
+        const spawnY = fallY(hitTime / FALL_DUR);
         const elapsed = lt - hitTime;
         const emergeP = Math.min(1, elapsed / EMERGE_DUR);
         const eased = 1 - Math.pow(1 - emergeP, 3);
-        const settled = Math.max(0, elapsed - EMERGE_DUR);
-        const dist = R * b.reach * eased + b.driftX * w * 2 * settled;
-        const bx = spawnX + Math.cos(b.angle) * dist + Math.sin(elapsed * 1.2 + b.bob) * R * 0.1;
-        const by = spawnY + Math.sin(b.angle) * dist + b.driftY * h * settled;
-        const br = R * 0.26 * b.size * (0.4 + 0.6 * eased);
-
-        ctx.save();
-        ctx.beginPath();
-        ctx.arc(bx, by, br, 0, Math.PI * 2);
-        ctx.fillStyle = '#2e9dff';
-        ctx.fill();
-        ctx.lineWidth = Math.max(1.5, br * 0.12);
-        ctx.strokeStyle = '#1568c9';
-        ctx.stroke();
-        // Solid specular highlight so the ball reads as a physical object.
-        ctx.beginPath();
-        ctx.ellipse(bx - br * 0.32, by - br * 0.32, br * 0.32, br * 0.2, -0.6, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(255,255,255,0.85)';
-        ctx.fill();
-        ctx.restore();
+        const dist = R * b.reach * eased;
+        const bob = Math.sin(elapsed * b.bobSpeed + b.bob) * R * 0.08;
+        const bx = redX + Math.cos(b.angle) * dist + bob;
+        const by = spawnY + Math.sin(b.angle) * dist + bob * 0.6 + Math.min(elapsed, 3) * R * 0.02;
+        const br = R * 0.24 * b.size * (0.5 + 0.5 * eased);
+        drawBall(ctx, bx, by, br, '#2f8fe0', '#154f88', '#8fd0ff');
       }
 
-      // Turret at the bottom, aimed up at the red ball's current position.
-      const angle = Math.atan2(redY - turretY, redX - w / 2);
+      // Turret — fixed at the bottom, pointed straight up at the fall line.
       ctx.save();
       ctx.translate(w / 2, turretY);
-      ctx.rotate(angle + Math.PI / 2);
       ctx.beginPath();
       ctx.moveTo(0, -R * 0.55);
       ctx.lineTo(R * 0.38, R * 0.38);
       ctx.lineTo(-R * 0.38, R * 0.38);
       ctx.closePath();
-      ctx.fillStyle = '#4fa8ff';
-      ctx.shadowColor = '#4fa8ff';
-      ctx.shadowBlur = 14;
+      ctx.fillStyle = '#2f8fe0';
       ctx.fill();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = '#154f88';
+      ctx.stroke();
       ctx.restore();
 
-      // In-flight projectile + a brief impact flash (the red ball itself
-      // never pops — only a quick, fading ring marks the moment of contact).
-      const withinShot = lt % FIRE_INTERVAL;
-      if (withinShot < FLIGHT) {
-        const p = withinShot / FLIGHT;
-        const bx = w / 2 + (redX - w / 2) * p, by = turretY + (redY - turretY) * p;
-        const pr = R * 0.18;
-        ctx.save();
-        ctx.beginPath();
-        ctx.arc(bx, by, pr, 0, Math.PI * 2);
-        ctx.fillStyle = '#2e9dff';
-        ctx.fill();
-        ctx.lineWidth = 2;
-        ctx.strokeStyle = '#1568c9';
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.ellipse(bx - pr * 0.32, by - pr * 0.32, pr * 0.32, pr * 0.2, -0.6, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(255,255,255,0.85)';
-        ctx.fill();
-        ctx.restore();
-      } else if (withinShot < FLIGHT + 0.25) {
-        const p = (withinShot - FLIGHT) / 0.25;
-        ctx.save();
-        ctx.globalAlpha = 1 - p;
-        ctx.lineWidth = 4;
-        ctx.strokeStyle = '#ffffff';
-        ctx.beginPath();
-        ctx.arc(redX, redY, redR * (1 + p * 0.5), 0, Math.PI * 2);
-        ctx.stroke();
-        ctx.restore();
+      // In-flight projectile — launches from the turret, arrives exactly at
+      // the next hit instant. This is the only blue object that ever moves
+      // upward, and it always starts at the bottom turret.
+      const nextHit = hitTimes.find((ht) => lt < ht && lt >= ht - FLIGHT);
+      if (nextHit !== undefined) {
+        const p = 1 - (nextHit - lt) / FLIGHT;
+        const targetY = fallY(nextHit / FALL_DUR);
+        const bx = w / 2, by = turretY + (targetY - turretY) * p;
+        drawBall(ctx, bx, by, R * 0.17, '#2f8fe0', '#154f88', '#8fd0ff');
       }
 
-      // The red ball, always falling, drawn on top.
-      ctx.save();
-      ctx.shadowColor = '#ff4d4d';
-      ctx.shadowBlur = 26;
-      ctx.beginPath();
-      ctx.arc(redX, redY, redR, 0, Math.PI * 2);
-      const grad = ctx.createRadialGradient(redX - redR * 0.3, redY - redR * 0.3, redR * 0.1, redX, redY, redR);
-      grad.addColorStop(0, '#ff8a80');
-      grad.addColorStop(1, '#ff3b3b');
-      ctx.fillStyle = grad;
-      ctx.fill();
-      ctx.restore();
+      // Brief white impact flash exactly where/when a hit lands.
+      for (const ht of hitTimes) {
+        const since = lt - ht;
+        if (since >= 0 && since < 0.22) {
+          const p = since / 0.22;
+          const flashY = fallY(ht / FALL_DUR);
+          ctx.save();
+          ctx.globalAlpha = 1 - p;
+          ctx.lineWidth = 4;
+          ctx.strokeStyle = '#ffffff';
+          ctx.beginPath();
+          ctx.arc(redX, flashY, redR * (1 + p * 0.6), 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.restore();
+        }
+      }
+
+      // The red ball itself, always falling, drawn on top of everything —
+      // same solid material as the blue balls, just a different hue.
+      drawBall(ctx, redX, redY, redR, '#e8402f', '#7a1c14', '#ff9d84');
     };
   }
 
