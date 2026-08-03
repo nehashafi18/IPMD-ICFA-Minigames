@@ -1,10 +1,12 @@
 // AudioManager — single-source-of-truth for all minigame audio
 //
 // BGM  : HTMLAudioElement — one instance per track, never duplicated
-//        Kevin MacLeod (incompetech.com) · CC BY 4.0
-//          menu.mp3    = "Gymnopedie No 1"   (calm piano — menu / transition / home)
-//          game.mp3    = "Chipper Doodle v2" (fast chiptune — active gameplay)
-//          waiting.mp3 = "Sneaky Snitch"     (bouncy staccato — answer / thinking phase)
+//          transition-page.mp3  = background music for the transition page
+//          door-of-wonders.mp3  = background music for the minigame selection page
+//          memory-match.mp3     = background music for the Memory Match instructions + gameplay
+//          Cascade Bloom.mp3    = background music for the Cascade instructions + gameplay
+//          Hidden Brushstrokes.mp3 = background music for Art Detective
+//          Sunlit Memory Gallery.mp3 = background music for Memory Gallery
 // SFX  : Web Audio API — synthesized oscillators, no files
 // Prefs: musicVol + sfxVol persisted to localStorage
 
@@ -84,13 +86,16 @@ export const sounds = {
 
 // ── Background Music (HTMLAudioElement) ───────────────────────────────────────
 
-export type MusicMode = 'intro' | 'game' | 'waiting';
+export type MusicMode = 'transition' | 'home' | 'memory-match' | 'cascade' | 'artDetective' | 'memoryGallery';
 
 // One Audio element per track — created once at module load, never duplicated.
 const BGM: Record<MusicMode, HTMLAudioElement> = {
-  intro:   new Audio('/music/menu.mp3'),
-  game:    new Audio('/music/game.mp3'),
-  waiting: new Audio('/music/waiting.mp3'),
+  transition:    new Audio('/music/transition-page.mp3'),
+  home:          new Audio('/music/door-of-wonders.mp3'),
+  'memory-match': new Audio('/music/memory-match.mp3'),
+  cascade:        new Audio('/music/Cascade%20Bloom.mp3'),
+  artDetective:   new Audio('/music/Hidden%20Brushstrokes.mp3'),
+  memoryGallery:  new Audio('/music/Sunlit%20Memory%20Gallery.mp3'),
 };
 
 (Object.values(BGM) as HTMLAudioElement[]).forEach(t => {
@@ -103,14 +108,35 @@ const BGM: Record<MusicMode, HTMLAudioElement> = {
 // No other track may play while current is set — enforced by stopOthers().
 let current: MusicMode | null = null;
 let fadeTimer: ReturnType<typeof setInterval> | null = null;
-// True once the browser's autoplay policy has been satisfied by a user gesture.
-let interacted = false;
-// Prevents registering duplicate unlock listeners when play() fails more than once.
-let unlockPending = false;
 
 function clearFade(): void {
   if (fadeTimer) { clearInterval(fadeTimer); fadeTimer = null; }
 }
+
+// Always-on safety net: the very first gesture anywhere in the app (click, key,
+// tap) unmutes and resumes whatever track is current. This is a no-op if audio
+// is already playing unmuted — but it's essential because some browsers (Safari
+// in particular) can silently ignore a JS-driven `.muted = false` on an element
+// that was never started from a real gesture, leaving music playing-but-silent
+// with no further signal that anything is wrong. Attaching this unconditionally,
+// rather than only after both autoplay attempts fail, closes that gap.
+let globalUnlockAttached = false;
+function attachGlobalUnlock(): void {
+  if (globalUnlockAttached || typeof document === 'undefined') return;
+  globalUnlockAttached = true;
+  const handler = () => {
+    if (current) {
+      const t = BGM[current];
+      t.muted  = false;
+      t.volume = prefs.musicVol;
+      if (t.paused) t.play().catch(() => {});
+    }
+  };
+  (['click', 'keydown', 'touchstart', 'pointerdown'] as const).forEach(ev =>
+    document.addEventListener(ev, handler, { capture: true }),
+  );
+}
+attachGlobalUnlock();
 
 // Pause every track except `keep`. Does NOT reset currentTime.
 function stopOthers(keep: MusicMode): void {
@@ -119,60 +145,33 @@ function stopOthers(keep: MusicMode): void {
   });
 }
 
-// Attempt to start a track unmuted. If the browser's autoplay policy blocks it,
-// fall back to muted autoplay and immediately unmute once the element is playing
-// (changing .muted on an already-playing element is always allowed). This means
-// music starts automatically with no tap required in the vast majority of cases.
+// Start a track muted first — muted autoplay is allowed by every major browser
+// with zero prior interaction — then unmute the instant it's playing. Trying
+// unmuted first is skipped: on a fresh session it is essentially guaranteed to
+// be rejected, and that failed round-trip only delays getting audio into the
+// "playing" state. Chrome honors the immediate unmute with no gesture needed,
+// so music is genuinely audible with zero clicks there. Safari's policy is
+// stricter: it can silently keep a track muted unless the unmute happens
+// inside a real user-gesture handler, which no page load ever is — in that
+// case the track plays silently until attachGlobalUnlock() catches the
+// user's first tap/click/keypress anywhere and unmutes it then.
 function startTrack(mode: MusicMode): void {
   const audio = BGM[mode];
   audio.volume = prefs.musicVol;
+  audio.muted  = true;
 
-  // ── Try unmuted first ────────────────────────────────────────────────────
-  audio.muted = false;
   const promise = audio.play();
-  if (!promise) return; // legacy sync-play browsers
+  if (!promise) { audio.muted = false; return; } // legacy sync-play browsers
 
   promise
-    .then(() => { interacted = true; })
+    .then(() => {
+      audio.muted  = false;
+      audio.volume = prefs.musicVol;
+    })
     .catch(() => {
-      // ── Muted autoplay fallback ──────────────────────────────────────────
-      // Start muted (always allowed), then immediately set muted = false.
-      // Once an element is in the playing state, unmuting is a plain property
-      // write — no gesture required — so music plays automatically.
-      audio.muted = true;
-      const fallback = audio.play();
-      if (!fallback) return;
-
-      fallback
-        .then(() => {
-          // Element is now playing; unmute instantly for auto audio.
-          audio.muted  = false;
-          audio.volume = prefs.musicVol;
-          interacted   = true;
-        })
-        .catch(() => {
-          // Even muted play blocked (very restrictive browser / iframe).
-          // Register a one-time gesture listener as a last resort.
-          if (interacted || unlockPending) return;
-          unlockPending = true;
-
-          const handler = () => {
-            unlockPending = false;
-            interacted    = true;
-            if (current) {
-              BGM[current].muted  = false;
-              BGM[current].volume = prefs.musicVol;
-              if (BGM[current].paused) BGM[current].play().catch(() => {});
-            }
-            (['click', 'keydown', 'touchstart', 'pointerdown'] as const).forEach(ev =>
-              document.removeEventListener(ev, handler, { capture: true } as AddEventListenerOptions),
-            );
-          };
-
-          (['click', 'keydown', 'touchstart', 'pointerdown'] as const).forEach(ev =>
-            document.addEventListener(ev, handler, { capture: true }),
-          );
-        });
+      // Even muted play was blocked (very restrictive browser / iframe).
+      // The always-on global gesture listener (attachGlobalUnlock) will
+      // start it on the user's first click/tap/keypress anywhere.
     });
 }
 
@@ -180,7 +179,7 @@ export const bgMusic = {
   // ── Primary API ──────────────────────────────────────────────────────────
 
   /** Play a music track. Stops any other track first. No-ops if already playing. */
-  playMusic(mode: MusicMode = 'intro'): void {
+  playMusic(mode: MusicMode = 'transition'): void {
     if (current === mode && !BGM[mode].paused) return;
     clearFade();
     stopOthers(mode);
@@ -219,7 +218,6 @@ export const bgMusic = {
       BGM[current].muted = false;
       if (BGM[current].paused) BGM[current].play().catch(() => {});
     }
-    interacted = true;
     savePrefs();
   },
 
@@ -236,13 +234,12 @@ export const bgMusic = {
 
   // ── Backward-compatible aliases used by existing components ──────────────
 
-  start(mode: MusicMode = 'intro'): void { this.playMusic(mode); },
+  start(mode: MusicMode = 'transition'): void { this.playMusic(mode); },
   stop():                             void { this.stopMusic(); },
   setMode(mode: MusicMode):           void { this.playMusic(mode); },
 
   /** Call from any user-gesture handler (click/tap) to unlock muted autoplay. */
   unlock(): void {
-    interacted = true;
     if (!current) return;
     BGM[current].muted  = false;
     BGM[current].volume = prefs.musicVol;

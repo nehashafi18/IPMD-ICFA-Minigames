@@ -22,12 +22,14 @@ interface AppState {
   soundEnabled: boolean;
   reducedMotion: boolean;
   scores: Record<PlayableGameId, number>;
+  submittedImageUrl: string | null;
   // Actions
   navigateTo: (game: GameId) => void;
   setTheme: (themeId: string) => void;
   toggleSound: () => void;
   toggleReducedMotion: () => void;
   updateScore: (game: PlayableGameId, score: number) => void;
+  setSubmittedImageUrl: (url: string | null) => void;
 }
 
 export const useAppStore = create<AppState>()(
@@ -38,8 +40,10 @@ export const useAppStore = create<AppState>()(
       soundEnabled: true,
       reducedMotion: false,
       scores: { memory: 0, match3: 0, bubble: 0, artDetective: 0, memoryGallery: 0 },
+      submittedImageUrl: null,
 
       navigateTo: (game) => set({ currentGame: game }),
+      setSubmittedImageUrl: (url) => set({ submittedImageUrl: url }),
 
       setTheme: (themeId) => set({ activeTheme: themeId }),
 

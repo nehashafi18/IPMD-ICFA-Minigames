@@ -4,7 +4,7 @@ import GameShell from '../../components/GameShell';
 import CompletionOverlay from '../../components/CompletionOverlay';
 import MemoryGalleryInstructions from './MemoryGalleryInstructions';
 import { useAppStore } from '../../store/useAppStore';
-import { bgMusic, sounds } from '../../systems/audioSystem';
+import { sounds } from '../../systems/audioSystem';
 
 interface Props { onBack: () => void; }
 
@@ -78,17 +78,14 @@ export default function MemoryGalleryGame({ onBack }: Props) {
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
   const updateScore = useAppStore(s => s.updateScore);
 
-  // Music mode + answer sounds — only switch on the phases that actually matter
+  // Answer sounds — only switch on the phases that actually matter
   useEffect(() => {
-    if (phase === 'recalling') {
-      bgMusic.setMode('waiting');
-    } else if (phase === 'feedback') {
+    if (phase === 'feedback') {
       if (roundResult && roundResult.correct === roundResult.total) {
         sounds.correct();
       } else {
         sounds.wrong();
       }
-      bgMusic.setMode('game');
     }
   }, [phase, roundResult]);
 
@@ -412,14 +409,14 @@ export default function MemoryGalleryGame({ onBack }: Props) {
                         className="absolute flex items-center justify-center rounded-full"
                         style={{
                           top: 6, right: 6, zIndex: 10,
-                          width: 48, height: 48,
+                          width: 76, height: 76,
                           background: isPicked ? '#4ade80' : '#fbbf24',
                           color: '#0a0612',
-                          fontSize: 22, fontWeight: 700,
+                          fontSize: 40, fontWeight: 700,
                           fontFamily: 'Quicksand, sans-serif',
                           boxShadow: isPicked
-                            ? '0 0 12px rgba(74,222,128,0.8)'
-                            : '0 0 12px rgba(251,191,36,0.8)',
+                            ? '0 0 20px rgba(74,222,128,0.85)'
+                            : '0 0 20px rgba(251,191,36,0.85)',
                         }}
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
@@ -438,9 +435,9 @@ export default function MemoryGalleryGame({ onBack }: Props) {
                         className="absolute flex items-center justify-center rounded-full"
                         style={{
                           top: 6, right: 6, zIndex: 10,
-                          width: 48, height: 48,
+                          width: 76, height: 76,
                           background: '#f87171', color: '#fff',
-                          fontSize: 22, fontWeight: 700,
+                          fontSize: 40, fontWeight: 700,
                         }}
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}

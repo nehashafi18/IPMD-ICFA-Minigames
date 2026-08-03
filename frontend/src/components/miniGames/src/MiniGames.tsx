@@ -24,14 +24,24 @@ export default function MiniGame() {
   const navigateTo   = useAppStore((s) => s.navigateTo);
   const soundEnabled = useAppStore((s) => s.soundEnabled);
 
-  const GAME_SCREENS = new Set(['memory', 'bubble', 'match3', 'artDetective', 'memoryGallery']);
-
   // Start/switch music on screen change.
   // useLayoutEffect fires synchronously before paint, keeping us closest to the
   // parent's click-gesture window so audio.play() succeeds without user interaction.
   useLayoutEffect(() => {
-    if (soundEnabled) {
-      bgMusic.start(GAME_SCREENS.has(currentGame) ? 'game' : 'intro');
+    if (!soundEnabled) {
+      bgMusic.stop();
+    } else if (currentGame === 'transition') {
+      bgMusic.start('transition');
+    } else if (currentGame === 'home') {
+      bgMusic.start('home');
+    } else if (currentGame === 'memory') {
+      bgMusic.start('memory-match');
+    } else if (currentGame === 'bubble') {
+      bgMusic.start('cascade');
+    } else if (currentGame === 'artDetective') {
+      bgMusic.start('artDetective');
+    } else if (currentGame === 'memoryGallery') {
+      bgMusic.start('memoryGallery');
     } else {
       bgMusic.stop();
     }

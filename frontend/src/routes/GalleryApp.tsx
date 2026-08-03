@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { apiFetch } from "../api/client";
 import "../App.css";
 import MiniGame from "../components/miniGames/src/MiniGames";
+import { useAppStore } from "../components/miniGames/src/store/useAppStore";
 
 interface CardData {
   display_name: string;
@@ -272,6 +273,12 @@ export default function App() {
         formData.append(key, value);
       }
     });
+
+    // Make the user's uploaded image available inside the mini-game transition gallery.
+    // previewUrl is a blob URL created from the uploaded File — valid for the session lifetime.
+    if (previewUrl) {
+      useAppStore.getState().setSubmittedImageUrl(previewUrl);
+    }
 
     setLoading(true);
 

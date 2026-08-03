@@ -2,621 +2,221 @@ import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { useAppStore } from '../store/useAppStore';
 import { SHOWCASE_IMAGES } from '../config/showcaseImages';
+import { QuantumTunnelEngine } from '../three/QuantumTunnelEngine';
 
-// ─── Timing ───────────────────────────────────────────────────────────────────
+// ─── Timing — each title holds 12-13.5s so it can actually be read ─────────────
 
-const TOTAL_MS    = 20_500;
-const SLIDE_MS    = 5_000;
-const MSG_MS      = 3_600;
-const FADE_OUT_MS = 700;
+const TOTAL_MS  = 79_000;
+const LAUNCH_AT = 63_000;
+const FLASH_AT  = 77_000;
 
-// ─── Progress messages ────────────────────────────────────────────────────────
+// ─── Narrative text ───────────────────────────────────────────────────────────
 
-const PROGRESS_MSGS = [
-  'Adding magical details…',
-  'Finding hidden patterns…',
-  'Painting tiny brushstrokes…',
-  'Mixing your perfect colors…',
-  'Crafting your masterpiece…',
-  'Weaving layers of texture…',
-  'Every detail matters…',
-  'Creating something uniquely yours…',
-  'Almost there…',
-  'Bringing your vision to life…',
-  'Choosing just the right hues…',
-  'Something special is taking shape…',
+const NARRATIVE: Array<{ at: number; text: string | null }> = [
+  { at:   800, text: 'Thank you for sharing your artwork.' },
+  { at: 13300, text: 'Your creation is now entering a world of transformation.' },
+  { at: 25800, text: 'While your masterpiece is being generated, explore the creativity of fellow artists.' },
+  { at: 38300, text: 'These artworks were created by artists who shared their imagination with our community.' },
+  { at: 50800, text: 'Stay tuned…' },
+  { at: 63300, text: 'Your own artwork is about to become something extraordinary.' },
+  { at: 76800, text: null },
 ];
 
-// ─── Cinematic slide transitions ─────────────────────────────────────────────
+type Phase = 'gallery' | 'launch' | 'flash';
 
-type SlideStyle = 'paintBloom' | 'inkDrip' | 'lightFlare' | 'cinematicDissolve' | 'cornerSweep';
-const SLIDE_STYLES: SlideStyle[] = [
-  'paintBloom', 'inkDrip', 'lightFlare', 'cinematicDissolve', 'cornerSweep',
-];
-
-const BLOOM_ORIGINS: [number, number][] = [
-  [38, 55], [62, 42], [45, 65], [55, 35], [40, 52],
-];
-
-function slideVariants(style: SlideStyle, slideIdx: number) {
-  const [bx, by] = BLOOM_ORIGINS[slideIdx % 5];
-  const EXIT_FADE = { duration: 0.5, ease: 'easeIn' as const };
-
-  switch (style) {
-    case 'paintBloom': return {
-      initial: {
-        opacity: 1,
-        clipPath: `circle(0% at ${bx}% ${by}%)`,
-        filter: 'brightness(1.4)',
-      },
-      animate: {
-        opacity: 1,
-        clipPath: `circle(160% at ${bx}% ${by}%)`,
-        filter: 'brightness(1)',
-        transition: { duration: 1.2, ease: [0.35, 0.0, 0.15, 1.0] as const },
-      },
-      exit: { opacity: 0, filter: 'brightness(1.5)', transition: EXIT_FADE },
-    };
-
-    case 'inkDrip': return {
-      initial: {
-        opacity: 1,
-        clipPath: 'polygon(0% 0%, 100% 0%, 100% 0%, 50% 2%, 0% 0%)',
-      },
-      animate: {
-        opacity: 1,
-        clipPath: 'polygon(0% 0%, 100% 0%, 100% 100%, 50% 103%, 0% 100%)',
-        transition: { duration: 1.05, ease: [0.4, 0.0, 0.2, 1.0] as const },
-      },
-      exit: { opacity: 0, transition: EXIT_FADE },
-    };
-
-    case 'lightFlare': return {
-      initial: {
-        opacity: 0,
-        filter: 'brightness(3) blur(18px)',
-        scale: 1.08,
-      },
-      animate: {
-        opacity: 1,
-        filter: 'brightness(1) blur(0px)',
-        scale: 1.02,
-        transition: { duration: 1.1, ease: 'easeOut' as const },
-      },
-      exit: {
-        opacity: 0,
-        filter: 'brightness(2.5) blur(6px)',
-        transition: { duration: 0.4, ease: 'easeIn' as const },
-      },
-    };
-
-    case 'cinematicDissolve': return {
-      initial: { opacity: 0, scale: 1.05 },
-      animate: {
-        opacity: 1,
-        scale: 1.02,
-        transition: { duration: 1.3, ease: 'easeInOut' as const },
-      },
-      exit: {
-        opacity: 0,
-        scale: 0.98,
-        transition: { duration: 0.7, ease: 'easeIn' as const },
-      },
-    };
-
-    case 'cornerSweep': return {
-      initial: {
-        opacity: 1,
-        clipPath: 'polygon(0% 0%, 0% 0%, 0% 0%, 0% 0%)',
-      },
-      animate: {
-        opacity: 1,
-        clipPath: 'polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)',
-        transition: { duration: 1.0, ease: [0.25, 0.46, 0.45, 0.94] as const },
-      },
-      exit: { opacity: 0, transition: EXIT_FADE },
-    };
-  }
-}
-
-// ─── Particle canvas ──────────────────────────────────────────────────────────
-
-const PARTICLE_COLORS = [
-  'rgba(255,255,255,',
-  'rgba(255,210,90,',
-  'rgba(180,140,255,',
-];
-
-interface Ptcl {
-  x: number; y: number;
-  vx: number; vy: number;
-  r: number;
-  alpha: number; alphaDir: number;
-  color: string;
-  t: number;
-}
-
-function makePtcl(w: number, h: number, spread = false): Ptcl {
-  return {
-    x:        Math.random() * w,
-    y:        spread ? Math.random() * h : h + 10,
-    vx:       (Math.random() - 0.5) * 0.3,
-    vy:       -(0.18 + Math.random() * 0.3),
-    r:        0.6 + Math.random() * 1.5,
-    alpha:    spread ? Math.random() * 0.38 : 0,
-    alphaDir: 0.01 + Math.random() * 0.01,
-    color:    PARTICLE_COLORS[Math.floor(Math.random() * PARTICLE_COLORS.length)],
-    t:        Math.random() * 200,
-  };
-}
-
-function ParticleCanvas({
-  containerRef,
-}: {
-  containerRef: React.RefObject<HTMLDivElement | null>;
-}) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    const resize = () => {
-      const el = containerRef.current;
-      if (!el) return;
-      const { width, height } = el.getBoundingClientRect();
-      canvas.width  = width;
-      canvas.height = height;
-    };
-    resize();
-    const ro = new ResizeObserver(resize);
-    if (containerRef.current) ro.observe(containerRef.current);
-
-    const COUNT = 24;
-    let { width: w, height: h } = canvas;
-    const ptcls: Ptcl[] = Array.from({ length: COUNT }, (_, i) =>
-      makePtcl(w, h, i < COUNT / 2),
-    );
-
-    let rafId = 0;
-    const tick = () => {
-      w = canvas.width; h = canvas.height;
-      ctx.clearRect(0, 0, w, h);
-
-      for (let i = 0; i < ptcls.length; i++) {
-        const p = ptcls[i];
-        p.t    += 1;
-        p.x    += p.vx + Math.sin(p.t * 0.03) * 0.22;
-        p.y    += p.vy;
-        p.alpha += p.alphaDir;
-
-        if (p.alpha >= 0.42) p.alphaDir = -Math.abs(p.alphaDir);
-        if (p.alpha <= 0 || p.y < -10) { ptcls[i] = makePtcl(w, h); continue; }
-
-        ctx.save();
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = `${p.color}${p.alpha.toFixed(2)})`;
-        ctx.shadowColor = `${p.color}0.5)`;
-        ctx.shadowBlur = p.r * 3.5;
-        ctx.fill();
-        ctx.restore();
-      }
-
-      rafId = requestAnimationFrame(tick);
-    };
-    rafId = requestAnimationFrame(tick);
-    return () => { cancelAnimationFrame(rafId); ro.disconnect(); };
-  }, [containerRef]);
-
-  return (
-    <canvas
-      ref={canvasRef}
-      className="absolute inset-0 pointer-events-none"
-      style={{ zIndex: 4 }}
-    />
-  );
-}
-
-// ─── Loading state (no showcase images available) ────────────────────────────
-
-function LoadingArtworkState() {
-  return (
-    <div
-      className="w-full h-full flex flex-col items-center justify-center gap-3"
-      style={{ background: 'linear-gradient(135deg, #06070e 0%, #0b0d1c 100%)' }}
-    >
-      <motion.div
-        animate={{ scale: [1, 1.12, 1], opacity: [0.5, 0.9, 0.5] }}
-        transition={{ duration: 2.6, repeat: Infinity, ease: 'easeInOut' }}
-        style={{ fontSize: 44, lineHeight: 1 }}
-      >
-        🎨
-      </motion.div>
-      <motion.p
-        animate={{ opacity: [0.25, 0.5, 0.25] }}
-        transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut' }}
-        className="text-xs font-medium"
-        style={{
-          color:         'rgba(255,255,255,0.38)',
-          letterSpacing: '0.1em',
-          textTransform: 'uppercase',
-        }}
-      >
-        Preparing gallery
-      </motion.p>
-    </div>
-  );
-}
-
-// ─── Main component ───────────────────────────────────────────────────────────
+// ─── Component ────────────────────────────────────────────────────────────────
+//
+// An infinite physical archive: the camera glides through a warmly-lit gallery
+// corridor that slowly bends and changes wings. Hundreds of framed artworks and
+// drifting paper fragments surround it, appearing suddenly, fading like a
+// memory, or folding shut and reopening as a different piece — driven by
+// QuantumTunnelEngine (Three.js). This component owns only the DOM overlay:
+// cinematic title cards, status badge, and progress bar.
 
 interface Props { onDone: () => void; }
 
 export default function TransitionScreen({ onDone }: Props) {
   const prefersReduced = useReducedMotion();
-  const storeReduced   = useAppStore((s) => s.reducedMotion);
+  const storeReduced   = useAppStore(s => s.reducedMotion);
+  const submittedUrl   = useAppStore(s => s.submittedImageUrl);
   const reduced        = storeReduced || !!prefersReduced;
 
-  const [gallery, setGallery]       = useState<typeof SHOWCASE_IMAGES>([]);
-  const [slideIdx, setSlideIdx]     = useState(0);
-  const [slideStyle, setSlideStyle] = useState<SlideStyle>('paintBloom');
-  const [msgIdx, setMsgIdx]         = useState(0);
-  const [finalizing, setFinalizing] = useState(false);
+  const [phase,  setPhase]  = useState<Phase>('gallery');
+  const [curMsg, setCurMsg] = useState<string | null>(null);
 
-  const doneRef    = useRef(false);
-  const galleryRef = useRef<HTMLDivElement>(null);
+  const doneRef   = useRef(false);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  // ── Preload only SHOWCASE_IMAGES ──────────────────────────────────────────
+  // ── Archive corridor engine (Three.js) ──────────────────────────────────────
 
   useEffect(() => {
-    let alive = true;
-    const loaded: (typeof SHOWCASE_IMAGES[number] & { order: number })[] = [];
+    const canvas = canvasRef.current;
+    if (!canvas || reduced) return;
 
-    SHOWCASE_IMAGES.forEach((item, i) => {
-      const img = new Image();
-      img.onload = () => {
-        if (!alive) return;
-        loaded.push({ ...item, order: i });
-        loaded.sort((a, b) => a.order - b.order);
-        setGallery(loaded.map(({ src, caption }) => ({ src, caption })));
-      };
-      img.src = item.src;
+    const urls: string[] = [];
+    if (submittedUrl) urls.push(submittedUrl);
+    SHOWCASE_IMAGES.forEach(s => urls.push(s.src));
+    if (!urls.length) return;
+
+    const engine = new QuantumTunnelEngine({
+      canvas,
+      urls,
+      totalMs: TOTAL_MS,
+      launchAtMs: LAUNCH_AT,
+      reducedMotion: reduced,
     });
+    engine.start();
 
-    return () => { alive = false; };
+    return () => engine.dispose();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [submittedUrl, reduced]);
+
+  // ── Narrative text ──────────────────────────────────────────────────────────
+
+  useEffect(() => {
+    const ts = NARRATIVE.map(({ at, text }) => setTimeout(() => setCurMsg(text), at));
+    return () => ts.forEach(clearTimeout);
   }, []);
 
-  // ── Advance gallery every SLIDE_MS ────────────────────────────────────────
+  // ── Phase timers ────────────────────────────────────────────────────────────
 
   useEffect(() => {
-    if (gallery.length < 2) return;
-    const t = setInterval(() => {
-      setSlideIdx(i => (i + 1) % gallery.length);
-      setSlideStyle(s => {
-        const idx = SLIDE_STYLES.indexOf(s);
-        return SLIDE_STYLES[(idx + 1) % SLIDE_STYLES.length];
-      });
-    }, SLIDE_MS);
-    return () => clearInterval(t);
-  }, [gallery.length]);
-
-  // ── Rotate progress messages ───────────────────────────────────────────────
-
-  useEffect(() => {
-    const t = setInterval(() => setMsgIdx(i => (i + 1) % PROGRESS_MSGS.length), MSG_MS);
-    return () => clearInterval(t);
-  }, []);
-
-  // ── Final cinematic black fade, then navigate ──────────────────────────────
-
-  useEffect(() => {
-    const fadeStart = setTimeout(() => {
-      if (!doneRef.current) setFinalizing(true);
-    }, TOTAL_MS - FADE_OUT_MS);
-
-    const navigate = setTimeout(() => {
+    const t1 = setTimeout(() => setPhase('launch'), LAUNCH_AT);
+    const t2 = setTimeout(() => setPhase('flash'),  FLASH_AT);
+    const t3 = setTimeout(() => {
       if (!doneRef.current) { doneRef.current = true; onDone(); }
     }, TOTAL_MS);
-
-    return () => { clearTimeout(fadeStart); clearTimeout(navigate); };
+    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [onDone]);
 
-  // ── Reduced-motion path ────────────────────────────────────────────────────
+  // ── Reduced-motion fallback ─────────────────────────────────────────────────
 
   if (reduced) {
     return (
       <div
-        className="fixed inset-0 z-40 flex flex-col items-center justify-center gap-4 px-8 text-center"
-        style={{ background: '#040507' }}
+        className="fixed inset-0 z-40 flex flex-col items-center justify-center gap-6 px-8 text-center"
+        style={{ background: '#000000' }}
       >
-        <p className="text-2xl font-semibold" style={{ color: '#fff' }}>
-          Your artwork is being created
-        </p>
-        <p className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>
-          ✨ Thousands of unique masterpieces crafted — yours is next
+        <p className="text-2xl font-semibold text-white">Thank you for sharing your artwork!</p>
+        <p className="text-base" style={{ color: 'rgba(255,255,255,0.55)', maxWidth: 320 }}>
+          We're transforming your image into a fine art masterpiece.
         </p>
       </div>
     );
   }
 
-  const current  = gallery[slideIdx] ?? null;
-  const variants = slideVariants(slideStyle, slideIdx);
-
   return (
-    <div
-      className="fixed inset-0 z-40 flex flex-col overflow-hidden select-none"
-      style={{ background: '#040507' }}
-    >
-      {/* ── Background radial ───────────────────────────────────────────── */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background:
-            'radial-gradient(ellipse 100% 70% at 50% 10%, #0a0b18 0%, #040507 55%)',
-        }}
+    <div className="fixed inset-0 z-40 overflow-hidden select-none" style={{ background: '#000000' }}>
+
+      {/* ── The archive corridor (WebGL) ──────────────────────────────────────
+          Hundreds of framed artworks and paper fragments surrounding the
+          camera in a warmly-lit, slowly bending gallery — see
+          QuantumTunnelEngine for the full scene.
+      ──────────────────────────────────────────────────────────────────── */}
+      <canvas
+        ref={canvasRef}
+        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
       />
 
-      {/* ── Drifting ambient orbs ───────────────────────────────────────── */}
+      {/* ── Status badge ────────────────────────────────────────────────────── */}
       <motion.div
-        className="absolute pointer-events-none"
-        animate={{
-          x: [0, 30, 10, 0],
-          y: [0, -20, 15, 0],
-          opacity: [0.05, 0.09, 0.06, 0.05],
-        }}
-        transition={{ duration: 20, repeat: Infinity, ease: 'easeInOut' }}
-        style={{
-          width: '55%', height: '40%',
-          top: '-8%', right: '-5%',
-          borderRadius: '50%',
-          background:
-            'radial-gradient(ellipse, rgba(255,210,100,1) 0%, transparent 68%)',
-          filter: 'blur(72px)',
-        }}
-      />
-      <motion.div
-        className="absolute pointer-events-none"
-        animate={{
-          x: [0, -25, 8, 0],
-          y: [0, 18, -12, 0],
-          opacity: [0.06, 0.1, 0.05, 0.06],
-        }}
-        transition={{
-          duration: 26, repeat: Infinity, ease: 'easeInOut', delay: 4,
-        }}
-        style={{
-          width: '50%', height: '45%',
-          bottom: '15%', left: '-8%',
-          borderRadius: '50%',
-          background:
-            'radial-gradient(ellipse, rgba(80,130,255,1) 0%, transparent 68%)',
-          filter: 'blur(80px)',
-        }}
-      />
-
-      {/* ── Header badge ────────────────────────────────────────────────── */}
-      <motion.div
-        className="relative z-10 flex-shrink-0 flex justify-center pt-5 pb-2"
+        className="absolute z-20 top-5 left-0 right-0 flex justify-center"
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7, delay: 0.15 }}
+        transition={{ duration: 0.7, delay: 0.3 }}
       >
         <motion.div
           className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold"
           style={{
-            background:     'rgba(255,255,255,0.05)',
-            border:         '1px solid rgba(255,255,255,0.12)',
-            color:          'rgba(210,210,220,0.82)',
-            letterSpacing:  '0.08em',
+            background: 'rgba(0,0,0,0.58)',
+            border: '1px solid rgba(255,255,255,0.12)',
+            color: 'rgba(210,210,220,0.82)',
+            letterSpacing: '0.08em',
             backdropFilter: 'blur(8px)',
           }}
           animate={{ opacity: [0.65, 1, 0.65] }}
           transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
         >
           <motion.span
+            style={{ fontSize: 7, color: '#D8B978' }}
             animate={{ opacity: [0.4, 1, 0.4] }}
             transition={{ duration: 1.4, repeat: Infinity }}
-            style={{ fontSize: 7, color: '#9B9FFF' }}
-          >
-            ●
-          </motion.span>
+          >●</motion.span>
           CREATING YOUR ARTWORK
         </motion.div>
       </motion.div>
 
-      {/* ── Gallery (takes up most of the remaining space) ──────────────── */}
-      <motion.div
-        className="relative z-10 flex-1 flex justify-center px-4"
-        initial={{ opacity: 0, y: 14 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.85, delay: 0.3 }}
-        style={{ minHeight: 0 }}
-      >
-        {/* Glow halo */}
-        <motion.div
-          className="absolute inset-0 pointer-events-none"
-          animate={{ opacity: [0.1, 0.2, 0.1] }}
-          transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
-          style={{
-            background:
-              'radial-gradient(ellipse 70% 80% at 50% 50%, rgba(100,80,200,0.3) 0%, transparent 70%)',
-            filter: 'blur(18px)',
-          }}
-        />
+      {/* ── Center vignette — keeps the cinematic title legible over a busy field ── */}
+      <div
+        className="absolute inset-0 z-10 pointer-events-none"
+        style={{
+          background: 'radial-gradient(ellipse 62% 42% at 50% 50%, rgba(0,0,0,0.5), transparent 72%)',
+        }}
+      />
 
-        {/* Gallery card */}
-        <div
-          ref={galleryRef}
-          className="relative rounded-2xl overflow-hidden self-stretch"
-          style={{
-            width: '88%',
-            boxShadow: [
-              '0 2px 8px rgba(0,0,0,0.55)',
-              '0 12px 32px rgba(0,0,0,0.55)',
-              '0 40px 80px rgba(0,0,0,0.6)',
-              '0 0 0 1px rgba(255,255,255,0.07)',
-            ].join(', '),
-          }}
-        >
-          {/* Loading state — shown only when no images have loaded yet */}
-          {gallery.length === 0 && <LoadingArtworkState />}
-
-          {/* Cinematic artwork carousel */}
-          <AnimatePresence mode="sync">
-            {current && (
-              <motion.div
-                key={current.src}
-                className="absolute inset-0"
-                initial={variants.initial}
-                animate={variants.animate}
-                exit={variants.exit}
-                style={{ willChange: 'transform, opacity, clip-path, filter' }}
-              >
-                <img
-                  src={current.src}
-                  alt={current.caption}
-                  className="w-full h-full object-cover"
-                  loading="eager"
-                  onError={() =>
-                    setGallery(g => g.filter(item => item.src !== current.src))
-                  }
-                />
-                {/* Vignette */}
-                <div
-                  className="absolute inset-0"
-                  style={{
-                    background:
-                      'linear-gradient(to top, rgba(4,5,7,0.72) 0%, rgba(4,5,7,0.04) 40%, rgba(4,5,7,0.16) 100%)',
-                  }}
-                />
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Floating particles */}
-          <ParticleCanvas containerRef={galleryRef} />
-
-          {/* Caption badge */}
-          <AnimatePresence mode="wait">
-            {current && (
-              <motion.div
-                key={`cap-${current.caption}`}
-                className="absolute bottom-4 left-4 z-10 px-3 py-1.5 rounded-full"
-                style={{
-                  background:     'rgba(0,0,0,0.46)',
-                  backdropFilter: 'blur(10px)',
-                  border:         '1px solid rgba(255,255,255,0.11)',
-                }}
-                initial={{ opacity: 0, y: 5 }}
-                animate={{
-                  opacity: 1, y: 0,
-                  transition: { duration: 0.5, delay: 0.45 },
-                }}
-                exit={{ opacity: 0, y: 4, transition: { duration: 0.25 } }}
-              >
-                <span
-                  className="text-xs font-semibold"
-                  style={{ color: 'rgba(255,255,255,0.86)', letterSpacing: '0.03em' }}
-                >
-                  ✦ {current.caption}
-                </span>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Slide dot indicators */}
-          {gallery.length > 1 && (
-            <div className="absolute bottom-4 right-4 z-10 flex gap-1 items-center">
-              {Array.from({ length: Math.min(gallery.length, 7) }, (_, i) => {
-                const active = i === slideIdx % 7;
-                return (
-                  <div
-                    key={i}
-                    className="rounded-full transition-all duration-300"
-                    style={{
-                      width:      active ? 14 : 4,
-                      height:     4,
-                      background: active
-                        ? 'rgba(255,255,255,0.82)'
-                        : 'rgba(255,255,255,0.22)',
-                    }}
-                  />
-                );
-              })}
-            </div>
-          )}
-        </div>
-      </motion.div>
-
-      {/* ── Progress messages ────────────────────────────────────────────── */}
-      <motion.div
-        className="relative z-10 flex-shrink-0 text-center px-10 mt-4"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.6, delay: 0.55 }}
-      >
+      {/* ── Narrative text — cinematic title overlay, centered ─────────────────── */}
+      <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none px-10">
         <AnimatePresence mode="wait">
-          <motion.p
-            key={msgIdx}
-            className="text-base font-semibold"
-            style={{ color: 'rgba(255,255,255,0.9)' }}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0, transition: { duration: 0.45 } }}
-            exit={{    opacity: 0, y: -7, transition: { duration: 0.3 } }}
-          >
-            {PROGRESS_MSGS[msgIdx]}
-          </motion.p>
+          {curMsg && (
+            <motion.p
+              key={curMsg}
+              className="font-display"
+              style={{
+                color: 'rgba(255,255,255,0.97)',
+                fontSize: 'clamp(1.5rem, 4.2vw, 2.9rem)',
+                fontWeight: 600,
+                lineHeight: 1.35,
+                letterSpacing: '0.015em',
+                textAlign: 'center',
+                maxWidth: 820,
+                textShadow: '0 4px 40px rgba(0,0,0,0.95), 0 2px 14px rgba(0,0,0,1)',
+              }}
+              initial={{ opacity: 0, scale: 0.95, y: 16 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 1.03, y: -12 }}
+              transition={{ duration: 1.1, ease: 'easeInOut' }}
+            >
+              {curMsg}
+            </motion.p>
+          )}
         </AnimatePresence>
+      </div>
 
-        <motion.p
-          className="text-xs mt-1.5"
-          style={{ color: 'rgba(255,255,255,0.3)', letterSpacing: '0.02em' }}
-          animate={{ opacity: [0.3, 0.46, 0.3] }}
-          transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-        >
-          ✨ Thousands of unique masterpieces crafted — yours is next
-        </motion.p>
-      </motion.div>
-
-      {/* ── Subtle progress bar ──────────────────────────────────────────── */}
+      {/* ── Progress bar ─────────────────────────────────────────────────────── */}
       <motion.div
-        className="relative z-10 flex-shrink-0 mx-10 mt-4 mb-6"
+        className="absolute z-20 left-10 right-10"
+        style={{ bottom: 20 }}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5, delay: 1.5 }}
       >
-        {/* Track */}
-        <div
-          className="w-full rounded-full overflow-hidden"
-          style={{ height: 2, background: 'rgba(255,255,255,0.08)' }}
-        >
-          {/* Fill — animates over the full duration */}
+        <div style={{
+          height: 2, borderRadius: 9999, overflow: 'hidden',
+          background: 'rgba(255,255,255,0.08)',
+        }}>
           <motion.div
-            className="h-full rounded-full"
-            style={{ background: 'rgba(255,255,255,0.35)', transformOrigin: 'left' }}
+            style={{
+              height: '100%', borderRadius: 9999,
+              background: 'rgba(255,255,255,0.35)',
+              transformOrigin: 'left',
+            }}
             initial={{ scaleX: 0 }}
             animate={{ scaleX: 1 }}
-            transition={{
-              duration: TOTAL_MS / 1000,
-              ease: 'linear',
-              delay: 0,
-            }}
+            transition={{ duration: TOTAL_MS / 1000, ease: 'linear' }}
           />
         </div>
       </motion.div>
 
-      {/* ── Final cinematic fade-out overlay ────────────────────────────── */}
+      {/* ── Final fade to black ──────────────────────────────────────────────── */}
       <AnimatePresence>
-        {finalizing && (
+        {phase === 'flash' && (
           <motion.div
             className="absolute inset-0 z-50 pointer-events-none"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: FADE_OUT_MS / 1000, ease: 'easeIn' }}
-            style={{ background: '#040507' }}
+            transition={{ duration: (TOTAL_MS - FLASH_AT) / 1000, ease: 'easeIn' }}
+            style={{ background: '#000000' }}
           />
         )}
       </AnimatePresence>
