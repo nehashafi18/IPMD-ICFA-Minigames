@@ -264,6 +264,28 @@ function Portal({
         transition={{ duration: 0.38 }}
       />
 
+      {/* Hover-only shimmer — still and calm by default, a soft diagonal
+          sweep of light glides across the surface only while hovered, then
+          settles the instant the cursor leaves. Never plays on its own. */}
+      <motion.div
+        className="absolute inset-0 pointer-events-none overflow-hidden"
+        animate={{ opacity: hovered ? 1 : 0 }}
+        transition={{ duration: hovered ? 0.15 : 0.35, ease: 'easeOut' }}
+      >
+        <motion.div
+          className="absolute inset-y-0"
+          style={{
+            width: '45%',
+            background: 'linear-gradient(115deg, transparent 0%, rgba(255,255,255,0) 30%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0) 70%, transparent 100%)',
+            mixBlendMode: 'screen',
+          }}
+          animate={hovered ? { left: ['-55%', '115%'] } : { left: '-55%' }}
+          transition={hovered
+            ? { duration: 1.5, repeat: Infinity, repeatDelay: 1.1, ease: 'easeInOut' }
+            : { duration: 0 }}
+        />
+      </motion.div>
+
       {/* Label */}
       <div
         className="absolute inset-x-0 bottom-0 flex flex-col items-center text-center px-4 pb-6 pt-16"
