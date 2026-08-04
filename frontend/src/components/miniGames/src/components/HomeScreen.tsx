@@ -54,6 +54,17 @@ const WORLD_GAMES: WorldGame[] = [
   },
 ];
 
+// A handful of fixed glint positions that ride along inside the hover
+// shimmer band — kept as a stable module-level constant (not re-randomized
+// per render) so they don't jitter across hover state changes.
+const SHIMMER_GLINTS = [
+  { x: 20, y: 18, size: 7, delay: 0 },
+  { x: 55, y: 42, size: 5, delay: 0.12 },
+  { x: 35, y: 68, size: 8, delay: 0.22 },
+  { x: 72, y: 25, size: 5, delay: 0.32 },
+  { x: 48, y: 85, size: 6, delay: 0.18 },
+];
+
 // ─── Living background — a dark, restrained gallery space ──────────────────
 // Cinematic light rays, drifting fog, and a reflective floor — no sparkle,
 // no glitter, no floating stars. Closer to a museum installation than a
@@ -265,8 +276,10 @@ function Portal({
       />
 
       {/* Hover-only shimmer — still and calm by default, a soft diagonal
-          sweep of light glides across the surface only while hovered, then
-          settles the instant the cursor leaves. Never plays on its own. */}
+          sweep of light with a few glints rides across the surface only
+          while hovered, then settles the instant the cursor leaves. Plain
+          opacity (no blend mode) so it stays visible over every portal's
+          light pastel background, not just the dark ones. */}
       <motion.div
         className="absolute inset-0 pointer-events-none overflow-hidden"
         animate={{ opacity: hovered ? 1 : 0 }}
@@ -274,16 +287,33 @@ function Portal({
       >
         <motion.div
           className="absolute inset-y-0"
-          style={{
-            width: '45%',
-            background: 'linear-gradient(115deg, transparent 0%, rgba(255,255,255,0) 30%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0) 70%, transparent 100%)',
-            mixBlendMode: 'screen',
-          }}
-          animate={hovered ? { left: ['-55%', '115%'] } : { left: '-55%' }}
+          style={{ width: '42%' }}
+          animate={hovered ? { left: ['-50%', '118%'] } : { left: '-50%' }}
           transition={hovered
-            ? { duration: 1.5, repeat: Infinity, repeatDelay: 1.1, ease: 'easeInOut' }
+            ? { duration: 1.4, repeat: Infinity, repeatDelay: 1.2, ease: 'easeInOut' }
             : { duration: 0 }}
-        />
+        >
+          <div
+            className="absolute inset-0"
+            style={{
+              background: 'linear-gradient(112deg, transparent 0%, rgba(255,255,255,0.28) 32%, rgba(255,255,255,0.85) 50%, rgba(255,255,255,0.28) 68%, transparent 100%)',
+            }}
+          />
+          {SHIMMER_GLINTS.map((g, i) => (
+            <motion.div
+              key={i}
+              className="absolute rounded-full"
+              style={{
+                left: `${g.x}%`, top: `${g.y}%`, width: g.size, height: g.size,
+                background: 'radial-gradient(circle, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0) 72%)',
+              }}
+              animate={hovered ? { opacity: [0, 1, 0], scale: [0.3, 1, 0.3] } : { opacity: 0 }}
+              transition={hovered
+                ? { duration: 1.4, repeat: Infinity, repeatDelay: 1.2, delay: g.delay, ease: 'easeInOut' }
+                : { duration: 0 }}
+            />
+          ))}
+        </motion.div>
       </motion.div>
 
       {/* Label */}
