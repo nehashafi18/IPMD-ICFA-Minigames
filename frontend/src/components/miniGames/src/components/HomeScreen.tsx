@@ -328,21 +328,27 @@ export default function HomeScreen() {
         animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
         transition={{ duration: 0.9, ease: 'easeOut' }}
       >
-        <p className="text-[11px] font-semibold" style={{ color: '#e0b34f', letterSpacing: '0.24em' }}>
+        <p
+          className="font-semibold"
+          style={{ color: '#e0b34f', letterSpacing: '0.2em', fontSize: 'clamp(0.85rem, 1.5vw, 1.2rem)' }}
+        >
           YOUR ARTWORK IS BEING CREATED
         </p>
         <h1
-          className="font-display text-2xl sm:text-3xl font-semibold mt-1.5"
-          style={{ color: '#f0e6da', textShadow: '0 2px 24px rgba(140,110,220,0.5)' }}
+          className="font-display font-semibold mt-1.5"
+          style={{
+            color: '#f0e6da', textShadow: '0 3px 30px rgba(140,110,220,0.55)',
+            fontSize: 'clamp(1.8rem, 4vw, 3.4rem)', lineHeight: 1.1,
+          }}
         >
           Play a Mini-Game While You Wait
         </h1>
       </motion.div>
 
-      {/* Four giant portals */}
+      {/* Four giant portals — anchored below the caption, never under it */}
       <div
-        className="absolute inset-0 flex items-center justify-center"
-        style={{ zIndex: 5, gap: '1vw', padding: '0 1.5vw' }}
+        className="absolute flex items-center justify-center"
+        style={{ zIndex: 5, top: '17%', left: 0, right: 0, bottom: 0, gap: '1vw', padding: '0 1.5vw' }}
       >
         {WORLD_GAMES.map((g) => (
           <Portal key={g.id} game={g} onSelect={() => handleEnter(g)} />
@@ -412,19 +418,6 @@ export default function HomeScreen() {
         </AnimatePresence>
       </div>
 
-      {/* Credit */}
-      <div className="absolute bottom-3 left-4" style={{ zIndex: 5, color: 'rgba(240,230,218,0.4)', fontSize: 10 }}>
-        Music by{' '}
-        <a
-          href="https://incompetech.com"
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{ color: 'rgba(240,230,218,0.55)', textDecoration: 'underline' }}
-        >
-          Kevin MacLeod
-        </a>
-        {' '}· CC BY 4.0
-      </div>
     </div>
   );
 }
