@@ -31,25 +31,25 @@ const WORLD_GAMES: WorldGame[] = [
   {
     id: 'memory', intro: 'memory-intro' as GameId,
     title: 'Memory Match',
-    desc: 'Uncover pairs of beautiful artworks.',
+    desc: 'Remember the artwork. Find the matching card.',
     glow: '#E8977F',
   },
   {
     id: 'bubble', intro: 'bubble-intro' as GameId,
     title: 'Cascade',
-    desc: 'Watch color and pattern flow together.',
+    desc: 'Hit the falling target while avoiding the chaos you create.',
     glow: '#6FC4C9',
   },
   {
     id: 'artDetective', intro: 'artDetective' as GameId,
     title: 'Art Detective',
-    desc: 'Search for clues hidden in the gallery.',
+    desc: 'Investigate the artwork and uncover hidden clues.',
     glow: '#E0B34F',
   },
   {
     id: 'memoryGallery', intro: 'memoryGallery' as GameId,
     title: 'Memory Gallery',
-    desc: 'Discover artwork and the stories inside.',
+    desc: 'Watch the sequence. Remember the order. Tap the cards correctly.',
     glow: '#A879E8',
   },
 ];
