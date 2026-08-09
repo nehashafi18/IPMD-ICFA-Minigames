@@ -120,6 +120,20 @@ export default function MiniGame() {
       )}
 
     </AnimatePresence>
+    <div
+      style={{
+        position: 'fixed',
+        left: 8,
+        bottom: 4,
+        zIndex: 9999,
+        fontSize: 10,
+        color: 'rgba(255,255,255,0.35)',
+        pointerEvents: 'none',
+        userSelect: 'none',
+      }}
+    >
+      Created by Neha Shafi
+    </div>
     </div>
   );
 }
