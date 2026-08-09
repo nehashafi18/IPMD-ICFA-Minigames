@@ -1,5 +1,7 @@
 venv/
 sd-backend/venv/
+sd-backend/.venv/
+.venv/
 node_modules/
 dist/
 outputs/

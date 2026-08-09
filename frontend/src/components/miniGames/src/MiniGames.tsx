@@ -1,4 +1,5 @@
 import { AnimatePresence, motion } from 'framer-motion';
+import { useEffect, useLayoutEffect } from 'react';
 import { useAppStore, type GameId } from './store/useAppStore';
 import HomeScreen from './components/HomeScreen';
 import TransitionScreen from './components/TransitionScreen';
@@ -8,6 +9,7 @@ import Match3Game from './games/match3/Match3Game';
 import BubbleGame from './games/bubble/BubbleGame';
 import ArtDetectiveGame from './games/artDetective/ArtDetectiveGame';
 import MemoryGalleryGame from './games/memoryGallery/MemoryGalleryGame';
+import { bgMusic } from './systems/audioSystem';
 import './index.css'
 import './minigame.css'
 
@@ -18,8 +20,35 @@ const pageVariants = {
 };
 
 export default function MiniGame() {
-  const currentGame = useAppStore((s) => s.currentGame);
-  const navigateTo  = useAppStore((s) => s.navigateTo);
+  const currentGame  = useAppStore((s) => s.currentGame);
+  const navigateTo   = useAppStore((s) => s.navigateTo);
+  const soundEnabled = useAppStore((s) => s.soundEnabled);
+
+  // Start/switch music on screen change.
+  // useLayoutEffect fires synchronously before paint, keeping us closest to the
+  // parent's click-gesture window so audio.play() succeeds without user interaction.
+  useLayoutEffect(() => {
+    if (!soundEnabled) {
+      bgMusic.stop();
+    } else if (currentGame === 'transition') {
+      bgMusic.start('transition');
+    } else if (currentGame === 'home') {
+      bgMusic.start('home');
+    } else if (currentGame === 'memory') {
+      bgMusic.start('memory-match');
+    } else if (currentGame === 'bubble') {
+      bgMusic.start('cascade');
+    } else if (currentGame === 'artDetective') {
+      bgMusic.start('artDetective');
+    } else if (currentGame === 'memoryGallery') {
+      bgMusic.start('memoryGallery');
+    } else {
+      bgMusic.stop();
+    }
+  }, [soundEnabled, currentGame]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Stop only when the whole MiniGame component unmounts
+  useEffect(() => () => { bgMusic.stop(); }, []);
 
   return (
     <div className="minigame-root" style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
@@ -91,6 +120,20 @@ export default function MiniGame() {
       )}
 
     </AnimatePresence>
+    <div
+      style={{
+        position: 'fixed',
+        left: 8,
+        bottom: 4,
+        zIndex: 9999,
+        fontSize: 10,
+        color: 'rgba(255,255,255,0.35)',
+        pointerEvents: 'none',
+        userSelect: 'none',
+      }}
+    >
+      Created by Neha Shafi
+    </div>
     </div>
   );
 }
